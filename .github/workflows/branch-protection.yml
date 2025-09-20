@@ -1,87 +1,90 @@
+---
 name: Branch Protection Enforcement
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   prevent-direct-push:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-    - name: Block direct push to main
-      run: |
-        echo "❌ Direct pushes to main branch are not allowed!"
-        echo "Please create a pull request to merge your changes."
-        exit 1
+      - name: Block direct push to main
+        run: |
+          echo "❌ Direct pushes to main branch are not allowed!"
+          echo "Please create a pull request to merge your changes."
+          exit 1
 
   validate-pr:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check PR title format
-      run: |
-        PR_TITLE="${{ github.event.pull_request.title }}"
-        if [[ ! "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+ ]]; then
-          echo "❌ PR title must follow conventional commit format"
-          echo "Examples: 'feat: add user authentication', 'fix: resolve login issue'"
-          exit 1
-        fi
-        echo "✅ PR title format is valid"
-    
-    - name: Check PR description
-      run: |
-        PR_BODY="${{ github.event.pull_request.body }}"
-        if [ -z "$PR_BODY" ]; then
-          echo "❌ PR description cannot be empty"
-          echo "Please provide a detailed description of your changes"
-          exit 1
-        fi
-        echo "✅ PR description is provided"
-    
-    - name: Check for CODEOWNERS
-      run: |
-        if [ ! -f ".github/CODEOWNERS" ]; then
-          echo "❌ CODEOWNERS file is missing"
-          exit 1
-        fi
-        echo "✅ CODEOWNERS file exists"
-    
-    - name: Validate branch naming
-      run: |
-        BRANCH_NAME="${{ github.head_ref }}"
-        if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|docs)/.+ ]]; then
-          echo "❌ Branch name must follow naming convention"
-          echo "Use: feature/, bugfix/, hotfix/, or docs/ prefix"
-          echo "Current branch: $BRANCH_NAME"
-          exit 1
-        fi
-        echo "✅ Branch naming convention is valid"
+      - uses: actions/checkout@v4
+
+      - name: Check PR title format
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ ! "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+ ]]; then
+            echo "❌ PR title must follow conventional commit format"
+            echo "Examples: 'feat: add user authentication'"
+            exit 1
+          fi
+          echo "✅ PR title format is valid"
+
+      - name: Check PR description
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          if [ -z "$PR_BODY" ]; then
+            echo "❌ PR description cannot be empty"
+            echo "Please provide a detailed description of your changes"
+            exit 1
+          fi
+          echo "✅ PR description is provided"
+
+      - name: Check for CODEOWNERS
+        run: |
+          if [ ! -f ".github/CODEOWNERS" ]; then
+            echo "❌ CODEOWNERS file is missing"
+            exit 1
+          fi
+          echo "✅ CODEOWNERS file exists"
+
+      - name: Validate branch naming
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|docs)/.+ ]]; then
+            echo "❌ Branch name must follow naming convention"
+            echo "Use: feature/, bugfix/, hotfix/, or docs/ prefix"
+            echo "Current branch: $BRANCH_NAME"
+            exit 1
+          fi
+          echo "✅ Branch naming convention is valid"
 
   security-scan:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run security scan
-      run: |
-        echo "🔒 Running security scan..."
-        # Add actual security scanning tools here
-        echo "✅ Security scan completed"
+      - uses: actions/checkout@v4
+
+      - name: Run security scan
+        run: |
+          echo "🔒 Running security scan..."
+          # Add actual security scanning tools here
+          echo "✅ Security scan completed"
 
   quality-checks:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Code quality check
-      run: |
-        echo "📋 Running code quality checks..."
-        # Add code quality tools here
-        echo "✅ Code quality checks passed"
+      - uses: actions/checkout@v4
+
+      - name: Code quality check
+        run: |
+          echo "📋 Running code quality checks..."
+          # Add code quality tools here
+          echo "✅ Code quality checks passed"
