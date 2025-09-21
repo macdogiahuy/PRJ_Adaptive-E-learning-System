@@ -467,6 +467,24 @@ This repository implements strict branch protection rules to maintain code quali
 - **Status checks** - CI pipeline must pass before merging
 - **Up-to-date branches** - Branches must be current with main before merging
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Java 11 or higher
+- Apache Tomcat 9.0+
+- SQL Server
+- Maven 3.6+
+
+### Development Workflow
+
+1. **Fork the repository** and clone your fork
+2. **Create a feature branch** from main: `git checkout -b feature/your-feature`
+3. **Make your changes** following our coding guidelines
+4. **Add tests** for new functionality
+5. **Run tests** to ensure everything works: `mvn test`
+6. **Submit a pull request** using our PR template
+
 ## 📋 Contributing
 
 We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for detailed information about:
