@@ -19,7 +19,7 @@ This repository implements strict branch protection rules to maintain code quali
 - Java 11 or higher
 - Apache Tomcat 9.0+
 - SQL Server
-- Maven 3.6+
+- Ant
 
 ### Development Workflow
 
