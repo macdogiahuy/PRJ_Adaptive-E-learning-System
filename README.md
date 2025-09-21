@@ -482,7 +482,7 @@ This repository implements strict branch protection rules to maintain code quali
 2. **Create a feature branch** from main: `git checkout -b feature/your-feature`
 3. **Make your changes** following our coding guidelines
 4. **Add tests** for new functionality
-5. **Run tests** to ensure everything works: `mvn test`
+5. **Run tests** to ensure everything works: `ant test`
 6. **Submit a pull request** using our PR template
 
 ## 📋 Contributing
