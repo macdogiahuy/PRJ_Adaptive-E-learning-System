@@ -118,3 +118,5 @@ coverage/
 *.tmp
 *.temp
 .cache/
+/Adaptive_Elearning/nbproject/private/
+/Adaptive_Elearning/dist/
