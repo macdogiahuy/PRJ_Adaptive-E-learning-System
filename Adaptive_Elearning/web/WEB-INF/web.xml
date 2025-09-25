@@ -1,31 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
-         http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
-         version="4.0">
-
-    <display-name>Adaptive Elearning</display-name>
-
-    <!-- Servlet Configuration -->
+<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <servlet>
-        <servlet-name>DashboardServlet</servlet-name>
-        <servlet-class>controller.DashboardServlet</servlet-class>
+        <servlet-name>DashBoardServlet</servlet-name>
+        <servlet-class>controller.DashBoardServlet</servlet-class>
     </servlet>
-
+    <servlet>
+        <servlet-name>AccountManagementServlet</servlet-name>
+        <servlet-class>controller.AccountManagementServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateAdminServlet</servlet-name>
+        <servlet-class>controller.CreateAdminServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>NotificationCourseServlet</servlet-name>
+        <servlet-class>controller.NotificationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ReportedCourseServlet</servlet-name>
+        <servlet-class>controller.ReportedCourseServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
-        <servlet-name>DashboardServlet</servlet-name>
+        <servlet-name>DashBoardServlet</servlet-name>
         <url-pattern>/dashboard</url-pattern>
     </servlet-mapping>
-
-    <!-- Welcome File List -->
+    <servlet-mapping>
+        <servlet-name>AccountManagementServlet</servlet-name>
+        <url-pattern>/accountmanagement</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateAdminServlet</servlet-name>
+        <url-pattern>/createadmin</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>NotificationCourseServlet</servlet-name>
+        <url-pattern>/notification</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReportedCourseServlet</servlet-name>
+        <url-pattern>/reportedcourse</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>dashboard</welcome-file>
     </welcome-file-list>
-
-    <!-- Session Configuration -->
-    <session-config>
-        <session-timeout>30</session-timeout>
-    </session-config>
-
 </web-app>

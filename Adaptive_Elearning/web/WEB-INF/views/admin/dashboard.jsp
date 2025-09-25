@@ -12,69 +12,52 @@
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <nav class="sidebar">
+       <nav class="sidebar">
             <div class="sidebar-header">
-                <h3>Adaptive_Elearning</h3>
+                <h3>DashBoard</h3>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item active">
-                    <a href="#" class="nav-link">
+                    <a href="${pageContext.request.contextPath}/dashboard" class="nav-link">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
+                <li class="nav-item ">
+                    <a href="${pageContext.request.contextPath}/accountmanagement" class="nav-link">
                         <i class="fas fa-users"></i>
-                        <span>Users</span>
+                        <span>Account Management</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-bell"></i>
-                        <span>Notifications</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-user-plus"></i>
+                <li class="nav-item ">
+                    <a href="${pageContext.request.contextPath}/createadmin" class="nav-link">
+                        <i class="fas fa-users"></i>
                         <span>Create Admin</span>
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    <a href="${pageContext.request.contextPath}/notification" class="nav-link">
+                        <i class="fas fa-bell"></i>
+                        <span>Notification Management</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
+                        <i class="fas fa-flag"></i>
+                        <span>Reported Groups</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="${pageContext.request.contextPath}/reportedcourse" class="nav-link">
                         <i class="fas fa-book"></i>
-                        <span>Courses</span>
+                        <span>Reported Courses</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-users-cog"></i>
-                        <span>Learning Groups</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Statistical Chart</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-database"></i>
-                        <span>Data Values</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-users"></i>
-                        <span>Users</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-eye"></i>
-                        <span>Learner View</span>
+                <li class="nav-item ">
+                    <a href="" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>Leaner View</span>
                     </a>
                 </li>
                 <li class="nav-item">
