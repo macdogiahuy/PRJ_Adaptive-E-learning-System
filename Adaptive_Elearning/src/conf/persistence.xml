@@ -30,10 +30,10 @@
     <class>model.Comments</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost\\HOANGNEMAY;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=Sp25_DemoPRJ;encrypt=true;trustServerCertificate=true;"/>
       <property name="javax.persistence.jdbc.user" value="sa"/>
       <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-      <property name="javax.persistence.jdbc.password" value="1234"/>
+      <property name="javax.persistence.jdbc.password" value="01012003"/>
     </properties>
   </persistence-unit>
 </persistence>
