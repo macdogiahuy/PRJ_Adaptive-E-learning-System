@@ -4,13 +4,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import model.User;
+import userDAO.UserDAO;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
-
+     UserDAO userDAO = new UserDAO();
     
-    private static final String ADMIN_USER = "admin";
-    private static final String ADMIN_PASS = "1";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -25,15 +25,16 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/Pages/user/login.jsp").forward(request, response);
             return;
         }
+        //login với database
+        User us = userDAO.checkLogin(username, password);
 
-        if (username.equals(ADMIN_USER) && password.equals(ADMIN_PASS)) {
-            // Đăng nhập thành công 
+        if (us != null) {
             HttpSession session = request.getSession();
-            session.setAttribute("user", username);
+            session.setAttribute("user", us.getUserName()); 
+            session.setAttribute("role", us.getRole());
 
-           response.sendRedirect(request.getContextPath() + "/dashboard");
+            response.sendRedirect(request.getContextPath() + "/dashboard");
         } else {
-            // Sai tài khoản/mật khẩu
             request.setAttribute("alertMessage", "Invalid username or password!");
             request.setAttribute("alertStatus", false);
             request.getRequestDispatcher("/WEB-INF/views/Pages/user/login.jsp").forward(request, response);
@@ -43,7 +44,6 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Nếu user đã login → chuyển dashboard luôn
         request.getRequestDispatcher("/WEB-INF/views/Pages/user/login.jsp").forward(request, response);
     }
 }
