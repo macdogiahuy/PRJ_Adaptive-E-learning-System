@@ -11,7 +11,6 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Hiển thị trang Register.jsp khi gọi GET
         request.getRequestDispatcher("/WEB-INF/views/Pages/user/register.jsp").forward(request, response);
     }
 

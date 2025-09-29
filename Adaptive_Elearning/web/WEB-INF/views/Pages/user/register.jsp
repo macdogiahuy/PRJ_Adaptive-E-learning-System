@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="input-box">
-                    <input type="text" name="email" class="input-field" placeholder="Email" value="${param.email}">
+                    <input type="email" name="email" class="input-field" placeholder="Email" value="${param.email}">
                     <i class="bx bx-envelope"></i>
                 </div>
 
