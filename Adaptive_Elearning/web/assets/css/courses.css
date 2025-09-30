@@ -1,0 +1,147 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background: #f4f7fb;
+    color: #333;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    background: #1f2937;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+}
+
+.sidebar-header {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+}
+
+.nav-item {
+    margin: 10px 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #d1d5db;
+    text-decoration: none;
+    transition: 0.3s;
+    border-radius: 6px;
+}
+
+.nav-link:hover,
+.nav-item.active .nav-link {
+    background: #374151;
+    color: #fff;
+    border-left: 4px solid #3b82f6;
+}
+
+/* Main content */
+.main-content {
+    margin-left: 240px;
+    padding: 30px;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-header h1 {
+    font-size: 28px;
+    margin: 0;
+    color: #1f2937;
+}
+
+/* Search box */
+.search-box {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.search-box:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
+}
+
+/* Table */
+.course-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.course-table th, .course-table td {
+    border-bottom: 1px solid #eee;
+    padding: 14px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.course-table th {
+    background: #f9fafb;
+    font-weight: bold;
+    color: #374151;
+}
+
+.course-table tbody tr:hover {
+    background: #f3f4f6;
+    transition: 0.2s ease-in-out;
+}
+
+/* Thumbnail */
+.thumb {
+    width: 200px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Status Badge */
+.status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.status.Active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status.Inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status.Pending {
+    background: #fef3c7;
+    color: #92400e;
+}
