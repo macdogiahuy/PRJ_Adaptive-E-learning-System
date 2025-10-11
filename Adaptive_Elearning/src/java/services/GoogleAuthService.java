@@ -8,11 +8,12 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import utils.EnvConfig;
 
 public class GoogleAuthService {
-    private static final String CLIENT_ID = "205113301359-b3nkl32vnb76mmjd6e5nb907mmbe2i5j.apps.googleusercontent.com";
-    private static final String CLIENT_SECRET = "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";
-    private static final String REDIRECT_URI = "http://localhost:8080/adaptive_elearning/oauth2callback";
+    private static final String CLIENT_ID = EnvConfig.get("GOOGLE_CLIENT_ID");
+    private static final String CLIENT_SECRET = EnvConfig.get("GOOGLE_CLIENT_SECRET");
+    private static final String REDIRECT_URI = EnvConfig.get("REDIRECT_URI");
 
     public String buildAuthUrl(HttpSession session) {
         String state = UUID.randomUUID().toString();
