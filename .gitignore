@@ -1,2 +1,7 @@
 # Ignore environment configuration files
 env.properties
+# Bỏ qua tệp chứa secrets/cấu hình môi trường
+Adaptive_Elearning/src/java/env.properties
+
+# Bỏ qua các tệp .class được biên dịch (NetBeans/Java)
+Adaptive_Elearning/build/
