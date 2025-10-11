@@ -30,10 +30,12 @@
     <class>model.Comments</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost\\HOANGNEMAY;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;"/>
-      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <!-- Database configuration is now handled by DBConnection.java using env.properties -->
+      <!-- These are placeholder values - actual values are read from env.properties -->
+      <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost;databaseName=placeholder"/>
+      <property name="javax.persistence.jdbc.user" value="placeholder"/>
       <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-      <property name="javax.persistence.jdbc.password" value="1234"/>
+      <property name="javax.persistence.jdbc.password" value="placeholder"/>
     </properties>
   </persistence-unit>
 </persistence>
