@@ -5,14 +5,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import utils.EnvConfig;
 
 public class DBConnection {
    public static String driverName = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-    public static String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;";
-    public static String userDB = "sa";
-    public static String passDB = "123456";
-
-
+    public static String dbURL = EnvConfig.get("DB_URL");
+    public static String userDB = EnvConfig.get("DB_USER");
+    public static String passDB = EnvConfig.get("DB_PASSWORD");
+    
     // Hàm lấy Connection
     public static Connection getConnection() throws SQLException {
         Connection con = null;
