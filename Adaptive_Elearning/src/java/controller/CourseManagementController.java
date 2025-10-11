@@ -261,9 +261,6 @@ public class CourseManagementController {
         return 0;
     }
     
-    /**
-     * Get total courses count with search filter
-     */
     public int getTotalCoursesCount(String searchQuery) {
         String sql = "SELECT COUNT(*) FROM Courses WHERE Title LIKE ?";
         

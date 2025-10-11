@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/admin_accountmanagement.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/nbproject/build-impl.xml</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/ResetPasswordServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/LoginServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/web.xml</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/META-INF/context.xml</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/CourseManagementController.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/Pages/user/login.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/services/GoogleAuthService.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/admin_coursemanagement.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/dao/UserDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/Pages/home.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/admin/reportedgroup.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/DashboardController.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/model/Users.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/UsersJpaController.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/RegisterServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/dashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/utils/Csrf.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/utils/SHA256Helper.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/assests/css/login.css</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/Pages/user/register.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/utils/EmailHelper.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/assests/css/home.css</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/AccountManagementController.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/ForgotPasswordServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/admin/reportedcourse.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/VerifyOtpServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/admin_dashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/assests/css/dashboard.css</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/assests/css/register.css</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/admin/dashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/Pages/user/forgot-password.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/GoogleCallbackServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/Pages/user/verify-otp.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/GoogleLoginServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/services/AdminServiceImpl.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/services/ServiceResults.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/controller/HomeServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/dao/DBConnection.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/src/java/services/AdminService.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/admin/adcoursemanagement.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/NetBeansProjects/PRJ_Adaptive-E-learning-System/Adaptive_Elearning/web/WEB-INF/views/Pages/user/reset-password.jsp</file>
+        </group>
+    </open-files>
+</project-private>
