@@ -2534,6 +2534,105 @@ AS
 GO
 ALTER TABLE [dbo].[Lectures] ENABLE TRIGGER [onLectureInsertDelete]
 GO
+
+-- ============================================
+-- COURSE GROUP CHAT AUTO-JOIN TRIGGER
+-- ============================================
+
+-- Tạo trigger tự động join course group chat khi user enroll vào khóa học
+CREATE TRIGGER TR_AutoJoinCourseGroupChat
+ON [dbo].[Enrollments]
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @CourseId UNIQUEIDENTIFIER
+    DECLARE @UserId UNIQUEIDENTIFIER
+    DECLARE @ConversationId UNIQUEIDENTIFIER
+    DECLARE @CourseTitle NVARCHAR(255)
+    DECLARE @CourseThumb NVARCHAR(255)
+    DECLARE @InstructorId UNIQUEIDENTIFIER
+    
+    -- Lấy thông tin từ bản ghi enrollment mới
+    SELECT @CourseId = i.CourseId, @UserId = i.CreatorId
+    FROM inserted i
+    
+    -- Lấy thông tin khóa học
+    SELECT @CourseTitle = Title, @CourseThumb = ThumbUrl, @InstructorId = InstructorId
+    FROM Courses
+    WHERE Id = @CourseId
+    
+    -- Kiểm tra xem khóa học đã có group chat chưa
+    SELECT @ConversationId = Id
+    FROM Conversations
+    WHERE Title LIKE 'Nhóm học: ' + @CourseTitle + ' [CourseId:' + CAST(@CourseId AS VARCHAR(50)) + ']'
+    AND IsPrivate = 0
+    
+    -- Nếu chưa có group chat, tạo mới
+    IF @ConversationId IS NULL
+    BEGIN
+        SET @ConversationId = NEWID()
+        
+        INSERT INTO Conversations (Id, Title, IsPrivate, AvatarUrl, CreationTime, CreatorId)
+        VALUES (
+            @ConversationId,
+            'Nhóm học: ' + @CourseTitle + ' [CourseId:' + CAST(@CourseId AS VARCHAR(50)) + ']',
+            0,
+            ISNULL(@CourseThumb, ''),
+            GETDATE(),
+            @InstructorId
+        )
+        
+        -- Thêm instructor vào group làm admin
+        INSERT INTO ConversationMembers (CreatorId, ConversationId, IsAdmin, LastVisit, CreationTime)
+        VALUES (@InstructorId, @ConversationId, 1, GETDATE(), GETDATE())
+        
+        -- Thêm tất cả enrolled users hiện tại vào group
+        INSERT INTO ConversationMembers (CreatorId, ConversationId, IsAdmin, LastVisit, CreationTime)
+        SELECT DISTINCT e.CreatorId, @ConversationId, 0, GETDATE(), GETDATE()
+        FROM Enrollments e
+        WHERE e.CourseId = @CourseId
+        AND e.CreatorId != @InstructorId
+        AND NOT EXISTS (
+            SELECT 1 FROM ConversationMembers cm 
+            WHERE cm.CreatorId = e.CreatorId AND cm.ConversationId = @ConversationId
+        )
+    END
+    ELSE
+    BEGIN
+        -- Nếu đã có group chat, chỉ thêm user mới vào
+        IF NOT EXISTS (
+            SELECT 1 FROM ConversationMembers 
+            WHERE CreatorId = @UserId AND ConversationId = @ConversationId
+        )
+        BEGIN
+            INSERT INTO ConversationMembers (CreatorId, ConversationId, IsAdmin, LastVisit, CreationTime)
+            VALUES (@UserId, @ConversationId, 0, GETDATE(), GETDATE())
+        END
+    END
+    
+    -- Gửi tin nhắn chào mừng (tùy chọn)
+    DECLARE @WelcomeMessageId UNIQUEIDENTIFIER = NEWID()
+    DECLARE @WelcomeMessage NVARCHAR(255)
+    
+    SELECT @WelcomeMessage = u.FullName + ' đã tham gia nhóm học!'
+    FROM Users u WHERE u.Id = @UserId
+    
+    INSERT INTO ChatMessages (Id, Content, Status, ConversationId, CreationTime, LastModificationTime, CreatorId, LastModifierId)
+    VALUES (
+        @WelcomeMessageId,
+        @WelcomeMessage,
+        'Delivered',
+        @ConversationId,
+        GETDATE(),
+        GETDATE(),
+        '00000000-0000-0000-0000-000000000000', -- System message
+        '00000000-0000-0000-0000-000000000000'
+    )
+END
+
+GO
 USE [master]
 GO
 ALTER DATABASE [CourseHubDB] SET  READ_WRITE 

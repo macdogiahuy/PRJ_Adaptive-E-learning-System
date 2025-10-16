@@ -7,7 +7,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 import model.Courses;
 import model.Users;
 
-@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-12T01:03:01", comments="EclipseLink-2.7.12.v20230209-rNA")
+@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-15T20:46:21", comments="EclipseLink-2.7.12.v20230209-rNA")
 @StaticMetamodel(CourseReviews.class)
 public class CourseReviews_ { 
 

@@ -3,53 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/test_currency_format.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/dao/DBConnection.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/services/AdminServiceImpl.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/services/AdminService.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/model/Users.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/model/EFMigrationsHistory.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/exceptions/PreexistingEntityException.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/UsersJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/TagJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/SysdiagramsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/SubmissionsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/SectionsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/CreateAdminController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/DashboardController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/EFMigrationsHistoryJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/EnrollmentsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/InstructorsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/LectureMaterialJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/McqChoicesJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/NotificationController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/NotificationsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/AccountManagementController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/ArticlesJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/AssignmentsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/BillsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/CategoriesJpaController.java</file>
             <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/ChatMessagesJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/CommentMediaJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/CommentsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/views/admin/dashboard.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/admin_dashboard.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/admin_accountmanagement.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/admin_coursemanagement.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/CoursesJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/views/admin/createadmin.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/admin_notification.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/views/admin/notification.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/views/admin/adcoursemanagement.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/ReportedCourseController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/views/admin/reportedcourse.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/views/admin/accountmanagement.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/views/admin/reportedgroup.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/admin_reportedgroup.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/admin_reportedcourse.jsp</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/ReactionsJpaController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/ReportedGroupController.java</file>
-            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/LecturesJpaController.java</file>
+            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/web/WEB-INF/web.xml</file>
+            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/services/AdminService.java</file>
+            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/services/AdminServiceImpl.java</file>
+            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/services/ServiceResults.java</file>
+            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/controller/CourseManagementController.java</file>
+            <file>file:/D:/moinhatlunhoangduanmoidayne/Adaptive_Elearning/Adaptive_Elearning/src/java/websocket/CourseGroupChatEndpoint.java</file>
         </group>
     </open-files>
 </project-private>

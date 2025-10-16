@@ -76,7 +76,7 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
-            color: #F8FAFC; 
+            background-color: #281f52; 
         }
         
         .edit-container {

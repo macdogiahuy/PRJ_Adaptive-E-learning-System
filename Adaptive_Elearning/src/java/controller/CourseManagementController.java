@@ -1,4 +1,4 @@
-package controller;
+    package controller;
 
 import dao.DBConnection;
 import java.sql.Connection;
@@ -163,9 +163,7 @@ public class CourseManagementController {
         return formattedNumber + " ₫";
     }
     
-    /**
-     * Get course statistics
-     */
+  
     public CourseStats getCourseStats() throws SQLException {
         String sql = "SELECT " +
                     "COUNT(*) as total, " +
@@ -190,9 +188,6 @@ public class CourseManagementController {
         return new CourseStats(0, 0, 0, 0);
     }
     
-    /**
-     * Get all courses with optional search and pagination
-     */
     public List<Course> getCourses(String searchTerm, int limit, int offset) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, ");
@@ -248,9 +243,7 @@ public class CourseManagementController {
         return courses;
     }
     
-    /**
-     * Get total course count for pagination
-     */
+  
     public int getTotalCourseCount(String searchTerm) throws SQLException {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Courses ");
         List<Object> params = new ArrayList<>();
@@ -298,12 +291,48 @@ public class CourseManagementController {
         return 0;
     }
     
-    /**
-     * Test database connection
-     */
+ 
     public boolean testConnection() {
         try (Connection conn = DBConnection.getConnection()) {
             return conn != null && !conn.isClosed();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Ban a course (change status from Ongoing to Off)
+     */
+    public boolean banCourse(String courseId) {
+        String sql = "UPDATE Courses SET Status = 'Off' WHERE Id = ? AND Status = 'Ongoing'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, courseId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Unban a course (change status from Off to Ongoing)
+     */
+    public boolean unbanCourse(String courseId) {
+        String sql = "UPDATE Courses SET Status = 'Ongoing' WHERE Id = ? AND Status = 'Off'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, courseId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

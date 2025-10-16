@@ -468,6 +468,9 @@
             box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1);
             transition: all 0.3s ease;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 450px;
         }
 
         .course-card::before {
@@ -505,6 +508,7 @@
             justify-content: center;
             color: #666;
             font-size: 16px;
+            flex-shrink: 0;
         }
 
         .course-thumbnail img {
@@ -522,12 +526,16 @@
             justify-content: center;
             color: #a0aec0;
             font-size: 2rem;
+            flex-shrink: 0;
         }
 
         .course-info {
             padding: 1.5rem;
             position: relative;
             z-index: 1;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
         .course-title {
@@ -536,6 +544,11 @@
             color: #F8FAFC;
             margin-bottom: 0.5rem;
             line-height: 1.3;
+            min-height: 2.6rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .course-meta {
@@ -562,7 +575,8 @@
         }
 
         .course-status {
-            margin-top: 1rem;
+            margin-top: auto;
+            margin-bottom: 0;
         }
 
         .status-badge {
@@ -588,6 +602,92 @@
             background: rgba(66, 153, 225, 0.1); 
             color: #2c5282; 
             border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+        .status-off { 
+            background: rgba(239, 68, 68, 0.1); 
+            color: #c53030; 
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Course Actions */
+        .course-actions {
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-ban, .btn-unban {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .btn-ban {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+        }
+
+        .btn-ban:hover {
+            background: linear-gradient(135deg, #DC2626, #B91C1C);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-unban {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+
+        .btn-unban:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #059669;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #DC2626;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Empty State */
@@ -1154,6 +1254,30 @@
                 <h2><i class="fas fa-graduation-cap"></i> Quản lý khóa học</h2>
             </div>
 
+            <!-- Success/Error Messages -->
+            <%
+                String successMessage = (String) session.getAttribute("successMessage");
+                String errorMessage = (String) session.getAttribute("errorMessage");
+                if (successMessage != null) {
+                    session.removeAttribute("successMessage");
+            %>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <%= successMessage %>
+            </div>
+            <%
+                }
+                if (errorMessage != null) {
+                    session.removeAttribute("errorMessage");
+            %>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <%= errorMessage %>
+            </div>
+            <%
+                }
+            %>
+
             <!-- Statistics Section -->
             <div class="stats-container">
                 <div class="stat-card users">
@@ -1238,8 +1362,26 @@
                                        String statusClass = "status-ongoing"; // default
                                        if ("Draft".equalsIgnoreCase(status)) statusClass = "status-draft";
                                        else if ("Completed".equalsIgnoreCase(status)) statusClass = "status-completed";
+                                       else if ("Off".equalsIgnoreCase(status)) statusClass = "status-off";
                                     %>
                                     <span class="status-badge <%= statusClass %>"><%= status %></span>
+                                </div>
+                                
+                                <!-- Course Actions -->
+                                <div class="course-actions">
+                                    <% if ("Ongoing".equalsIgnoreCase(status)) { %>
+                                        <a href="course_ban_handler.jsp?action=ban&courseId=<%= course.getId() %>&currentPage=<%= currentPage %>&searchQuery=<%= java.net.URLEncoder.encode(searchQuery, "UTF-8") %>" 
+                                           class="btn-ban"
+                                           onclick="return confirm('Bạn có chắc chắn muốn ban khóa học này?');">
+                                            <i class="fas fa-ban"></i> Ban
+                                        </a>
+                                    <% } else if ("Off".equalsIgnoreCase(status)) { %>
+                                        <a href="course_ban_handler.jsp?action=unban&courseId=<%= course.getId() %>&currentPage=<%= currentPage %>&searchQuery=<%= java.net.URLEncoder.encode(searchQuery, "UTF-8") %>" 
+                                           class="btn-unban"
+                                           onclick="return confirm('Bạn có chắc chắn muốn unban khóa học này?');">
+                                            <i class="fas fa-check"></i> Unban
+                                        </a>
+                                    <% } %>
                                 </div>
                             </div>
                         </div>

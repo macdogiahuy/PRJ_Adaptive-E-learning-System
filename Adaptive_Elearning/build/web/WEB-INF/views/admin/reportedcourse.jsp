@@ -801,6 +801,8 @@
 
         .course-content {
             padding: 1.5rem;
+            background: linear-gradient(145deg, rgba(107, 70, 193, 0.1), rgba(139, 92, 246, 0.05));
+            
         }
 
         .course-title {
