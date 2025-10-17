@@ -37,7 +37,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Trang chủ - Homepage</title>
-        <link rel="stylesheet" href="assets/css/home.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/home.css">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -122,7 +122,7 @@
             </div>
 
             <div class="middle-nav container-fluid d-flex justify-content-between align-items-center py-3">
-                <img src="assets/images/logo.png" alt="Logo" style="height:50px;">
+                <img src="${pageContext.request.contextPath}/assets/images/logo.png" alt="Logo" style="height:50px;">
 
                 <!-- Search form -->
                 <form method="get" action="home" class="search-bar d-flex flex-grow-1 mx-4">
@@ -167,7 +167,7 @@
                         for (Course c : courses) {%>
                 <div class="course-card">
                     <div class="course-thumbnail">
-                        <img src="<%= c.getThumbUrl() != null && !c.getThumbUrl().isEmpty() ? c.getThumbUrl() : "assets/images/default.jpg"%>" 
+                        <img src="<%= c.getThumbUrl() != null && !c.getThumbUrl().isEmpty() ? c.getThumbUrl() : request.getContextPath() + "/assets/images/default.jpg"%>" 
                              alt="<%= c.getTitle()%>" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div class="course-content">
