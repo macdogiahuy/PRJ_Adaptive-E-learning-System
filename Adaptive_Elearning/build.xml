@@ -10,6 +10,13 @@
 <project name="Adaptive_Elearning" default="default" basedir=".">
     <description>Builds, tests, and runs the project Adaptive_Elearning.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    <!-- Copy env.properties to build classes directory after compilation -->
+    <target name="-post-compile">
+        <copy file="src/conf/env.properties" todir="build/web/WEB-INF/classes/conf" failonerror="false"/>
+        <mkdir dir="build/web/WEB-INF/classes/conf"/>
+        <copy file="src/conf/env.properties" todir="build/web/WEB-INF/classes/conf" failonerror="false"/>
+    </target>
     <!--
 
     There exist several targets which are by default empty and which can be 
