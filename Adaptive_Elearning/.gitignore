@@ -1,0 +1,64 @@
+# Sensitive Configuration Files - DO NOT COMMIT
+src/conf/env.properties
+*.env
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Google Service Account Keys
+service-account-key.json
+google-credentials.json
+firebase-adminsdk-*.json
+
+# Database configuration files
+src/conf/persistence.xml.local
+src/conf/db.properties
+database.properties
+
+# IDE files
+nbproject/private/
+build/
+dist/
+*.class
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JAR files (except lib folder)
+*.jar
+!lib/*.jar
+
+# NetBeans specific
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Maven target directory
+target/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Application specific sensitive files
+config/secrets.properties
+config/api-keys.properties
+oauth-credentials.json
