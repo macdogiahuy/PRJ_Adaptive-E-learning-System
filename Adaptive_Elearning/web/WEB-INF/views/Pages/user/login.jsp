@@ -5,7 +5,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     <title>Login</title>
     <link
       rel="stylesheet"
-      href="${pageContext.request.contextPath}/assests/css/login.css"
+      href="${pageContext.request.contextPath}/assets/css/login.css"
     />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
@@ -90,7 +90,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             class="google-btn"
           >
             <img
-              src="${pageContext.request.contextPath}/assests/img/google.png"
+              src="${pageContext.request.contextPath}/assets/img/google.png"
               alt="Google"
             />
             Sign in with Google

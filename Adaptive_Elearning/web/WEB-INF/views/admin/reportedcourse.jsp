@@ -125,7 +125,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reported Courses - CourseHub E-Learning</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/assests/css/universe-background.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/assets/css/universe-background.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -1062,7 +1062,7 @@
             }
         }
     </style>
-    <script src="${pageContext.request.contextPath}/assests/js/universe-theme.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/universe-theme.js"></script>
 </head>
 <body class="universe-theme">
     <!-- Universe Background Layer -->

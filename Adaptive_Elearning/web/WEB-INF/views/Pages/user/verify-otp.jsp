@@ -3,7 +3,7 @@
 <html>
 <head>
   <title>Verify OTP</title>
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/assests/css/login.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/login.css">
 </head>
 <body>
 <div class="form-box">
