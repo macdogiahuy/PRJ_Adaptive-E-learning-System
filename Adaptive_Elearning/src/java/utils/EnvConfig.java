@@ -10,7 +10,7 @@ public class EnvConfig {
     private static final Properties props = new Properties();
 
     static {
-        try (InputStream input = EnvConfig.class.getClassLoader().getResourceAsStream("env.properties")) {
+        try (InputStream input = EnvConfig.class.getClassLoader().getResourceAsStream("conf/env.properties")) {
             if (input != null) {
                 props.load(input);
                 LOGGER.info("✅ Environment configuration loaded successfully");
