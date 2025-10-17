@@ -10,7 +10,7 @@
     </session-config>
     <!-- Error pages -->
     <welcome-file-list>
-        <welcome-file>WEB-INF/views/Pages/user/login.jsp</welcome-file>
+        <welcome-file>login</welcome-file>
     </welcome-file-list>
     <!-- Temporarily disabled to see real errors -->
     <!--
