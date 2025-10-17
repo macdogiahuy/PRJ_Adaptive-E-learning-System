@@ -2,6 +2,11 @@
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <display-name>CourseHub E-Learning Dashboard</display-name>
     <description>Adaptive E-learning Management System Dashboard</description>
+    <!-- Static resource mapping -->
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/assets/*</url-pattern>
+    </servlet-mapping>
     <!-- Welcome page configuration -->
     <!-- Session timeout (in minutes) -->
     

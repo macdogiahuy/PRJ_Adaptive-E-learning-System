@@ -2583,16 +2583,16 @@
             <div class="nav-group">
                 <div class="nav-group-title">Overview</div>
                 <ul>
-                    <li><a href="/adaptive_elearning/admin_dashboard.jsp"><i class="fas fa-tachometer-alt"></i><span>Tổng quan</span></a></li>
-                    <li><a href="/adaptive_elearning/admin_notification.jsp"><i class="fas fa-bell"></i><span>Thông báo</span></a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin_dashboard.jsp"><i class="fas fa-tachometer-alt"></i><span>Tổng quan</span></a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin_notification.jsp"><i class="fas fa-bell"></i><span>Thông báo</span></a></li>
                 </ul>
             </div>
 
             <div class="nav-group">
                 <div class="nav-group-title">User Management</div>
                 <ul>
-                    <li><a href="/adaptive_elearning/admin_createadmin.jsp"><i class="fas fa-user-plus"></i><span>Tạo Admin</span></a></li>
-                    <li><a href="/adaptive_elearning/admin_accountmanagement.jsp" class="active"><i class="fas fa-users"></i><span>Quản lý Tài Khoản</span></a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin_createadmin.jsp"><i class="fas fa-user-plus"></i><span>Tạo Admin</span></a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin_accountmanagement.jsp" class="active"><i class="fas fa-users"></i><span>Quản lý Tài Khoản</span></a></li>
                 
                 </ul>
             </div>
@@ -2600,9 +2600,9 @@
             <div class="nav-group">
                 <div class="nav-group-title">Content Management</div>
                 <ul>
-                    <li><a href="/adaptive_elearning/admin_coursemanagement.jsp"><i class="fas fa-book"></i><span>Quản lý Khóa học</span></a></li>
-                    <li><a href="/adaptive_elearning/admin_reportedcourse.jsp"><i class="fas fa-flag"></i><span>Khóa học bị báo cáo</span></a></li>
-                    <li><a href="/adaptive_elearning/admin_reportedgroup.jsp"><i class="fas fa-users"></i><span>Nhóm bị báo cáo</span></a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin_coursemanagement.jsp"><i class="fas fa-book"></i><span>Quản lý Khóa học</span></a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin_reportedcourse.jsp"><i class="fas fa-flag"></i><span>Khóa học bị báo cáo</span></a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin_reportedgroup.jsp"><i class="fas fa-users"></i><span>Nhóm bị báo cáo</span></a></li>
                 </ul>
             </div>
 
@@ -2820,7 +2820,7 @@
                                         <td>
                                             <div class="action-buttons">
                                                 <% if (!"Inactive".equals(role)) { %>
-                                                    <a href="/adaptive_elearning/admin_edit_user_role.jsp?userId=<%= userId %>" 
+                                                    <a href="${pageContext.request.contextPath}/admin_edit_user_role.jsp?userId=<%= userId %>" 
                                                        class="btn btn-edit" title="Chỉnh sửa vai trò">
                                                         <i class="fas fa-edit"></i>
                                                         Sửa
@@ -3182,7 +3182,7 @@
 
         function editRole(userId, currentRole) {
             showLoading('Đang chuyển đến trang chỉnh sửa...');
-            window.location.href = '/adaptive_elearning/admin_edit_user_role.jsp?userId=' + userId;
+            window.location.href = '${pageContext.request.contextPath}/admin_edit_user_role.jsp?userId=' + userId;
         }
 
         function deactivateUser(userId) {
