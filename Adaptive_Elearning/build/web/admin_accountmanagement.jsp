@@ -46,6 +46,27 @@
                 return;
             }
         }
+    } else if ("unbanUser".equals(action)) {
+        String userId = request.getParameter("userId");
+        
+        if (userId != null) {
+            try {
+                AccountManagementController controller = new AccountManagementController();
+                boolean success = controller.unbanUser(userId);
+                
+                if (success) {
+                    response.sendRedirect("admin_accountmanagement.jsp?unbanned=success");
+                    return;
+                } else {
+                    response.sendRedirect("admin_accountmanagement.jsp?unbanned=error");
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.sendRedirect("admin_accountmanagement.jsp?unbanned=error&msg=" + e.getMessage());
+                return;
+            }
+        }
     }
     
     // Forward to account management JSP in views

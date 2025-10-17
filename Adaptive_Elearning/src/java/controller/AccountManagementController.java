@@ -1,5 +1,6 @@
 package controller;
 
+import dao.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,8 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import dao.DBConnection;
 
 public class AccountManagementController {
     
@@ -232,6 +231,65 @@ public class AccountManagementController {
             if (stmt != null) stmt.close();
             if (connection != null) connection.close();
         }
+    }
+    
+    /**
+     * Unban user (restore previous role from Inactive)
+     * Default role will be 'Learner' if no previous role found
+     */
+    public boolean unbanUser(String userId) throws SQLException {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            connection = DBConnection.getConnection();
+            // Set default role to 'Learner' for unbanned users
+            String sql = "UPDATE Users SET Role = 'Learner', LastModificationTime = GETDATE() WHERE Id = ? AND Role = 'Inactive'";
+            stmt = connection.prepareStatement(sql);
+            stmt.setString(1, userId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } finally {
+            if (stmt != null) stmt.close();
+            if (connection != null) connection.close();
+        }
+    }
+    
+    /**
+     * Get user information by ID
+     */
+    public Map<String, Object> getUserById(String userId) throws SQLException {
+        Map<String, Object> user = null;
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            connection = DBConnection.getConnection();
+            String sql = "SELECT Id, FullName, Email, Role, CreationTime, SystemBalance FROM Users WHERE Id = ?";
+            stmt = connection.prepareStatement(sql);
+            stmt.setString(1, userId);
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                user = new HashMap<>();
+                user.put("id", rs.getString("Id"));
+                user.put("fullName", rs.getString("FullName"));
+                user.put("email", rs.getString("Email"));
+                user.put("role", rs.getString("Role"));
+                user.put("creationTime", rs.getTimestamp("CreationTime"));
+                user.put("systemBalance", rs.getLong("SystemBalance"));
+            }
+            
+        } finally {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            if (connection != null) connection.close();
+        }
+        
+        return user;
     }
     
     /**

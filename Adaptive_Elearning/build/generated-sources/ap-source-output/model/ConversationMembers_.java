@@ -8,7 +8,7 @@ import model.ConversationMembersPK;
 import model.Conversations;
 import model.Users;
 
-@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-07T16:21:20", comments="EclipseLink-2.7.12.v20230209-rNA")
+@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-15T20:46:21", comments="EclipseLink-2.7.12.v20230209-rNA")
 @StaticMetamodel(ConversationMembers.class)
 public class ConversationMembers_ { 
 

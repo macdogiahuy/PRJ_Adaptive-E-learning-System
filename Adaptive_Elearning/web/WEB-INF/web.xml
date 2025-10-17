@@ -4,6 +4,7 @@
     <description>Adaptive E-learning Management System Dashboard</description>
     <!-- Welcome page configuration -->
     <!-- Session timeout (in minutes) -->
+    
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>

@@ -1,4 +1,4 @@
-package controller;
+    package controller;
 
 import dao.DBConnection;
 import java.sql.Connection;
@@ -108,14 +108,12 @@ public class CourseManagementController {
         }
         
         public String getFormattedPrice() {
-            NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
-            return formatter.format(price);
+            return CourseManagementController.formatVietnameseCurrency(price);
         }
         
         public String getFormattedDiscountedPrice() {
             if (hasDiscount()) {
-                NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
-                return formatter.format(getDiscountedPrice());
+                return CourseManagementController.formatVietnameseCurrency(getDiscountedPrice());
             }
             return getFormattedPrice();
         }
@@ -149,8 +147,23 @@ public class CourseManagementController {
     }
     
     /**
-     * Get course statistics
+     * Static method to format currency in Vietnamese format
+     * @param amount the amount to format
+     * @return formatted currency string
      */
+    public static String formatVietnameseCurrency(double amount) {
+        // Convert to long to avoid decimal places for VND
+        long longAmount = Math.round(amount);
+        
+        // Use NumberFormat with Vietnamese locale for number formatting
+        NumberFormat numberFormatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN"));
+        String formattedNumber = numberFormatter.format(longAmount);
+        
+        // Add VND currency symbol
+        return formattedNumber + " ₫";
+    }
+    
+  
     public CourseStats getCourseStats() throws SQLException {
         String sql = "SELECT " +
                     "COUNT(*) as total, " +
@@ -175,9 +188,6 @@ public class CourseManagementController {
         return new CourseStats(0, 0, 0, 0);
     }
     
-    /**
-     * Get all courses with optional search and pagination
-     */
     public List<Course> getCourses(String searchTerm, int limit, int offset) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, ");
@@ -233,9 +243,7 @@ public class CourseManagementController {
         return courses;
     }
     
-    /**
-     * Get total course count for pagination
-     */
+  
     public int getTotalCourseCount(String searchTerm) throws SQLException {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Courses ");
         List<Object> params = new ArrayList<>();
@@ -283,80 +291,48 @@ public class CourseManagementController {
         return 0;
     }
     
-    /**
-     * Start a course (set status to Ongoing)
-     */
-    public boolean startCourse(String courseId) throws SQLException {
-        String sql = "UPDATE Courses SET Status = 'Ongoing' WHERE Id = ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, courseId);
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-    
-    /**
-     * Stop a course (set status to Off)
-     */
-    public boolean stopCourse(String courseId) throws SQLException {
-        String sql = "UPDATE Courses SET Status = 'Off' WHERE Id = ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, courseId);
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-    
-    /**
-     * Get course by ID
-     */
-    public Course getCourseById(String courseId) throws SQLException {
-        String sql = "SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, " +
-                    "c.DiscountExpiry, c.Level, c.LearnerCount, c.RatingCount, c.TotalRating, " +
-                    "u.FullName as InstructorName " +
-                    "FROM Courses c " +
-                    "LEFT JOIN Users u ON c.InstructorId = u.Id " +
-                    "WHERE c.Id = ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, courseId);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Course(
-                        rs.getString("Id"),
-                        rs.getString("Title"),
-                        rs.getString("ThumbUrl"),
-                        rs.getString("Status"),
-                        rs.getDouble("Price"),
-                        rs.getDouble("Discount"),
-                        rs.getTimestamp("DiscountExpiry"),
-                        rs.getString("Level"),
-                        rs.getInt("LearnerCount"),
-                        rs.getInt("RatingCount"),
-                        rs.getLong("TotalRating"),
-                        rs.getString("InstructorName")
-                    );
-                }
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Test database connection
-     */
+ 
     public boolean testConnection() {
         try (Connection conn = DBConnection.getConnection()) {
             return conn != null && !conn.isClosed();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Ban a course (change status from Ongoing to Off)
+     */
+    public boolean banCourse(String courseId) {
+        String sql = "UPDATE Courses SET Status = 'Off' WHERE Id = ? AND Status = 'Ongoing'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, courseId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Unban a course (change status from Off to Ongoing)
+     */
+    public boolean unbanCourse(String courseId) {
+        String sql = "UPDATE Courses SET Status = 'Ongoing' WHERE Id = ? AND Status = 'Off'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, courseId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -69,10 +69,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard CourseHub E-Learning</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Admin Dashboard - CourseHub E-Learning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="${pageContext.request.contextPath}/assests/css/universe-background.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <style>
         * {
             margin: 0;
@@ -81,35 +81,64 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0F0F23 0%, #1A1A2E 50%, #16213E 100%);
+            color: #F8FAFC;
             min-height: 100vh;
-            color: #333;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
+           background:linear-gradient(145deg, rgba(107, 70, 193, 0.1), rgba(139, 92, 246, 0.05)) ;
+            backdrop-filter: blur(15px);
+            padding: 1.5rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.4);
+            position: relative;
         }
-
+        
         .header h1 {
-            color: white;
-            font-size: 1.5rem;
+            font-family: 'Orbitron', monospace;
+            color: #F8FAFC;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+            background: linear-gradient(45deg, #06B6D4, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-
+        
         .user-info {
-            color: white;
+            color: #F8FAFC;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+            background: linear-gradient(45deg, #06B6D4, #8B5CF6);
+            -webkit-text-fill-color:transparent;
+            background-clip: text
         }
 
         .container {
@@ -117,44 +146,181 @@
             min-height: calc(100vh - 80px);
         }
 
-        .sidebar {
-            width: 250px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 2rem 0;
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        /* Sidebar */
+        .sidebar { 
+            width: 280px; 
+            background: linear-gradient(145deg, rgba(107, 70, 193, 0.15), rgba(139, 92, 246, 0.08)); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            padding: 2rem 0; 
+            border-right: 1px solid rgba(139, 92, 246, 0.3); 
+            position: relative;
+            overflow: hidden;
         }
 
-        .sidebar ul {
-            list-style: none;
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 50%, rgba(6, 182, 212, 0.1) 100%);
+            pointer-events: none;
         }
 
-        .sidebar li {
-            margin: 0.5rem 0;
+        .sidebar ul { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0;
+            position: relative;
+            z-index: 1;
         }
 
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: background 0.3s ease;
+        .sidebar li { 
+            margin-bottom: 0.25rem; 
+            padding: 0 1rem;
         }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background: rgba(255, 255, 255, 0.2);
+        .sidebar a { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            padding: 1rem 1.25rem; 
+            color: rgba(248, 250, 252, 0.85); 
+            text-decoration: none; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
         }
 
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .sidebar a i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar a span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar a:hover { 
+            color: #F8FAFC; 
+            transform: translateX(8px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25);
+        }
+
+        .sidebar a:hover::before {
+            opacity: 1;
+        }
+
+        .sidebar a:hover i {
+            color: #06B6D4;
+            transform: scale(1.1);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a.active { 
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.2)); 
+            color: #F8FAFC; 
+            border-left: 4px solid #8B5CF6;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+            transform: translateX(4px);
+        }
+
+        .sidebar a.active i {
+            color: #06B6D4;
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+        }
+
+        .sidebar a.active::before {
+            opacity: 1;
+        }
+
+        /* Navigation Groups */
+        .nav-group {
+            margin-bottom: 2rem;
+        }
+
+        .nav-group-title {
+            color: rgba(248, 250, 252, 0.6);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 2rem 0.5rem 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            padding: 0 2rem 1.5rem 2rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-header h3 {
+            color: #F8FAFC;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #06B6D4, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin: 0;
+        }
+
+        /* Main Content */
         .main-content {
             flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
+            margin-left: 0px;
+            padding: 1rem 2rem;
         }
 
-        .stats-grid {
+        .page-header { 
+            background: linear-gradient(145deg, rgba(107, 70, 193, 0.1), rgba(139, 92, 246, 0.05)); 
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            padding: 2rem; 
+            border-radius: 16px; 
+            margin-bottom: 2rem; 
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1); 
+        }
+        .page-header h2 { 
+            color: #F8FAFC; 
+            margin-bottom: 0.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            background: linear-gradient(45deg, #06B6D4, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        /* Statistics Cards */
+        .stats-container, .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
@@ -162,15 +328,18 @@
         }
 
         .stat-card {
-            background: white;
-            border-radius: 15px;
+            background: linear-gradient(145deg, rgba(107, 70, 193, 0.2), rgba(139, 92, 246, 0.1));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: relative;
-            overflow: hidden;
         }
 
         .stat-card::before {
@@ -179,36 +348,50 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: var(--accent-color);
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
 
-        .stat-card.users::before { --accent-color: #667eea; }
-        .stat-card.courses::before { --accent-color: #f093fb; }
-        .stat-card.enrollments::before { --accent-color: #4facfe; }
-        .stat-card.notifications::before { --accent-color: #43e97b; }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
 
         .stat-info h3 {
-            color: #666;
+            color: rgba(248, 250, 252, 0.8);
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
         .stat-info .number {
             font-size: 2rem;
-            font-weight: bold;
-            color: #333;
+            font-weight: 700;
+            background: linear-gradient(45deg, #06B6D4, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
         }
 
         .stat-info .change {
             font-size: 0.8rem;
             margin-top: 0.25rem;
+            color: rgba(248, 250, 252, 0.7);
         }
 
         .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -216,11 +399,23 @@
             color: white;
         }
 
-        .stat-card.users .stat-icon { background: #667eea; }
-        .stat-card.courses .stat-icon { background: #f093fb; }
-        .stat-card.enrollments .stat-icon { background: #4facfe; }
-        .stat-card.notifications .stat-icon { background: #43e97b; }
+        .stat-card.users .stat-icon {
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+        }
 
+        .stat-card.courses .stat-icon {
+            background: linear-gradient(135deg, #EC4899, #8B5CF6);
+        }
+
+        .stat-card.enrollments .stat-icon {
+            background: linear-gradient(135deg, #06B6D4, #3B82F6);
+        }
+
+        .stat-card.notifications .stat-icon {
+            background: linear-gradient(135deg, #10B981, #06B6D4);
+        }
+
+        /* Chart Cards */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -229,32 +424,62 @@
         }
 
         .chart-card {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(145deg, rgba(107, 70, 193, 0.1), rgba(139, 92, 246, 0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.4);
         }
 
         .chart-card h3 {
-            margin-bottom: 1rem;
-            color: #333;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            background: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(107, 70, 193, 0.05));
+            color: #F8FAFC;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
+        .chart-card h3.universe-title {
+            background: linear-gradient(45deg, #06B6D4, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .chart-container {
             position: relative;
             height: 300px;
+            background: rgba(30, 27, 75, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 2rem;
+            border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
         .error-message {
-            background: #fee;
-            color: #c33;
+            background: rgba(249, 115, 22, 0.2);
+            border: 1px solid rgba(249, 115, 22, 0.5);
+            color: #F8FAFC;
             padding: 1rem;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 1rem;
-            border: 1px solid #fcc;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(16px);
         }
 
         @media (max-width: 768px) {
@@ -285,11 +510,15 @@
             }
         }
     </style>
+    <script src="${pageContext.request.contextPath}/assests/js/universe-theme.js"></script>
 </head>
-<body>
-    <div class="header">
-        <h1>
-            <i class="fas fa-graduation-cap"></i>
+<body class="universe-theme">
+    <!-- Universe Background Layer -->
+    <div class="universe-background"></div>
+    
+    <div class="header universe-header">
+        <h1 class="universe-title">
+            <i class="fas fa-tachometer-alt"></i>
             Dashboard CourseHub E-Learning
         </h1>
         <div class="user-info">
@@ -299,23 +528,78 @@
     </div>
 
     <div class="container">
-        <nav class="sidebar">
-     
+        <nav class="sidebar universe-sidebar">
+            <div class="nav-header">
+                <h3><i class="fas fa-rocket"></i> Admin Panel</h3>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">Dashboard & Overview</div>
                 <ul>
-                <li><a href="/adaptive_elearning/admin_dashboard.jsp" class="active"><i class="fas fa-tachometer-alt"></i> Tổng quan</a></li>
-                <li><a href="/adaptive_elearning/admin_notification.jsp"><i class="fas fa-bell"></i> Thông báo</a></li>
-                <li><a href="/adaptive_elearning/admin_createadmin.jsp"><i class="fas fa-user-plus"></i> Tạo Admin</a></li>
-                <li><a href="/adaptive_elearning/admin_accountmanagement.jsp"><i class="fas fa-users"></i> Quản lý Tài Khoản</a></li>
-                <li><a href="/adaptive_elearning/admin_reportedcourse.jsp"><i class="fas fa-flag"></i> Quản lý Khóa Học</a></li>
-                <li><a href="/adaptive_elearning/admin_coursemanagement.jsp"><i class="fa-solid fa-bars-progress"></i> Các Khóa Học</a></li>
-                <li><a href="/adaptive_elearning/admin_reportedgroup.jsp"><i class="fas fa-user-graduate"></i> Quản lý Nhóm</a></li>
-                <li><a href="#"><i class="fas fa-chart-bar"></i> Home</a></li>
-                <li><a href="#"><i class="fas fa-cog"></i> LogOut</a></li>
-            </ul>
-       
+                    <li><a href="/adaptive_elearning/admin_dashboard.jsp" class="active">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Tổng quan</span>
+                    </a></li>
+                    <li><a href="/adaptive_elearning/admin_notification.jsp">
+                        <i class="fas fa-bell"></i>
+                        <span>Thông báo</span>
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">User Management</div>
+                <ul>
+                    <li><a href="/adaptive_elearning/admin_createadmin.jsp">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Tạo Admin</span>
+                    </a></li>
+                    <li><a href="/adaptive_elearning/admin_accountmanagement.jsp">
+                        <i class="fas fa-users"></i>
+                        <span>Quản lý Tài Khoản</span>
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">Content Management</div>
+                <ul>
+                    <li><a href="/adaptive_elearning/admin_coursemanagement.jsp">
+                        <i class="fa-solid fa-bars-progress"></i>
+                        <span>Các Khóa Học</span>
+                    </a></li>
+                    <li><a href="/adaptive_elearning/admin_reportedcourse.jsp">
+                        <i class="fas fa-flag"></i>
+                        <span>Quản lý Khóa Học</span>
+                    </a></li>
+                    <li><a href="/adaptive_elearning/admin_reportedgroup.jsp">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Quản lý Nhóm</span>
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">System</div>
+                <ul>
+                    <li><a href="#">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Home</span>
+                    </a></li>
+                    <li><a href="#">
+                        <i class="fas fa-cog"></i>
+                        <span>LogOut</span>
+                    </a></li>
+                </ul>
+            </div>
         </nav>
 
         <main class="main-content">
+            <div class="page-header">
+                <h2><i class="fas fa-tachometer-alt"></i> Dashboard Tổng Quan</h2>
+                <p style="color: rgba(248, 250, 252, 0.8); margin-top: 0.5rem;">Theo dõi và quản lý toàn bộ hệ thống e-learning CourseHub</p>
+            </div>
+            
             <% if (error != null) { %>
                 <div class="error-message">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -373,28 +657,28 @@
             <!-- Charts -->
             <div class="charts-grid">
                 <div class="chart-card">
-                    <h3><i class="fas fa-chart-line"></i> Đăng ký khóa học theo tháng (năm 2024)</h3>
+                    <h3 class="universe-title"><i class="fas fa-chart-line"></i> Đăng ký khóa học theo tháng (năm 2024)</h3>
                     <div class="chart-container">
                         <canvas id="usersChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-card">
-                    <h3><i class="fas fa-chart-bar"></i> Enrollments theo tháng (năm 2024)</h3>
+                    <h3 class="universe-title"><i class="fas fa-chart-bar"></i> Enrollments theo tháng (năm 2024)</h3>
                     <div class="chart-container">
                         <canvas id="enrollmentsChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-card">
-                    <h3><i class="fas fa-chart-pie"></i> Top 5 Courses phổ biến</h3>
+                    <h3 class="universe-title"><i class="fas fa-chart-pie"></i> Top 5 Courses phổ biến</h3>
                     <div class="chart-container">
                         <canvas id="topCoursesChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-card">
-                    <h3><i class="fas fa-users-cog"></i> Phân bố User theo Role</h3>
+                    <h3 class="universe-title"><i class="fas fa-users-cog"></i> Phân bố User theo Role</h3>
                     <div class="chart-container">
                         <canvas id="userRoleChart"></canvas>
                     </div>

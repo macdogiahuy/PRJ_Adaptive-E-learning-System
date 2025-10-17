@@ -6,7 +6,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 import model.Articles;
 import model.TagPK;
 
-@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-07T16:21:20", comments="EclipseLink-2.7.12.v20230209-rNA")
+@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-15T20:46:21", comments="EclipseLink-2.7.12.v20230209-rNA")
 @StaticMetamodel(Tag.class)
 public class Tag_ { 
 

@@ -6,7 +6,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 import model.LectureMaterialPK;
 import model.Lectures;
 
-@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-07T16:21:20", comments="EclipseLink-2.7.12.v20230209-rNA")
+@Generated(value="org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor", date="2025-10-15T20:46:21", comments="EclipseLink-2.7.12.v20230209-rNA")
 @StaticMetamodel(LectureMaterial.class)
 public class LectureMaterial_ { 
 
