@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1">
+      <stop offset="0" stop-color="#a78bfa" />
+      <stop offset="1" stop-color="#60a5fa" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#g1)" />
+  <g fill="#ffffff" opacity="0.12">
+    <circle cx="200" cy="180" r="120">
+      <animate attributeName="r" from="100" to="140" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="860" cy="140" r="90">
+      <animate attributeName="r" from="70" to="110" dur="4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <g transform="translate(80,80)">
+    <text x="0" y="0" font-size="42" fill="#fff" font-family="Arial, Helvetica, sans-serif" opacity="0.95">Explore topical courses</text>
+    <text x="0" y="56" font-size="28" fill="#f3f4f6" opacity="0.9">Hands-on lessons, expert instructors</text>
+  </g>
+</svg>

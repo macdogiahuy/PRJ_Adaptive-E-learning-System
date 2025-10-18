@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400">
+  <defs>
+    <linearGradient id="g3" x1="0" x2="1">
+      <stop offset="0" stop-color="#8b5cf6" />
+      <stop offset="1" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#g3)" />
+  <g>
+    <circle cx="240" cy="200" r="90" fill="#fff" opacity="0.06">
+      <animate attributeName="r" values="70;100;70" dur="7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="720" cy="180" r="110" fill="#fff" opacity="0.05">
+      <animate attributeName="cx" values="700;740;700" dur="8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <g transform="translate(100,120)">
+    <text x="0" y="0" font-size="48" fill="#fff" font-family="Georgia, serif" opacity="0.98">Start building skills</text>
+    <text x="0" y="60" font-size="24" fill="#e6edf3" opacity="0.9">Mentor-led courses & hands-on labs</text>
+  </g>
+</svg>
