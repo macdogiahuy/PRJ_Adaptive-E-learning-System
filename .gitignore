@@ -5,3 +5,8 @@ Adaptive_Elearning/src/java/env.properties
 
 # Bỏ qua các tệp .class được biên dịch (NetBeans/Java)
 Adaptive_Elearning/build/
+
+# Environment configs
+*.env
+*.properties
+Adaptive_Elearning/src/main/java/env.properties
