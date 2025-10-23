@@ -104,6 +104,10 @@ public class CourseManagementController {
             return price;
         }
         
+        public double getDiscountPrice() {
+            return getDiscountedPrice();
+        }
+        
         public double getAverageRating() {
             if (ratingCount == 0) return 0;
             return (double) totalRating / ratingCount;

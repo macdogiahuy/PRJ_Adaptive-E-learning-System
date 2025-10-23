@@ -59,7 +59,7 @@
             <div class="col-lg-4">
                 <div class="price-box mb-3">
                     <div class="fs-3 fw-bold text-danger">${not empty course ? course.getFormattedDiscountedPrice() : '0 ₫'}</div>
-                    <button class="btn buy-btn w-100 mt-2">Buy this course</button>
+                    <button class="btn buy-btn w-100 mt-2">Add to cart</button>
                 </div>
 
                 <!-- Sidebar thumbnail -->
