@@ -11,7 +11,7 @@ import model.Users;
 public class AuthFilter implements Filter {
 
     private static final List<String> PUBLIC_URLS = List.of(
-        "/home", "/login", "/register",
+        "/home","/courses","/detail" ,"/login", "/register",
         "/google-login", "/oauth2callback",
         "/css/", "/js/", "/assets/", "/img/", "/assests/"
     );
