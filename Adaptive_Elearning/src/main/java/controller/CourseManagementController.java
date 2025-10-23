@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Date;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -290,6 +292,122 @@ public class CourseManagementController {
         }
         return 0;
     }
+
+    /**
+     * Get list of all category titles (for sidebar)
+     */
+    public List<String> getAllCategoryTitles() throws SQLException {
+        String sql = "SELECT Title FROM Categories ORDER BY Title";
+        List<String> cats = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                cats.add(rs.getString("Title"));
+            }
+        }
+        return cats;
+    }
+
+    /**
+     * Get category counts map (Title -> CourseCount) for sidebar badges
+     */
+    public Map<String, Integer> getCategoryCounts() throws SQLException {
+        String sql = "SELECT Title, CourseCount FROM Categories";
+        Map<String, Integer> counts = new HashMap<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                counts.put(rs.getString("Title"), rs.getInt("CourseCount"));
+            }
+        }
+        return counts;
+    }
+
+    /**
+     * Get total courses count for a given category title
+     */
+    public int getTotalCoursesCountByCategory(String categoryTitle) throws SQLException {
+        String catSql = "SELECT Id FROM Categories WHERE Title = ?";
+        String catId = null;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement cstmt = conn.prepareStatement(catSql)) {
+            cstmt.setString(1, categoryTitle);
+            try (ResultSet crs = cstmt.executeQuery()) {
+                if (crs.next()) catId = crs.getString("Id");
+            }
+        }
+        if (catId == null) return 0;
+
+        String sql = "SELECT COUNT(*) FROM Courses WHERE LeafCategoryId = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, catId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get courses by category title with pagination
+     */
+    public List<Course> getCoursesByCategory(String categoryTitle, int limit, int offset) throws SQLException {
+        String catSql = "SELECT Id FROM Categories WHERE Title = ?";
+        String catId = null;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement cstmt = conn.prepareStatement(catSql)) {
+            cstmt.setString(1, categoryTitle);
+            try (ResultSet crs = cstmt.executeQuery()) {
+                if (crs.next()) catId = crs.getString("Id");
+            }
+        }
+        if (catId == null) return new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, ");
+        sql.append("c.DiscountExpiry, c.Level, c.LearnerCount, c.RatingCount, c.TotalRating, ");
+        sql.append("u.FullName as InstructorName ");
+        sql.append("FROM Courses c ");
+        sql.append("LEFT JOIN Users u ON c.InstructorId = u.Id ");
+        sql.append("WHERE c.LeafCategoryId = ? ");
+        sql.append("ORDER BY c.CreationTime DESC ");
+        if (limit > 0) {
+            sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        }
+
+        List<Course> courses = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            pstmt.setString(idx++, catId);
+            if (limit > 0) {
+                pstmt.setInt(idx++, offset);
+                pstmt.setInt(idx++, limit);
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    courses.add(new Course(
+                        rs.getString("Id"),
+                        rs.getString("Title"),
+                        rs.getString("ThumbUrl"),
+                        rs.getString("Status"),
+                        rs.getDouble("Price"),
+                        rs.getDouble("Discount"),
+                        rs.getTimestamp("DiscountExpiry"),
+                        rs.getString("Level"),
+                        rs.getInt("LearnerCount"),
+                        rs.getInt("RatingCount"),
+                        rs.getLong("TotalRating"),
+                        rs.getString("InstructorName")
+                    ));
+                }
+            }
+        }
+        return courses;
+    }
     
  
     public boolean testConnection() {
@@ -325,17 +443,79 @@ public class CourseManagementController {
      */
     public boolean unbanCourse(String courseId) {
         String sql = "UPDATE Courses SET Status = 'Ongoing' WHERE Id = ? AND Status = 'Off'";
-        
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
             stmt.setString(1, courseId);
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
-            
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Get a single course by ID
+    public Course getCourseById(String id) throws SQLException {
+        String sql = "SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, " +
+                "c.DiscountExpiry, c.Level, c.LearnerCount, c.RatingCount, c.TotalRating, " +
+                "u.FullName as InstructorName " +
+                "FROM Courses c LEFT JOIN Users u ON c.InstructorId = u.Id WHERE c.Id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Course(
+                        rs.getString("Id"),
+                        rs.getString("Title"),
+                        rs.getString("ThumbUrl"),
+                        rs.getString("Status"),
+                        rs.getDouble("Price"),
+                        rs.getDouble("Discount"),
+                        rs.getTimestamp("DiscountExpiry"),
+                        rs.getString("Level"),
+                        rs.getInt("LearnerCount"),
+                        rs.getInt("RatingCount"),
+                        rs.getLong("TotalRating"),
+                        rs.getString("InstructorName")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
+    // Get more courses by instructor, excluding the current course
+    public List<Course> getCoursesByInstructor(String instructorName, String excludeCourseId) throws SQLException {
+        String sql = "SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, " +
+                "c.DiscountExpiry, c.Level, c.LearnerCount, c.RatingCount, c.TotalRating, " +
+                "u.FullName as InstructorName " +
+                "FROM Courses c LEFT JOIN Users u ON c.InstructorId = u.Id " +
+                "WHERE u.FullName = ? AND c.Id <> ? ORDER BY c.CreationTime DESC LIMIT 4";
+        List<Course> courses = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, instructorName);
+            pstmt.setString(2, excludeCourseId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    courses.add(new Course(
+                        rs.getString("Id"),
+                        rs.getString("Title"),
+                        rs.getString("ThumbUrl"),
+                        rs.getString("Status"),
+                        rs.getDouble("Price"),
+                        rs.getDouble("Discount"),
+                        rs.getTimestamp("DiscountExpiry"),
+                        rs.getString("Level"),
+                        rs.getInt("LearnerCount"),
+                        rs.getInt("RatingCount"),
+                        rs.getLong("TotalRating"),
+                        rs.getString("InstructorName")
+                    ));
+                }
+            }
+        }
+        return courses;
     }
 }
