@@ -4,6 +4,17 @@
     <description>Adaptive E-learning Management System Dashboard</description>
     <!-- Welcome page configuration -->
     <!-- Session timeout (in minutes) -->
+    
+    <!-- Cart Page Servlet -->
+    <servlet>
+        <servlet-name>CartPageServlet</servlet-name>
+        <servlet-class>servlet.CartPageServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>CartPageServlet</servlet-name>
+        <url-pattern>/cart-page</url-pattern>
+    </servlet-mapping>
    
     <servlet-mapping>
         <servlet-name>java</servlet-name>

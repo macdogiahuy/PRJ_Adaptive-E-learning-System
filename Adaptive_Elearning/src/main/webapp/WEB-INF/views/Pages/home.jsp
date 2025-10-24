@@ -66,14 +66,14 @@
                 
                 <div class="nav-menu">
                     <a href="/Adaptive_Elearning/" class="nav-link active">Trang chủ</a>
-                    <a href="#courses" class="nav-link">Khóa học</a>
-                    <a href="#about" class="nav-link">Giới thiệu</a>
-                    <a href="#contact" class="nav-link">Liên hệ</a>
+                    <a href="/Adaptive_Elearning/courses" class="nav-link">Khóa học</a>
+                    <a href="/Adaptive_Elearning/about" class="nav-link">Giới thiệu</a>
+                    <a href="/Adaptive_Elearning/contact" class="nav-link">Liên hệ</a>
                 </div>
                 
                 <div class="nav-actions">
                     <% if (u != null) { %>
-                        <a href="/Adaptive_Elearning/cart.jsp" class="cart-link">
+                        <a href="/Adaptive_Elearning/cart-page" class="cart-link">
                             <div class="cart-icon">
                                 <i class="fas fa-shopping-cart"></i>
                                 <span class="cart-badge">0</span>
@@ -130,7 +130,7 @@
                                 </div>
                                 <div class="dropdown-divider"></div>
                                 <div class="dropdown-items">
-                                    <a href="/Adaptive_Elearning/logout" class="dropdown-item logout-item">
+                                    <a href="/Adaptive_Elearning/login" class="dropdown-item logout-item">
                                         <i class="fas fa-sign-out-alt"></i>
                                         <span>Đăng xuất</span>
                                     </a>
@@ -139,6 +139,7 @@
                         </div>
                     <% } else { %>
                         <a href="/Adaptive_Elearning/login" class="login-btn">Đăng nhập</a>
+                        <a href="/Adaptive_Elearning/register" class="register-btn">Đăng ký</a>
                     <% } %>
                 </div>
             </nav>

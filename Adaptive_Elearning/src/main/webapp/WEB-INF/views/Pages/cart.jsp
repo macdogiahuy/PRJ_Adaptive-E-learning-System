@@ -6,11 +6,13 @@
 
 <%
     // Get cart data from servlet
-    Cart cart = (Cart) request.getAttribute("cart");
     List<CartItem> cartItems = (List<CartItem>) request.getAttribute("cartItems");
-    Double totalPrice = (Double) request.getAttribute("totalPrice");
-    Integer totalItems = (Integer) request.getAttribute("totalItems");
-    Double discountAmount = (Double) request.getAttribute("discountAmount");
+    Double totalAmount = (Double) request.getAttribute("totalAmount");
+    Double totalDiscount = (Double) request.getAttribute("totalDiscount");
+    Double finalAmount = (Double) request.getAttribute("finalAmount");
+    Integer itemCount = (Integer) request.getAttribute("itemCount");
+    Boolean emptyCart = (Boolean) request.getAttribute("emptyCart");
+    String errorMessage = (String) request.getAttribute("errorMessage");
     
     // Get user from session
     Users user = null;
@@ -19,11 +21,12 @@
     }
     
     // Set defaults if null
-    if (cart == null) cart = new Cart();
     if (cartItems == null) cartItems = new ArrayList<>();
-    if (totalPrice == null) totalPrice = 0.0;
-    if (totalItems == null) totalItems = 0;
-    if (discountAmount == null) discountAmount = 0.0;
+    if (totalAmount == null) totalAmount = 0.0;
+    if (totalDiscount == null) totalDiscount = 0.0;
+    if (finalAmount == null) finalAmount = 0.0;
+    if (itemCount == null) itemCount = 0;
+    if (emptyCart == null) emptyCart = cartItems.isEmpty();
 %>
 
 <!DOCTYPE html>
