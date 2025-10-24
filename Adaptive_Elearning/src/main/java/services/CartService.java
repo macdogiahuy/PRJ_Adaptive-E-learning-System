@@ -1,262 +1,154 @@
 package services;
 
-import model.Cart;
 import model.CartItem;
-import controller.CourseManagementController;
-import controller.CourseManagementController.Course;
 import jakarta.servlet.http.HttpSession;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 /**
  * Service class for managing shopping cart operations
- * Handles cart storage in session and provides cart management functionality
  */
 public class CartService {
-    
-    private static final String CART_SESSION_KEY = "userCart";
-    private CourseManagementController courseController;
-    
-    // In-memory storage for demo purposes (in production, use database)
-    private static final Map<String, Cart> userCarts = new ConcurrentHashMap<>();
-    
-    public CartService() {
-        this.courseController = new CourseManagementController();
-    }
+    private static final String CART_SESSION_KEY = "cart";
     
     /**
-     * Get cart from session, create new if doesn't exist
+     * Get cart items from session
      */
-    public Cart getCartFromSession(HttpSession session, String userId) {
-        if (session == null || userId == null) {
-            return new Cart();
-        }
-        
-        Cart cart = (Cart) session.getAttribute(CART_SESSION_KEY);
-        if (cart == null || !userId.equals(cart.getUserId())) {
-            cart = new Cart(userId);
+    @SuppressWarnings("unchecked")
+    public List<CartItem> getCartItems(HttpSession session) {
+        List<CartItem> cart = (List<CartItem>) session.getAttribute(CART_SESSION_KEY);
+        if (cart == null) {
+            cart = new ArrayList<>();
             session.setAttribute(CART_SESSION_KEY, cart);
         }
-        
         return cart;
     }
     
     /**
-     * Save cart to session
+     * Add item to cart
      */
-    public void saveCartToSession(HttpSession session, Cart cart) {
-        if (session != null && cart != null) {
-            session.setAttribute(CART_SESSION_KEY, cart);
-        }
-    }
-    
-    /**
-     * Add course to cart
-     */
-    public boolean addCourseToCart(HttpSession session, String userId, String courseId) {
-        try {
-            // Get course details
-            Course course = courseController.getCourseById(courseId);
-            if (course == null) {
-                return false;
-            }
-            
-            // Get user's cart
-            Cart cart = getCartFromSession(session, userId);
-            
-            // Check if course already in cart
-            if (cart.containsCourse(courseId)) {
-                return false; // Course already in cart
-            }
-            
-            // Create cart item
-            CartItem cartItem = new CartItem(
-                course.getId(),
-                course.getTitle(),
-                "", // Description not available in current Course model
-                course.getThumbUrl(),
-                course.getInstructorName(),
-                course.getPrice(),
-                course.getDiscountPrice(),
-                course.getLevel(),
-                userId
-            );
-            
-            // Add to cart
-            boolean added = cart.addItem(cartItem);
-            
-            if (added) {
-                saveCartToSession(session, cart);
-            }
-            
-            return added;
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    /**
-     * Remove course from cart
-     */
-    public boolean removeCourseFromCart(HttpSession session, String userId, String courseId) {
-        Cart cart = getCartFromSession(session, userId);
-        boolean removed = cart.removeItem(courseId);
+    public boolean addToCart(HttpSession session, CartItem item) {
+        List<CartItem> cart = getCartItems(session);
         
-        if (removed) {
-            saveCartToSession(session, cart);
+        // Check if item already exists in cart
+        for (CartItem existingItem : cart) {
+            if (existingItem.getCourseId().equals(item.getCourseId())) {
+                // Update quantity
+                existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+                session.setAttribute(CART_SESSION_KEY, cart);
+                return true;
+            }
         }
         
-        return removed;
+        // Add new item
+        cart.add(item);
+        session.setAttribute(CART_SESSION_KEY, cart);
+        return true;
     }
     
     /**
      * Update item quantity in cart
      */
-    public boolean updateCartItemQuantity(HttpSession session, String userId, String courseId, int quantity) {
-        Cart cart = getCartFromSession(session, userId);
-        boolean updated = cart.updateItemQuantity(courseId, quantity);
+    public boolean updateCartItem(HttpSession session, String courseId, int quantity) {
+        List<CartItem> cart = getCartItems(session);
         
-        if (updated) {
-            saveCartToSession(session, cart);
+        for (CartItem item : cart) {
+            if (item.getCourseId().equals(courseId)) {
+                if (quantity <= 0) {
+                    cart.remove(item);
+                } else {
+                    item.setQuantity(quantity);
+                }
+                session.setAttribute(CART_SESSION_KEY, cart);
+                return true;
+            }
         }
+        return false;
+    }
+    
+    /**
+     * Remove item from cart
+     */
+    public boolean removeFromCart(HttpSession session, String courseId) {
+        List<CartItem> cart = getCartItems(session);
         
-        return updated;
+        Iterator<CartItem> iterator = cart.iterator();
+        while (iterator.hasNext()) {
+            CartItem item = iterator.next();
+            if (item.getCourseId().equals(courseId)) {
+                iterator.remove();
+                session.setAttribute(CART_SESSION_KEY, cart);
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
      * Clear entire cart
      */
-    public void clearCart(HttpSession session, String userId) {
-        Cart cart = getCartFromSession(session, userId);
-        cart.clearCart();
-        saveCartToSession(session, cart);
+    public void clearCart(HttpSession session) {
+        session.removeAttribute(CART_SESSION_KEY);
     }
     
     /**
-     * Get cart item count
+     * Get total amount
      */
-    public int getCartItemCount(HttpSession session, String userId) {
-        Cart cart = getCartFromSession(session, userId);
-        return cart.getTotalItems();
+    public double getTotalAmount(List<CartItem> cartItems) {
+        return cartItems.stream()
+                .mapToDouble(item -> item.getFinalPrice() * item.getQuantity())
+                .sum();
     }
     
     /**
-     * Get cart total price
+     * Get total discount
      */
-    public double getCartTotalPrice(HttpSession session, String userId) {
-        Cart cart = getCartFromSession(session, userId);
-        return cart.getTotalPrice();
+    public double getTotalDiscount(List<CartItem> cartItems) {
+        return cartItems.stream()
+                .mapToDouble(item -> (item.getOriginalPrice() - item.getFinalPrice()) * item.getQuantity())
+                .sum();
     }
     
     /**
-     * Check if course is in cart
+     * Get item count
      */
-    public boolean isCourseInCart(HttpSession session, String userId, String courseId) {
-        Cart cart = getCartFromSession(session, userId);
-        return cart.containsCourse(courseId);
+    public int getItemCount(List<CartItem> cartItems) {
+        return cartItems.stream()
+                .mapToInt(CartItem::getQuantity)
+                .sum();
     }
     
     /**
-     * Get cart summary for display
+     * Check if cart is empty
      */
-    public String getCartSummary(HttpSession session, String userId) {
-        Cart cart = getCartFromSession(session, userId);
-        return cart.getCartSummary();
+    public boolean isCartEmpty(HttpSession session) {
+        List<CartItem> cart = getCartItems(session);
+        return cart.isEmpty();
     }
     
     /**
-     * Validate cart before checkout
+     * Create sample cart item for testing
      */
-    public boolean validateCart(HttpSession session, String userId) {
-        Cart cart = getCartFromSession(session, userId);
-        
-        if (cart.isEmpty()) {
-            return false;
+    public CartItem createSampleCartItem(String courseId, String title, double price) {
+        CartItem item = new CartItem();
+        item.setCourseId(courseId);
+        item.setCourseName(title);
+        item.setOriginalPrice(price);
+        item.setFinalPrice(price);
+        item.setQuantity(1);
+        item.setCourseImage("/Adaptive_Elearning/assets/images/course-default.jpg");
+        item.setInstructorName("Giảng viên");
+        item.setAddedDate(new Date());
+        return item;
+    }
+    
+    /**
+     * Add sample data for testing
+     */
+    public void addSampleData(HttpSession session) {
+        if (isCartEmpty(session)) {
+            addToCart(session, createSampleCartItem("course1", "Lập trình Java cơ bản", 299000));
+            addToCart(session, createSampleCartItem("course2", "Thiết kế web với HTML/CSS", 199000));
+            addToCart(session, createSampleCartItem("course3", "JavaScript và jQuery", 249000));
         }
-        
-        // Check if all courses still exist and are available
-        for (CartItem item : cart.getItems()) {
-            try {
-                Course course = courseController.getCourseById(item.getCourseId());
-                if (course == null) {
-                    // Course no longer exists, remove from cart
-                    cart.removeItem(item.getCourseId());
-                    saveCartToSession(session, cart);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-        
-        return cart.isValid();
-    }
-    
-    /**
-     * Process checkout (placeholder for actual payment processing)
-     */
-    public boolean processCheckout(HttpSession session, String userId) {
-        if (!validateCart(session, userId)) {
-            return false;
-        }
-        
-        Cart cart = getCartFromSession(session, userId);
-        
-        // TODO: Implement actual payment processing
-        // TODO: Create enrollment records
-        // TODO: Send confirmation emails
-        
-        // For now, just clear the cart after successful "purchase"
-        clearCart(session, userId);
-        
-        return true;
-    }
-    
-    /**
-     * Transfer cart from anonymous session to logged-in user
-     */
-    public void transferAnonymousCart(HttpSession session, String userId) {
-        Cart anonymousCart = (Cart) session.getAttribute(CART_SESSION_KEY);
-        
-        if (anonymousCart != null && anonymousCart.getUserId() == null) {
-            // Update cart user ID
-            anonymousCart.setUserId(userId);
-            
-            // Update all cart items user ID
-            for (CartItem item : anonymousCart.getItems()) {
-                item.setUserId(userId);
-            }
-            
-            saveCartToSession(session, anonymousCart);
-        }
-    }
-    
-    /**
-     * Get cart statistics for admin/analytics
-     */
-    public Map<String, Object> getCartStatistics() {
-        Map<String, Object> stats = new HashMap<>();
-        
-        int totalCarts = userCarts.size();
-        int activeCarts = 0;
-        double totalValue = 0;
-        
-        for (Cart cart : userCarts.values()) {
-            if (!cart.isEmpty()) {
-                activeCarts++;
-                totalValue += cart.getTotalPrice();
-            }
-        }
-        
-        stats.put("totalCarts", totalCarts);
-        stats.put("activeCarts", activeCarts);
-        stats.put("totalValue", totalValue);
-        stats.put("averageCartValue", activeCarts > 0 ? totalValue / activeCarts : 0);
-        
-        return stats;
     }
 }

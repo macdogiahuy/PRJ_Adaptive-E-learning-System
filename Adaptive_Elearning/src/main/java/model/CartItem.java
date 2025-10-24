@@ -178,6 +178,19 @@ public class CartItem implements Serializable {
         return courseId != null ? courseId.hashCode() : 0;
     }
     
+    // Alias methods for JSP compatibility
+    public String getTitle() {
+        return courseName;
+    }
+    
+    public String getThumbnail() {
+        return courseImage;
+    }
+    
+    public double getPrice() {
+        return finalPrice;
+    }
+    
     @Override
     public String toString() {
         return "CartItem{" +
