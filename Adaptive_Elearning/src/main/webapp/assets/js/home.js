@@ -72,9 +72,13 @@ class CartManager {
             const response = await fetch('/Adaptive_Elearning/cart?action=count');
             const result = await response.json();
             
-            if (result.success && result.count > 0) {
-                this.cartBadge.textContent = result.count;
-                this.cartBadge.style.display = 'flex';
+            if (result.success && result.cartCount !== undefined) {
+                if (result.cartCount > 0) {
+                    this.cartBadge.textContent = result.cartCount;
+                    this.cartBadge.style.display = 'flex';
+                } else {
+                    this.cartBadge.style.display = 'none';
+                }
             } else {
                 this.cartBadge.style.display = 'none';
             }
