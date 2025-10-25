@@ -222,7 +222,7 @@
                             <span class="total-amount" id="totalAmount"><%= String.format("%,.0f đ", totalAmount) %></span>
                         </div>
                         
-                        <button type="button" class="btn-checkout" onclick="checkout()">
+                        <button type="button" class="btn-checkout" onclick="showPaymentMethodModal()">
                             <i class="fas fa-lock"></i>
                             Thanh toán an toàn
                         </button>
@@ -268,17 +268,58 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2024 EduHub. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+   
 
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
+
+    <!-- Payment Method Modal -->
+    <div id="paymentMethodModal" class="payment-modal">
+        <div class="payment-modal-content">
+            <div class="payment-modal-header">
+                <h3><i class="fas fa-credit-card"></i> Chọn phương thức thanh toán</h3>
+                <button class="payment-modal-close" onclick="closePaymentMethodModal()">&times;</button>
+            </div>
+            <div class="payment-modal-body">
+                <div class="payment-options">
+                    <div class="payment-option" onclick="selectPaymentMethod('cod')">
+                        <div class="payment-option-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="payment-option-content">
+                            <h4>Thanh toán khi nhận hàng (COD)</h4>
+                            <p>Thanh toán bằng tiền mặt khi nhận khóa học</p>
+                            <span class="payment-option-badge">Miễn phí</span>
+                        </div>
+                        <div class="payment-option-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-option" onclick="selectPaymentMethod('online')">
+                        <div class="payment-option-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div class="payment-option-content">
+                            <h4>Thanh toán online (VietQR)</h4>
+                            <p>Thanh toán ngay bằng mã QR qua ứng dụng ngân hàng</p>
+                            <span class="payment-option-badge popular">Phổ biến</span>
+                        </div>
+                        <div class="payment-option-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="payment-summary">
+                    <div class="payment-summary-row">
+                        <span>Tổng thanh toán:</span>
+                        <span class="payment-summary-amount"><%= String.format("%,.0f đ", totalAmount) %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script>
@@ -340,6 +381,35 @@
             showToast('Chức năng thanh toán đang được phát triển!', 'info');
             // TODO: Implement checkout functionality
             // window.location.href = '/Adaptive_Elearning/checkout';
+        }
+        
+        // Hiển thị modal chọn phương thức thanh toán
+        function showPaymentMethodModal() {
+            document.getElementById('paymentMethodModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Đóng modal chọn phương thức thanh toán
+        function closePaymentMethodModal() {
+            document.getElementById('paymentMethodModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Chọn phương thức thanh toán
+        function selectPaymentMethod(method) {
+            if (method === 'cod') {
+                window.location.href = '/Adaptive_Elearning/checkout?method=cod';
+            } else if (method === 'online') {
+                window.location.href = '/Adaptive_Elearning/checkout?method=online';
+            }
+        }
+        
+        // Đóng modal khi click bên ngoài
+        window.onclick = function(event) {
+            const modal = document.getElementById('paymentMethodModal');
+            if (event.target === modal) {
+                closePaymentMethodModal();
+            }
         }
         
         // Hiển thị toast notification
