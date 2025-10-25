@@ -122,14 +122,20 @@ public class CheckoutServlet extends HttpServlet {
                     System.err.println("Email sending failed: " + emailError.getMessage());
                 }
                 
-                // Xóa giỏ hàng khỏi session sau khi checkout thành công
+                // Lưu thông tin checkout thành công vào session
                 HttpSession session = request.getSession();
+                session.setAttribute("checkoutSuccess", true);
+                session.setAttribute("checkoutBillId", result.getBillId());
+                session.setAttribute("checkoutAmount", totalAmount);
+                session.setAttribute("checkoutMethod", paymentMethod);
+                session.setAttribute("checkoutMessage", result.getMessage());
+                
+                // Xóa giỏ hàng khỏi session sau khi checkout thành công
                 session.removeAttribute("cartItems");
                 session.removeAttribute("totalAmount");
                 
-                // Chuyển hướng đến trang thành công
-                String redirectMethod = "COD".equals(paymentMethod) ? "cod" : "online";
-                response.sendRedirect(request.getContextPath() + "/checkout.jsp?method=" + redirectMethod + "&success=true");
+                // Chuyển hướng đến trang "Thanh toán thành công"
+                response.sendRedirect(request.getContextPath() + "/checkout-success.jsp");
                 
             } else {
                 System.err.println("=== CHECKOUT FAILED ===");
