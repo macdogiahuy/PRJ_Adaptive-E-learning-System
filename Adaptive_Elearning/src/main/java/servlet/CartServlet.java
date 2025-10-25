@@ -206,6 +206,10 @@ public class CartServlet extends HttpServlet {
                                       .mapToDouble(CartItem::getFinalPrice)
                                       .sum();
         
+        // Lưu thông tin vào session để sử dụng khi checkout
+        session.setAttribute("totalAmount", totalAmount);
+        session.setAttribute("cartItems", cartItems);
+        
         request.setAttribute("cartItems", cartItems);
         request.setAttribute("totalAmount", totalAmount);
         request.setAttribute("cartCount", cartItems.size());
