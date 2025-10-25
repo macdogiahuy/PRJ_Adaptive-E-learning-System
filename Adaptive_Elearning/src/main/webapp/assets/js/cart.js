@@ -5,6 +5,13 @@
 
 // Cart management object
 const CartManager = {
+    // Get context path from current URL
+    getContextPath: function() {
+        const path = window.location.pathname;
+        const contextPath = path.substring(0, path.indexOf('/', 1));
+        return contextPath || '';
+    },
+    
     // Add course to cart
     addToCart: function(courseId, buttonElement) {
         // Disable button to prevent double clicks
@@ -13,8 +20,10 @@ const CartManager = {
             buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang thêm...';
         }
         
+        const contextPath = this.getContextPath();
+        
         // Send AJAX request
-        fetch('/Adaptive_Elearning/add-to-cart', {
+        fetch(contextPath + '/addToCart', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -22,7 +31,14 @@ const CartManager = {
             },
             body: 'courseId=' + encodeURIComponent(courseId)
         })
-        .then(response => response.json())
+        .then(response => {
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new TypeError("Server không trả về JSON. Có thể có lỗi server.");
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 // Show success message
@@ -128,6 +144,8 @@ const CartManager = {
     showMiniCartPreview: function(course) {
         if (!course) return;
         
+        const contextPath = this.getContextPath();
+        
         const miniCart = document.createElement('div');
         miniCart.className = 'mini-cart-preview';
         miniCart.style.cssText = `
@@ -148,10 +166,10 @@ const CartManager = {
                 <i class="fas fa-shopping-cart text-success me-2 mt-1"></i>
                 <div class="flex-grow-1">
                     <small class="text-muted">Đã thêm vào giỏ hàng:</small>
-                    <div class="fw-bold text-truncate">${course.title}</div>
-                    <div class="text-success">${formatPrice(course.price)}</div>
+                    <div class="fw-bold text-truncate">${course.title || 'Khóa học'}</div>
+                    <div class="text-success">${course.price ? formatPrice(course.price) : ''}</div>
                     <div class="mt-2">
-                        <a href="/Adaptive_Elearning/cart" class="btn btn-sm btn-outline-primary">
+                        <a href="${contextPath}/cart" class="btn btn-sm btn-outline-primary">
                             Xem giỏ hàng
                         </a>
                     </div>
@@ -172,7 +190,9 @@ const CartManager = {
     
     // Initialize cart counter on page load
     initializeCartCounter: function() {
-        fetch('/Adaptive_Elearning/add-to-cart', {
+        const contextPath = this.getContextPath();
+        
+        fetch(contextPath + '/getCartCount', {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -180,8 +200,8 @@ const CartManager = {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                this.updateCartCounter(data.cartItemCount);
+            if (data.success || data.count !== undefined) {
+                this.updateCartCounter(data.count || data.cartItemCount || 0);
             }
         })
         .catch(error => {

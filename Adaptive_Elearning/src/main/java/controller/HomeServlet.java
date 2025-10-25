@@ -61,7 +61,7 @@ public class HomeServlet extends HttpServlet {
         }
 
         // 6. Forward sang JSP
-        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/Pages/home.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("home.jsp");
         rd.forward(request, response);
     }
 }

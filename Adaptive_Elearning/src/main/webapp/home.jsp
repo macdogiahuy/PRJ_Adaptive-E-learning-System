@@ -1,265 +1,406 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@page import="controller.CourseManagementController"%>
+<%@page import="controller.CourseManagementController.Course"%>
+<%@page import="java.util.*"%>
+<%@page import="model.Users"%>
+
+<%
+    // Dữ liệu courses, phân trang, tìm kiếm
+    List<Course> courses = (List<Course>) request.getAttribute("courses");
+    String search = (String) request.getAttribute("search");
+    Integer currentPage = (Integer) request.getAttribute("currentPage");
+    Integer totalPages = (Integer) request.getAttribute("totalPages");
+    Integer totalCourses = (Integer) request.getAttribute("totalCourses");
+    String errorMessage = (String) request.getAttribute("errorMessage");
+
+    if (search == null) {
+        search = "http://localhost:8080/Adaptive_Elearning/home";
+    }
+    if (currentPage == null) {
+        currentPage = 1;
+    }
+    if (totalPages == null) {
+        totalPages = 1;
+    }
+    if (totalCourses == null) {
+        totalCourses = 0;
+    }
+
+    Users u = null;
+    int cartCount = 0;
+    if (session != null) {
+        u = (Users) session.getAttribute("account");
+        // Lấy số lượng giỏ hàng từ session
+        java.util.Map<String, model.CartItem> cart = 
+            (java.util.Map<String, model.CartItem>) session.getAttribute("cart");
+        if (cart != null) {
+            cartCount = cart.size();
+        }
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CourseHub - Trang chủ</title>
+    <title>EduHub - Học mọi lúc, mọi nơi</title>
+    <meta name="description" content="EduHub - Khám phá hàng nghìn khóa học chất lượng cao từ các chuyên gia hàng đầu. Học mọi lúc, mọi nơi với chi phí hợp lý.">
+    <meta name="keywords" content="học trực tuyến, khóa học online, giáo dục, kỹ năng, công nghệ">
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/cart.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="/Adaptive_Elearning/assets/css/home.css" as="style">
+    <link rel="preload" href="/Adaptive_Elearning/assets/js/home.js" as="script">
+    
+    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/Adaptive_Elearning/assets/css/home.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/Adaptive_Elearning/assets/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- Header -->
+    <header class="header">
         <div class="container">
-            <a class="navbar-brand" href="${pageContext.request.contextPath}/">
-                <i class="fas fa-graduation-cap"></i> CourseHub
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="${pageContext.request.contextPath}/">Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="${pageContext.request.contextPath}/courses">Khóa học</a>
-                    </li>
-                </ul>
+            <nav class="nav-container">
+                <a href="/Adaptive_Elearning/" class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>EduHub</span>
+                </a>
                 
-                <ul class="navbar-nav">
-                    <c:if test="${sessionScope.user != null}">
-                        <!-- Cart Icon -->
-                        <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/cart-page" class="nav-link cart-link">
-                                <div class="cart-icon-wrapper">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <span class="cart-counter" style="display: none;">0</span>
-                                </div>
-                            </a>
-                        </li>
-                        
-                        <!-- User Menu -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user"></i> ${sessionScope.user.fullName}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile">Hồ sơ</a></li>
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/my-courses">Khóa học của tôi</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout">Đăng xuất</a></li>
-                            </ul>
-                        </li>
-                    </c:if>
-                    
-                    <c:if test="${sessionScope.user == null}">
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/login">Đăng nhập</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/register">Đăng ký</a>
-                        </li>
-                    </c:if>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero-section bg-primary text-white py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4">Học tập trực tuyến với CourseHub</h1>
-                    <p class="lead mb-4">Khám phá hàng ngàn khóa học chất lượng cao từ các chuyên gia hàng đầu</p>
-                    <a href="${pageContext.request.contextPath}/courses" class="btn btn-light btn-lg">
-                        <i class="fas fa-search"></i> Khám phá khóa học
-                    </a>
+                <div class="nav-menu">
+                    <a href="/Adaptive_Elearning/" class="nav-link active">Trang chủ</a>
+                    <a href="/Adaptive_Elearning/courses" class="nav-link">Khóa học</a>
+                    <a href="/Adaptive_Elearning/about" class="nav-link">Giới thiệu</a>
+                    <a href="/Adaptive_Elearning/contact" class="nav-link">Liên hệ</a>
                 </div>
-                <div class="col-lg-6">
-                    <img src="${pageContext.request.contextPath}/assets/images/hero-image.jpg" 
-                         class="img-fluid rounded" alt="E-learning">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Courses Section -->
-    <section class="py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <h2 class="text-center mb-5">Khóa học nổi bật</h2>
-                </div>
-            </div>
-            
-            <!-- Courses Grid -->
-            <div class="courses-grid">
-                <c:forEach var="course" items="${featuredCourses}">
-                    <div class="course-card card">
-                        <img src="${course.thumbUrl != null ? course.thumbUrl : '/assets/images/default-course.jpg'}" 
-                             class="card-img-top" alt="${course.title}">
-                        
-                        <div class="card-body">
-                            <h5 class="card-title">${course.title}</h5>
-                            <p class="card-text">${course.description}</p>
-                            
-                            <div class="course-meta">
-                                <span><i class="fas fa-user"></i> ${course.creatorId.fullName}</span>
-                                <span><i class="fas fa-star"></i> 
-                                    <c:choose>
-                                        <c:when test="${course.ratingCount > 0}">
-                                            <fmt:formatNumber value="${course.totalRating / course.ratingCount}" pattern="#.#"/>
-                                            (${course.ratingCount})
-                                        </c:when>
-                                        <c:otherwise>Chưa có đánh giá</c:otherwise>
-                                    </c:choose>
-                                </span>
-                                <span><i class="fas fa-users"></i> ${course.learnerCount} học viên</span>
+                
+                <div class="nav-actions">
+                    <% if (u != null) { %>
+                        <a href="/Adaptive_Elearning/cart" class="cart-link">
+                            <div class="cart-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="cart-badge" <% if (cartCount == 0) { %>style="display: none;"<% } %>><%= cartCount %></span>
                             </div>
-                            
-                            <div class="course-price-section">
-                                <div class="course-price-info">
-                                    <c:choose>
-                                        <c:when test="${course.discount > 0 && (course.discountExpiry == null || course.discountExpiry.time > System.currentTimeMillis())}">
-                                            <span class="course-price">
-                                                <fmt:formatNumber value="${course.price * (1 - course.discount / 100)}" pattern="#,##0"/>₫
-                                            </span>
-                                            <span class="course-original-price">
-                                                <fmt:formatNumber value="${course.price}" pattern="#,##0"/>₫
-                                            </span>
-                                            <span class="course-discount">-${course.discount}%</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="course-price">
-                                                <fmt:formatNumber value="${course.price}" pattern="#,##0"/>₫
-                                            </span>
-                                        </c:otherwise>
-                                    </c:choose>
+                        </a>
+                        <div class="user-dropdown">
+                            <button class="user-menu-btn" type="button">
+                                <div class="user-avatar">
+                                    <% if (u.getAvatarUrl() != null && !u.getAvatarUrl().isEmpty()) { %>
+                                        <img src="<%= u.getAvatarUrl() %>" alt="Avatar" class="avatar-img">
+                                    <% } else { %>
+                                        <i class="fas fa-user-circle"></i>
+                                    <% } %>
                                 </div>
-                                
-                                <c:if test="${sessionScope.user != null}">
-                                    <!-- Add to Cart Button -->
-                                    <button type="button" 
-                                            class="btn btn-primary add-to-cart-btn" 
-                                            data-course-id="${course.id}">
-                                        <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
-                                    </button>
-                                </c:if>
-                                
-                                <c:if test="${sessionScope.user == null}">
-                                    <a href="${pageContext.request.contextPath}/login" 
-                                       class="btn btn-outline-primary">
-                                        <i class="fas fa-sign-in-alt"></i> Đăng nhập để mua
+                                <div class="user-info">
+                                    <span class="user-name"><%= u.getUserName() %></span>
+                                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                </div>
+                            </button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-header">
+                                    <div class="user-details">
+                                        <% if (u.getAvatarUrl() != null && !u.getAvatarUrl().isEmpty()) { %>
+                                            <img src="<%= u.getAvatarUrl() %>" alt="Avatar" class="dropdown-avatar">
+                                        <% } else { %>
+                                            <div class="dropdown-avatar-placeholder">
+                                                <i class="fas fa-user-circle"></i>
+                                            </div>
+                                        <% } %>
+                                        <div class="user-text">
+                                            <div class="user-fullname"><%= u.getUserName() %></div>
+                                            <div class="user-email"><%= u.getEmail() %></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-items">
+                                    <a href="/Adaptive_Elearning/dashboard" class="dropdown-item">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span>Dashboard</span>
                                     </a>
-                                </c:if>
+                                    <a href="/Adaptive_Elearning/my-courses" class="dropdown-item">
+                                        <i class="fas fa-book"></i>
+                                        <span>Khóa học đã đăng ký</span>
+                                    </a>
+                                    <a href="/Adaptive_Elearning/profile" class="dropdown-item">
+                                        <i class="fas fa-user-edit"></i>
+                                        <span>Chỉnh sửa hồ sơ</span>
+                                    </a>
+                                    <a href="/Adaptive_Elearning/settings" class="dropdown-item">
+                                        <i class="fas fa-cog"></i>
+                                        <span>Cài đặt</span>
+                                    </a>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-items">
+                                    <a href="/Adaptive_Elearning/login" class="dropdown-item logout-item">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Đăng xuất</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </c:forEach>
+                    <% } else { %>
+                        <a href="/Adaptive_Elearning/login" class="login-btn">Đăng nhập</a>
+                        <a href="/Adaptive_Elearning/register" class="register-btn">Đăng ký</a>
+                    <% } %>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Học tập không giới hạn</h1>
+            <p class="hero-subtitle">Khám phá hàng nghìn khóa học chất lượng cao từ các chuyên gia hàng đầu</p>
+            
+            <div class="search-container">
+                <form class="search-form" action="/Adaptive_Elearning/" method="GET">
+                    <input type="text" name="search" class="search-input" 
+                           placeholder="Tìm kiếm khóa học..." value="<%= search %>">
+                    <button type="submit" class="search-submit">
+                        <i class="fas fa-search"></i>
+                        Tìm kiếm
+                    </button>
+                </form>
             </div>
             
-            <!-- Load More Button -->
-            <div class="text-center mt-5">
-                <a href="${pageContext.request.contextPath}/courses" class="btn btn-outline-primary btn-lg">
-                    <i class="fas fa-plus"></i> Xem thêm khóa học
-                </a>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number"><%= totalCourses %></div>
+                    <div class="stat-label">Khóa học</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Học viên</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Giảng viên</div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="py-5 bg-light">
+    <!-- Courses Section -->
+    <section class="courses-section" id="courses">
         <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <h2 class="text-center mb-5">Tại sao chọn CourseHub?</h2>
-                </div>
+            <div class="section-header">
+                <h2 class="section-title">
+                    <%= !search.isEmpty() ? "Kết quả tìm kiếm: " + search : "Khóa học nổi bật" %>
+                </h2>
+                <p class="section-subtitle">
+                    <%= !search.isEmpty() ? "Tìm thấy " + totalCourses + " khóa học" : "Những khóa học được yêu thích nhất từ cộng đồng học viên" %>
+                </p>
             </div>
             
-            <div class="row">
-                <div class="col-md-4 text-center mb-4">
-                    <div class="feature-item p-4">
-                        <i class="fas fa-play-circle fa-3x text-primary mb-3"></i>
-                        <h4>Học mọi lúc, mọi nơi</h4>
-                        <p>Truy cập khóa học bất cứ khi nào, trên mọi thiết bị</p>
-                    </div>
+            <% if (errorMessage != null) { %>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <%= errorMessage %>
                 </div>
-                
-                <div class="col-md-4 text-center mb-4">
-                    <div class="feature-item p-4">
-                        <i class="fas fa-certificate fa-3x text-primary mb-3"></i>
-                        <h4>Chứng chỉ hoàn thành</h4>
-                        <p>Nhận chứng chỉ sau khi hoàn thành khóa học</p>
+            <% } %>
+            
+            <div class="courses-grid">
+                <% if (courses != null && !courses.isEmpty()) { 
+                    for (Course course : courses) { 
+                        String defaultImage = "/Adaptive_Elearning/assets/images/course-default.jpg";
+                        String courseImage = (course.getThumbUrl() != null && !course.getThumbUrl().isEmpty()) 
+                                           ? course.getThumbUrl() : defaultImage;
+                %>
+                    <article class="course-card">
+                        <div class="course-image">
+                            <img data-src="<%= courseImage %>" 
+                                 alt="<%= course.getTitle() %>" 
+                                 loading="lazy">
+                            <div class="course-category">
+                                <%= course.getLevel() != null ? course.getLevel() : "Chung" %>
+                            </div>
+                        </div>
+                        
+                        <div class="course-content">
+                            <h3 class="course-title"><%= course.getTitle() %></h3>
+                            <p class="course-description">
+                                Khóa học chất lượng cao với nội dung được thiết kế bởi <%= course.getInstructorName() != null ? course.getInstructorName() : "chuyên gia" %>. 
+                                Phù hợp cho người học ở mức độ <%= course.getLevel() != null ? course.getLevel().toLowerCase() : "mọi cấp độ" %>.
+                            </p>
+                            
+                            <div class="course-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-star"></i>
+                                    <%= String.format("%.1f", course.getAverageRating()) %> (<%= course.getRatingCount() %> đánh giá)
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <%= course.getLevel() %> level
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <%= course.getLearnerCount() %> học viên
+                                </span>
+                            </div>
+                            
+                            <div class="course-footer">
+                                <div class="course-price-wrapper">
+                                    <% if (course.getPrice() > 0) { %>
+                                        <span class="course-price">
+                                            <%= course.getFormattedPrice() %>
+                                        </span>
+                                    <% } else { %>
+                                        <span class="course-price free">Miễn phí</span>
+                                    <% } %>
+                                </div>
+                                
+                                <div class="course-actions">
+                                    <% if (u != null) { %>
+                                        <button class="add-to-cart-btn" 
+                                                data-course-id="<%= course.getId() %>"
+                                                type="button">
+                                            <i class="fas fa-cart-plus"></i>
+                                            Thêm vào giỏ
+                                        </button>
+                                    <% } else { %>
+                                        <a href="/Adaptive_Elearning/login" class="enroll-btn">
+                                            <i class="fas fa-play"></i>
+                                            Đăng ký học
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                <% } 
+                } else { %>
+                    <div class="empty-state">
+                        <div class="empty-icon">📚</div>
+                        <h3>
+                            <%= !search.isEmpty() ? "Không tìm thấy khóa học nào" : "Chưa có khóa học nào" %>
+                        </h3>
+                        <p>
+                            <%= !search.isEmpty() ? 
+                                "Thử tìm kiếm với từ khóa khác hoặc xem tất cả khóa học" : 
+                                "Hệ thống đang cập nhật thêm khóa học mới. Vui lòng quay lại sau!" %>
+                        </p>
+                        <% if (!search.isEmpty()) { %>
+                            <a href="/Adaptive_Elearning/" class="explore-btn">
+                                Xem tất cả khóa học
+                            </a>
+                        <% } else { %>
+                            <button class="explore-btn" onclick="window.location.reload()">
+                                Tải lại trang
+                            </button>
+                        <% } %>
                     </div>
-                </div>
-                
-                <div class="col-md-4 text-center mb-4">
-                    <div class="feature-item p-4">
-                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                        <h4>Cộng đồng học tập</h4>
-                        <p>Kết nối và học hỏi cùng cộng đồng học viên</p>
-                    </div>
-                </div>
+                <% } %>
             </div>
+            
+            <!-- Pagination -->
+            <% if (totalPages > 1) { %>
+                <div class="pagination-wrapper">
+                    <div class="pagination">
+                        <% if (currentPage > 1) { %>
+                            <a href="?page=<%= currentPage - 1 %><%= !search.isEmpty() ? "&search=" + java.net.URLEncoder.encode(search, "UTF-8") : "" %>" 
+                               class="page-btn">
+                               <i class="fas fa-chevron-left"></i> Trước
+                            </a>
+                        <% } %>
+                        
+                        <% 
+                        int startPage = Math.max(1, currentPage - 2);
+                        int endPage = Math.min(totalPages, currentPage + 2);
+                        
+                        for (int i = startPage; i <= endPage; i++) { %>
+                            <a href="?page=<%= i %><%= !search.isEmpty() ? "&search=" + java.net.URLEncoder.encode(search, "UTF-8") : "" %>" 
+                               class="page-number <%= (i == currentPage) ? "active" : "" %>">
+                               <%= i %>
+                            </a>
+                        <% } %>
+                        
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %><%= !search.isEmpty() ? "&search=" + java.net.URLEncoder.encode(search, "UTF-8") : "" %>" 
+                               class="page-btn">
+                               Sau <i class="fas fa-chevron-right"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                    
+                    <div class="pagination-info">
+                        Trang <%= currentPage %> / <%= totalPages %> 
+                        (Tổng cộng <%= totalCourses %> khóa học)
+                    </div>
+                </div>
+            <% } %>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
+    <footer class="footer">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-graduation-cap"></i> CourseHub</h5>
-                    <p>Nền tảng học tập trực tuyến hàng đầu Việt Nam</p>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>EduHub</h3>
+                    <p>Nền tảng học trực tuyến hàng đầu Việt Nam, mang đến những khóa học chất lượng cao với chi phí hợp lý.</p>
                 </div>
-                <div class="col-md-6">
-                    <h5>Liên hệ</h5>
-                    <p>
-                        <i class="fas fa-envelope"></i> support@coursehub.vn<br>
-                        <i class="fas fa-phone"></i> 1900-XXX-XXX
-                    </p>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Khóa học</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Lập trình</a></li>
+                        <li><a href="#">Thiết kế</a></li>
+                        <li><a href="#">Marketing</a></li>
+                        <li><a href="#">Kinh doanh</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Hỗ trợ</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Trung tâm trợ giúp</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a href="#">Báo cáo lỗi</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Kết nối</h4>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                        <li><a href="#"><i class="fab fa-youtube"></i> YouTube</a></li>
+                        <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    </ul>
                 </div>
             </div>
-            <hr>
-            <div class="row">
-                <div class="col-12 text-center">
-                    <p>&copy; 2024 CourseHub. All rights reserved.</p>
-                </div>
+            
+            <div style="text-align: center; padding-top: 2rem; border-top: 1px solid #374151;">
+                <p>&copy; 2024 EduHub. Tất cả quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="${pageContext.request.contextPath}/assets/js/cart.js"></script>
+    <!-- JavaScript -->
+    <script src="/Adaptive_Elearning/assets/js/home.js"></script>
     
+    <!-- Lazy loading fallback for older browsers -->
     <script>
-        // Check enrollment status and update buttons
+        // Fallback for browsers without IntersectionObserver
+        if (!('IntersectionObserver' in window)) {
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                img.src = img.dataset.src;
+            });
+        }
+        
+        // Update cart count on page load
         document.addEventListener('DOMContentLoaded', function() {
-            <c:if test="${sessionScope.user != null}">
-                // Check if user is already enrolled in courses or courses are in cart
-                const cartButtons = document.querySelectorAll('.add-to-cart-btn');
-                cartButtons.forEach(button => {
-                    const courseId = button.getAttribute('data-course-id');
-                    
-                    // You can add AJAX call here to check enrollment status
-                    // and update button accordingly
-                });
-            </c:if>
+            if (window.cartManager) {
+                window.cartManager.updateCartBadge();
+            }
         });
     </script>
 </body>
