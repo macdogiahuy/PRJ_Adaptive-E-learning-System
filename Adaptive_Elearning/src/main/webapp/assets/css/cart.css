@@ -1,0 +1,273 @@
+/* Shopping Cart Styles */
+
+/* Add to Cart Button Styles */
+.add-to-cart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.add-to-cart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.add-to-cart-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.add-to-cart-btn.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.add-to-cart-btn.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Cart Counter in Navigation */
+.cart-counter,
+.cart-badge {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+
+.cart-icon-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Cart Notification Styles */
+.cart-notification {
+    animation: slideInRight 0.3s ease-out;
+}
+
+.cart-notification .fas {
+    margin-right: 8px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Mini Cart Preview */
+.mini-cart-preview {
+    animation: slideInRight 0.3s ease-out;
+    max-width: 350px;
+}
+
+.mini-cart-preview .text-truncate {
+    max-width: 200px;
+}
+
+/* Course Card Hover Effects */
+.course-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.course-card .card-body {
+    padding: 20px;
+}
+
+.course-card .course-price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.course-card .course-original-price {
+    text-decoration: line-through;
+    color: #6c757d;
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+.course-card .course-discount {
+    background-color: #dc3545;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+/* Cart Icon in Navigation */
+.navbar .cart-link {
+    position: relative;
+    color: #333;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.navbar .cart-link:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+    text-decoration: none;
+}
+
+.navbar .cart-link .fas {
+    font-size: 18px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cart-notification,
+    .mini-cart-preview {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        width: auto;
+    }
+    
+    .add-to-cart-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    
+    .course-card {
+        margin-bottom: 20px;
+    }
+}
+
+/* Loading Animation */
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Course Grid Layout */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.course-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.course-card .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    height: 2.8em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.course-card .card-text {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 15px;
+    flex-grow: 1;
+    height: 3em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.course-card .course-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.course-card .course-price-section {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Success states */
+.btn-success:disabled {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* Alert improvements */
+.alert {
+    border: none;
+    border-radius: 8px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
