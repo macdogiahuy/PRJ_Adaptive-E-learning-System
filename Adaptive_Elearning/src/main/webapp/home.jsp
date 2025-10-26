@@ -58,6 +58,66 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Adaptive_Elearning/assets/css/home.css">
     
+    <!-- Alert Messages CSS -->
+    <style>
+        .alert-message {
+            padding: 1rem 0;
+            border-left: 4px solid;
+            animation: slideInDown 0.5s ease-out;
+            margin-bottom: 0;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        
+        .alert-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+        
+        .alert-text {
+            flex: 1;
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .alert-close:hover {
+            opacity: 1;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+    
     <!-- Favicon -->
     <link rel="icon" href="/Adaptive_Elearning/assets/images/favicon.ico" type="image/x-icon">
 </head>
@@ -140,7 +200,7 @@
                                 </div>
                                 <div class="dropdown-divider"></div>
                                 <div class="dropdown-items">
-                                    <a href="/Adaptive_Elearning/login" class="dropdown-item logout-item">
+                                    <a href="/Adaptive_Elearning/logout" class="dropdown-item logout-item">
                                         <i class="fas fa-sign-out-alt"></i>
                                         <span>Đăng xuất</span>
                                     </a>
@@ -155,6 +215,48 @@
             </nav>
         </div>
     </header>
+
+    <!-- Logout/Login Success Messages -->
+    <%
+        Boolean showLogoutMessage = (Boolean) request.getAttribute("showLogoutMessage");
+        String logoutMessage = (String) request.getAttribute("logoutMessage");
+        Boolean showLoginMessage = (Boolean) request.getAttribute("showLoginMessage");
+        String loginMessage = (String) request.getAttribute("loginMessage");
+    %>
+    
+    <% if (showLogoutMessage != null && showLogoutMessage) { %>
+    <div class="alert-message alert-success" id="logoutAlert">
+        <div class="container">
+            <div class="alert-content">
+                <i class="fas fa-check-circle alert-icon"></i>
+                <div class="alert-text">
+                    <strong>Đăng xuất thành công!</strong>
+                    <div><%= logoutMessage %></div>
+                </div>
+                <button type="button" class="alert-close" onclick="closeAlert('logoutAlert')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <% } %>
+    
+    <% if (showLoginMessage != null && showLoginMessage) { %>
+    <div class="alert-message alert-info" id="loginAlert">
+        <div class="container">
+            <div class="alert-content">
+                <i class="fas fa-user-check alert-icon"></i>
+                <div class="alert-text">
+                    <strong>Đăng nhập thành công!</strong>
+                    <div><%= loginMessage %></div>
+                </div>
+                <button type="button" class="alert-close" onclick="closeAlert('loginAlert')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <% } %>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -404,7 +506,29 @@
             if (window.cartManager) {
                 window.cartManager.updateCartBadge();
             }
+            
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert-message');
+                alerts.forEach(alert => {
+                    if (alert) {
+                        alert.style.transition = 'opacity 0.5s ease-out';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.remove(), 500);
+                    }
+                });
+            }, 5000);
         });
+        
+        // Function to close alert manually
+        function closeAlert(alertId) {
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                alert.style.transition = 'opacity 0.3s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }
+        }
     </script>
 </body>
 </html>

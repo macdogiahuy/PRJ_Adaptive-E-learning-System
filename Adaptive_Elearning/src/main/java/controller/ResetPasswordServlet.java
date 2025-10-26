@@ -28,10 +28,21 @@ public class ResetPasswordServlet extends HttpServlet {
 
     HttpSession session = req.getSession();
     String userId = (String) session.getAttribute("PWD_RESET_OK_USER_ID");
-    if (userId == null) { resp.sendRedirect(req.getContextPath() + "/login"); return; }
+    
+    System.out.println("DEBUG: ResetPasswordServlet.doPost() called");
+    System.out.println("DEBUG: userId from session: " + userId);
+    
+    if (userId == null) { 
+        System.out.println("DEBUG: No userId in session, redirecting to login");
+        resp.sendRedirect(req.getContextPath() + "/login"); 
+        return; 
+    }
 
     String password = req.getParameter("password");
     String confirm  = req.getParameter("confirm");
+
+    System.out.println("DEBUG: password length: " + (password != null ? password.length() : "null"));
+    System.out.println("DEBUG: confirm length: " + (confirm != null ? confirm.length() : "null"));
 
     if (password != null) password = password.trim();
     if (confirm != null)  confirm  = confirm.trim();
@@ -48,11 +59,15 @@ public class ResetPasswordServlet extends HttpServlet {
     userDAO.clearToken(userId);
     session.removeAttribute("PWD_RESET_OK_USER_ID");
 
+    System.out.println("DEBUG: Password update result: " + ok);
+
     if (ok) {
-        req.setAttribute("alertMessage", "Password updated. You can now sign in.");
+        System.out.println("DEBUG: Password updated successfully, redirecting to auth");
+        req.setAttribute("alertMessage", "Password updated successfully! You can now sign in.");
         req.setAttribute("alertStatus", true);
-        req.getRequestDispatcher("/WEB-INF/views/Pages/user/login.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/views/Pages/user/auth.jsp").forward(req, resp);
     } else {
+        System.out.println("DEBUG: Password update failed");
         req.setAttribute("alertMessage", "Something went wrong. Please try again.");
         req.setAttribute("alertStatus", false);
         req.getRequestDispatcher("/WEB-INF/views/Pages/user/reset-password.jsp").forward(req, resp);
