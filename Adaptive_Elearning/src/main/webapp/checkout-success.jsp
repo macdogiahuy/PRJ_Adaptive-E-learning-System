@@ -386,12 +386,7 @@
                     <i class="fas fa-home me-2"></i>
                     Về Trang Chủ
                 </a>
-                
-                <a href="${pageContext.request.contextPath}/dashboard" 
-                   class="btn-secondary-custom">
-                    <i class="fas fa-tachometer-alt me-2"></i>
-                    Dashboard
-                </a>
+          
             </div>
             
             <!-- Additional Info -->

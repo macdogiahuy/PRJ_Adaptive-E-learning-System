@@ -21,6 +21,10 @@ public class ForgotPasswordServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        System.out.println("DEBUG: ForgotPasswordServlet.doGet() called");
+        System.out.println("DEBUG: Request URI: " + req.getRequestURI());
+        System.out.println("DEBUG: Context Path: " + req.getContextPath());
+        
         Csrf.ensureToken(req.getSession());
         req.getRequestDispatcher("/WEB-INF/views/Pages/user/forgot-password.jsp").forward(req, resp);
     }
