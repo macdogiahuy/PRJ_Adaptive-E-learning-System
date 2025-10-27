@@ -130,9 +130,12 @@ public class CheckoutServlet extends HttpServlet {
                 session.setAttribute("checkoutMethod", paymentMethod);
                 session.setAttribute("checkoutMessage", result.getMessage());
                 
-                // Xóa giỏ hàng khỏi session sau khi checkout thành công
-                session.removeAttribute("cartItems");
+                // XÓA TẤT CẢ CÁC LOẠI CART khỏi session sau khi checkout thành công
+                session.removeAttribute("cartItems");  // List cart cho checkout
+                session.removeAttribute("cart");       // Map cart cho badge
                 session.removeAttribute("totalAmount");
+                
+                System.out.println("=== CART CLEARED FROM SESSION ===");
                 
                 // Chuyển hướng đến trang "Thanh toán thành công"
                 response.sendRedirect(request.getContextPath() + "/checkout-success.jsp");

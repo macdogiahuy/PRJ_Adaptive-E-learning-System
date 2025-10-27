@@ -44,7 +44,10 @@ public class MyCoursesServlet extends HttpServlet {
         }
         
         try {
+            logger.info("=== MY COURSES SERVLET START ===");
             logger.info("Loading courses for user: " + user.getUserName());
+            logger.info("User ID from session: " + user.getId());
+            logger.info("User ID type: " + (user.getId() != null ? user.getId().getClass().getName() : "null"));
             
             // Lấy danh sách các khóa học đã đăng ký của user
             List<CourseEnrollmentInfo> enrolledCourses = getEnrolledCourses(user.getId());
@@ -83,35 +86,18 @@ public class MyCoursesServlet extends HttpServlet {
         List<CourseEnrollmentInfo> result = new ArrayList<>();
         
         try {
-            // Query để lấy thông tin course và enrollment
-            String jpql = """
-                SELECT c, e FROM Courses c 
-                JOIN Enrollments e ON c.id = e.courseId 
-                WHERE e.creatorId = :userId 
-                ORDER BY e.creationTime DESC
-                """;
+            logger.info("=== GET ENROLLED COURSES START ===");
+            logger.info("Querying enrolled courses for user: " + userId);
             
-            TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
-            query.setParameter("userId", userId);
+            // Sử dụng native SQL để đảm bảo query hoạt động đúng
+            result = getEnrolledCoursesNative(userId);
             
-            List<Object[]> results = query.getResultList();
-            
-            for (Object[] row : results) {
-                Courses course = (Courses) row[0];
-                Enrollments enrollment = (Enrollments) row[1];
-                
-                CourseEnrollmentInfo info = new CourseEnrollmentInfo();
-                info.setCourse(course);
-                info.setEnrollment(enrollment);
-                info.setProgress(calculateProgress(enrollment));
-                
-                result.add(info);
-            }
+            logger.info("=== GET ENROLLED COURSES END ===");
+            logger.info("Found " + result.size() + " enrolled courses");
             
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error querying enrolled courses, using fallback method", e);
-            // Fallback: Query trực tiếp bằng native SQL
-            result = getEnrolledCoursesNative(userId);
+            logger.log(Level.SEVERE, "ERROR in getEnrolledCourses: " + e.getMessage(), e);
+            e.printStackTrace();
             
         } finally {
             em.close();
@@ -129,7 +115,10 @@ public class MyCoursesServlet extends HttpServlet {
         List<CourseEnrollmentInfo> result = new ArrayList<>();
         
         try {
-            // Native SQL query
+            logger.info("=== NATIVE QUERY FOR ENROLLMENTS ===");
+            logger.info("User ID: " + userId);
+            
+            // Native SQL query với positional parameter
             String sql = """
                 SELECT c.Id, c.Title, c.ThumbUrl, c.Price, c.Level, c.LearnerCount,
                        e.Status, e.CreationTime, e.BillId
@@ -144,35 +133,58 @@ public class MyCoursesServlet extends HttpServlet {
             
             List<Object[]> results = query.getResultList();
             
+            logger.info("Query returned " + results.size() + " rows");
+            
             for (Object[] row : results) {
-                CourseEnrollmentInfo info = new CourseEnrollmentInfo();
-                
-                // Tạo course object từ raw data
-                Courses course = new Courses();
-                course.setId((String) row[0]);
-                course.setTitle((String) row[1]);
-                course.setThumbUrl((String) row[2]);
-                if (row[3] != null) course.setPrice(((Number) row[3]).doubleValue());
-                course.setLevel((String) row[4]);
-                if (row[5] != null) course.setLearnerCount(((Number) row[5]).intValue());
-                
-                // Tạo enrollment object từ raw data
-                Enrollments enrollment = new Enrollments();
-                enrollment.setStatus((String) row[6]);
-                enrollment.setCreationTime((java.util.Date) row[7]);
-                // Note: BillId is Bills object, not String - will handle separately if needed
-                
-                info.setCourse(course);
-                info.setEnrollment(enrollment);
-                info.setProgress(0); // Default progress
-                
-                result.add(info);
+                try {
+                    CourseEnrollmentInfo info = new CourseEnrollmentInfo();
+                    
+                    // Tạo course object từ raw data
+                    Courses course = new Courses();
+                    course.setId(row[0] != null ? row[0].toString() : null);
+                    course.setTitle(row[1] != null ? row[1].toString() : "Untitled Course");
+                    course.setThumbUrl(row[2] != null ? row[2].toString() : null);
+                    
+                    if (row[3] != null) {
+                        course.setPrice(((Number) row[3]).doubleValue());
+                    }
+                    
+                    course.setLevel(row[4] != null ? row[4].toString() : "Beginner");
+                    
+                    if (row[5] != null) {
+                        course.setLearnerCount(((Number) row[5]).intValue());
+                    }
+                    
+                    // Tạo enrollment object từ raw data
+                    Enrollments enrollment = new Enrollments();
+                    enrollment.setStatus(row[6] != null ? row[6].toString() : "ACTIVE");
+                    
+                    if (row[7] != null) {
+                        if (row[7] instanceof java.sql.Timestamp) {
+                            enrollment.setCreationTime(new java.util.Date(((java.sql.Timestamp) row[7]).getTime()));
+                        } else if (row[7] instanceof java.util.Date) {
+                            enrollment.setCreationTime((java.util.Date) row[7]);
+                        }
+                    }
+                    
+                    info.setCourse(course);
+                    info.setEnrollment(enrollment);
+                    info.setProgress(calculateProgress(enrollment));
+                    
+                    result.add(info);
+                    
+                    logger.info("Added course: " + course.getTitle() + " - Status: " + enrollment.getStatus());
+                    
+                } catch (Exception rowError) {
+                    logger.log(Level.WARNING, "Error processing row", rowError);
+                }
             }
             
-            logger.info("Fallback method loaded " + result.size() + " courses");
+            logger.info("Successfully processed " + result.size() + " enrollments");
             
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error in fallback method", e);
+            logger.log(Level.SEVERE, "Error in native query", e);
+            e.printStackTrace();
         } finally {
             em.close();
         }

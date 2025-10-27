@@ -2,7 +2,17 @@
 <%@page import="model.Users"%>
 
 <%
-    Users user = (Users) session.getAttribute("account");
+    Users user = null;
+    int cartCount = 0;
+    if (session != null) {
+        user = (Users) session.getAttribute("account");
+        // Lấy số lượng giỏ hàng từ session
+        java.util.Map<String, model.CartItem> cart = 
+            (java.util.Map<String, model.CartItem>) session.getAttribute("cart");
+        if (cart != null) {
+            cartCount = cart.size();
+        }
+    }
 %>
 
 <!DOCTYPE html>
@@ -10,8 +20,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Về chúng tôi - EduHub</title>
-    <meta name="description" content="Tìm hiểu về EduHub - nền tảng học trực tuyến hàng đầu Việt Nam với sứ mệnh mang giáo dục chất lượng đến mọi người.">
+    <title>Về chúng tôi - FlyUp</title>
+    <meta name="description" content="Tìm hiểu về FlyUp - nền tảng học trực tuyến hàng đầu Việt Nam với sứ mệnh mang giáo dục chất lượng đến mọi người.">
     
     <!-- CSS -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -302,46 +312,76 @@
             <nav class="nav-container">
                 <a href="/Adaptive_Elearning/" class="logo">
                     <i class="fas fa-graduation-cap"></i>
-                    <span>EduHub</span>
+                    <span>FlyUp</span>
                 </a>
                 
                 <div class="nav-menu">
                     <a href="/Adaptive_Elearning/" class="nav-link">Trang chủ</a>
-                    <a href="#" class="nav-link">Khóa học</a>
+                    <a href="/Adaptive_Elearning/courses" class="nav-link">Khóa học</a>
                     <a href="/Adaptive_Elearning/about" class="nav-link active">Giới thiệu</a>
                     <a href="/Adaptive_Elearning/contact" class="nav-link">Liên hệ</a>
                 </div>
                 
                 <div class="nav-actions">
                     <% if (user != null) { %>
-                        <a href="/Adaptive_Elearning/cart-page" class="cart-link">
+                        <a href="/Adaptive_Elearning/cart" class="cart-link">
                             <div class="cart-icon">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span class="cart-badge">0</span>
+                                <span class="cart-badge" <% if (cartCount == 0) { %>style="display: none;"<% } %>><%= cartCount %></span>
                             </div>
                         </a>
-                        <div class="user-dropdown-container">
-                            <div class="user-avatar" onclick="toggleUserDropdown()">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="user-dropdown" id="userDropdown">
+                        <div class="user-dropdown">
+                            <button class="user-menu-btn" type="button">
+                                <div class="user-avatar">
+                                    <% if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) { %>
+                                        <img src="<%= user.getAvatarUrl() %>" alt="Avatar" class="avatar-img">
+                                    <% } else { %>
+                                        <i class="fas fa-user-circle"></i>
+                                    <% } %>
+                                </div>
+                                <div class="user-info">
+                                    <span class="user-name"><%= user.getUserName() %></span>
+                                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                </div>
+                            </button>
+                            <div class="dropdown-menu">
                                 <div class="dropdown-header">
-                                    <div class="user-info">
-                                        <span class="user-name"><%= user.getFullName() %></span>
-                                        <span class="user-email"><%= user.getEmail() %></span>
+                                    <div class="user-details">
+                                        <% if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) { %>
+                                            <img src="<%= user.getAvatarUrl() %>" alt="Avatar" class="dropdown-avatar">
+                                        <% } else { %>
+                                            <div class="dropdown-avatar-placeholder">
+                                                <i class="fas fa-user-circle"></i>
+                                            </div>
+                                        <% } %>
+                                        <div class="user-text">
+                                            <div class="user-fullname"><%= user.getUserName() %></div>
+                                            <div class="user-email"><%= user.getEmail() %></div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="dropdown-menu">
-                                    <a href="#" class="dropdown-item">
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-items">
+                                    <a href="/Adaptive_Elearning/dashboard" class="dropdown-item">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                    <a href="/Adaptive_Elearning/my-courses" class="dropdown-item">
                                         <i class="fas fa-book"></i>
-                                        <span>Khóa học của tôi</span>
+                                        <span>Khóa học đã đăng ký</span>
                                     </a>
-                                    <a href="#" class="dropdown-item">
-                                        <i class="fas fa-user-cog"></i>
-                                        <span>Cài đặt tài khoản</span>
+                                    <a href="/Adaptive_Elearning/profile" class="dropdown-item">
+                                        <i class="fas fa-user-edit"></i>
+                                        <span>Chỉnh sửa hồ sơ</span>
                                     </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="/Adaptive_Elearning/logout" class="dropdown-item logout">
+                                    <a href="/Adaptive_Elearning/settings" class="dropdown-item">
+                                        <i class="fas fa-cog"></i>
+                                        <span>Cài đặt</span>
+                                    </a>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-items">
+                                    <a href="/Adaptive_Elearning/logout" class="dropdown-item logout-item">
                                         <i class="fas fa-sign-out-alt"></i>
                                         <span>Đăng xuất</span>
                                     </a>
@@ -361,9 +401,9 @@
     <main class="about-container">
         <!-- Hero Section -->
      <section class="hero-section">
-            <h1 class="hero-title">Về EduHub</h1>
+            <h1 class="hero-title">Về FlyUp</h1>
             <p class="hero-subtitle">
-                Chúng tôi tin rằng giáo dục là chìa khóa mở ra tương lai. EduHub ra đời với sứ mệnh 
+                Chúng tôi tin rằng giáo dục là chìa khóa mở ra tương lai. FlyUp ra đời với sứ mệnh 
                 democratize education - mang giáo dục chất lượng cao đến tay mọi người, mọi lúc, mọi nơi.
             </p>
         </section>
@@ -373,7 +413,7 @@
             <div class="mission-content">
                 <h2>Sứ mệnh của chúng tôi</h2>
                 <p>
-                    EduHub được thành lập với mục tiêu cách mạng hóa cách mọi người học tập và phát triển kỹ năng. 
+                    FlyUp được thành lập với mục tiêu cách mạng hóa cách mọi người học tập và phát triển kỹ năng. 
                     Chúng tôi kết nối học viên với các chuyên gia hàng đầu trong ngành, tạo ra một cộng đồng học tập 
                     sôi động và hiệu quả.
                 </p>
@@ -383,7 +423,7 @@
                 </p>
             </div>
             <div class="mission-image">
-                <img src="/Adaptive_Elearning/assets/images/mission.jpg" alt="Sứ mệnh EduHub" 
+                <img src="/Adaptive_Elearning/assets/images/mission.jpg" alt="Sứ mệnh FlyUp" 
                      onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'">
             </div>
         </section>
@@ -465,7 +505,7 @@
                         <h3 class="team-name">Nguyễn Văn An</h3>
                         <p class="team-role">CEO & Founder</p>
                         <p class="team-description">
-                            Với hơn 15 năm kinh nghiệm trong lĩnh vực giáo dục và công nghệ, anh An đã dẫn dắt EduHub trở thành nền tảng học tập hàng đầu.
+                            Với hơn 15 năm kinh nghiệm trong lĩnh vực giáo dục và công nghệ, anh An đã dẫn dắt FlyUp trở thành nền tảng học tập hàng đầu.
                         </p>
                     </div>
                 </div>
@@ -477,7 +517,7 @@
                         <h3 class="team-name">Trần Thị Bình</h3>
                         <p class="team-role">CTO</p>
                         <p class="team-description">
-                            Chuyên gia công nghệ với passion về AI và machine learning, chị Bình chịu trách nhiệm phát triển các tính năng thông minh của EduHub.
+                            Chuyên gia công nghệ với passion về AI và machine learning, chị Bình chịu trách nhiệm phát triển các tính năng thông minh của FlyUp.
                         </p>
                     </div>
                 </div>
@@ -513,7 +553,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <h3>EduHub</h3>
+                    <h3>FlyUp</h3>
                     <p>Nền tảng học trực tuyến hàng đầu Việt Nam, mang đến những khóa học chất lượng cao với chi phí hợp lý.</p>
                 </div>
                 
@@ -549,25 +589,42 @@
             </div>
             
             <div style="text-align: center; padding-top: 2rem; border-top: 1px solid #374151;">
-                <p>&copy; 2024 EduHub. Tất cả quyền được bảo lưu.</p>
+                <p>&copy; 2024 FlyUp. Tất cả quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
 
     <!-- JavaScript -->
     <script>
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('userDropdown');
-            const userAvatar = document.querySelector('.user-avatar');
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.querySelector('.user-menu-btn');
+            const dropdownMenu = document.querySelector('.user-dropdown .dropdown-menu');
             
-            if (dropdown && !userAvatar.contains(event.target)) {
-                dropdown.classList.remove('show');
+            if (userMenuBtn && dropdownMenu) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('show');
+                    
+                    // Rotate arrow
+                    const arrow = this.querySelector('.dropdown-arrow');
+                    if (arrow) {
+                        arrow.style.transform = dropdownMenu.classList.contains('show') 
+                            ? 'rotate(180deg)' 
+                            : 'rotate(0deg)';
+                    }
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.remove('show');
+                        const arrow = userMenuBtn.querySelector('.dropdown-arrow');
+                        if (arrow) {
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
             }
         });
 

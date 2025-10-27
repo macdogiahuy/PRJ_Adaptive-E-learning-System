@@ -19,8 +19,8 @@ public class ContactServlet extends HttpServlet {
             throws ServletException, IOException {
         
         // Set page title and meta information
-        request.setAttribute("pageTitle", "Liên hệ - EduHub");
-        request.setAttribute("pageDescription", "Liên hệ với EduHub để được hỗ trợ và giải đáp thắc mắc");
+        request.setAttribute("pageTitle", "Liên hệ - FlyUp");
+        request.setAttribute("pageDescription", "Liên hệ với FlyUp để được hỗ trợ và giải đáp thắc mắc");
         
         // Forward to contact page
         request.getRequestDispatcher("/WEB-INF/views/Pages/contact.jsp").forward(request, response);

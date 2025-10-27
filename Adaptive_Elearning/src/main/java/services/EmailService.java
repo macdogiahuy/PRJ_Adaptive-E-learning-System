@@ -107,8 +107,8 @@ public class EmailService {
         
         content.append("<div class='container'>");
         content.append("<div class='header'>");
-        content.append("<h1>� Xác nhận đơn hàng - EduHub</h1>");
-        content.append("<p>Cảm ơn bạn đã mua khóa học tại EduHub!</p>");
+        content.append("<h1>� Xác nhận đơn hàng - FlyUp</h1>");
+        content.append("<p>Cảm ơn bạn đã mua khóa học tại FlyUp!</p>");
         content.append("</div>");
         
         content.append("<h2>Xin chào " + user.getUserName() + "!</h2>");
@@ -131,9 +131,9 @@ public class EmailService {
         content.append("</div>");
         
         content.append("<div class='footer'>");
-        content.append("<p>Cảm ơn bạn đã tin tưởng và học tập tại EduHub!</p>");
+        content.append("<p>Cảm ơn bạn đã tin tưởng và học tập tại FlyUp!</p>");
         content.append("<p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>");
-        content.append("<p><strong>📞 Hotline:</strong> 1900-xxxx | <strong>📧 Email:</strong> support@eduhub.com</p>");
+        content.append("<p><strong>📞 Hotline:</strong> 1900-xxxx | <strong>📧 Email:</strong> support@FlyUp.com</p>");
         content.append("</div>");
         
         content.append("</div>");
@@ -164,7 +164,7 @@ public class EmailService {
         logger.info("From: " + FROM_EMAIL);
         logger.info("To: " + toEmail);
         logger.info("Subject: Test Email - Hệ thống hoạt động bình thường");
-        logger.info("Content: Đây là email test. EduHub đã sẵn sàng!");
+        logger.info("Content: Đây là email test. FlyUp đã sẵn sàng!");
         logger.info("Email Config: " + FROM_EMAIL + " / " + EMAIL_PASSWORD);
         logger.info("=== KẾT THÚC TEST EMAIL ===");
         return true;

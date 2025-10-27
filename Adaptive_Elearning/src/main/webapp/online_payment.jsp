@@ -11,7 +11,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Thanh toán VietQR - EduHub</title>
+    <title>Thanh toán VietQR - FlyUp</title>
     <link rel="stylesheet" href="/Adaptive_Elearning/assets/css/checkout.css">
 </head>
 <body>
