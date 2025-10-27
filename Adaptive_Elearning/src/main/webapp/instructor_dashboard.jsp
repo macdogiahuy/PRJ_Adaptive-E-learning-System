@@ -16,7 +16,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng điều khiển Giảng viên - EduHub</title>
+    <title>Bảng điều khiển Giảng viên - FlyUp</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
             <div class="sidebar-header">
                 <a href="/Adaptive_Elearning/" class="logo">
                     <i class="fas fa-graduation-cap"></i>
-                    <span>EduHub</span>
+                    <span>FlyUp</span>
                 </a>
             </div>
             

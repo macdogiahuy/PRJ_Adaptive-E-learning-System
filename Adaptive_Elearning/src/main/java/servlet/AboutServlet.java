@@ -19,8 +19,8 @@ public class AboutServlet extends HttpServlet {
             throws ServletException, IOException {
         
         // Set page title and meta information
-        request.setAttribute("pageTitle", "Về chúng tôi - EduHub");
-        request.setAttribute("pageDescription", "Tìm hiểu về EduHub - nền tảng học trực tuyến hàng đầu Việt Nam");
+        request.setAttribute("pageTitle", "Về chúng tôi - FlyUp");
+        request.setAttribute("pageDescription", "Tìm hiểu về FlyUp - nền tảng học trực tuyến hàng đầu Việt Nam");
         
         // Forward to about page
         request.getRequestDispatcher("/WEB-INF/views/Pages/about.jsp").forward(request, response);

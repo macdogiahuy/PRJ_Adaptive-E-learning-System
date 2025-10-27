@@ -39,7 +39,7 @@ public class VietQRService {
             long amountLong = Math.round(amount);
             
             // Tạo nội dung chuyển khoản
-            String transferContent = String.format("EduHub %s %s", orderId, description);
+            String transferContent = String.format("FlyUp %s %s", orderId, description);
             
             // Encode nội dung để tránh lỗi URL
             String encodedContent = URLEncoder.encode(transferContent, "UTF-8");
@@ -136,7 +136,7 @@ public class VietQRService {
             shortName = customerName.substring(0, 10);
         }
         
-        return String.format("EduHub %s %s", orderId, shortName);
+        return String.format("FlyUp %s %s", orderId, shortName);
     }
     
     /**

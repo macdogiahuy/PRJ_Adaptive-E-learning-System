@@ -44,8 +44,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduHub - Học mọi lúc, mọi nơi</title>
-    <meta name="description" content="EduHub - Khám phá hàng nghìn khóa học chất lượng cao từ các chuyên gia hàng đầu. Học mọi lúc, mọi nơi với chi phí hợp lý.">
+    <title>FlyUp - Học mọi lúc, mọi nơi</title>
+    <meta name="description" content="FlyUp - Khám phá hàng nghìn khóa học chất lượng cao từ các chuyên gia hàng đầu. Học mọi lúc, mọi nơi với chi phí hợp lý.">
     <meta name="keywords" content="học trực tuyến, khóa học online, giáo dục, kỹ năng, công nghệ">
     
     <!-- Preload critical resources -->
@@ -128,15 +128,13 @@
             <nav class="nav-container">
                 <a href="/Adaptive_Elearning/" class="logo">
                     <i class="fas fa-graduation-cap"></i>
-                    <span>EduHub</span>
+                    <span>FlyUp</span>
                 </a>
                 
                 <div class="nav-menu">
                     <a href="/Adaptive_Elearning/" class="nav-link active">Trang chủ</a>
                     <a href="/Adaptive_Elearning/courses" class="nav-link">Khóa học</a>
-                    <% if (u != null) { %>
-                        <a href="/Adaptive_Elearning/my-courses" class="nav-link">Khóa học của tôi</a>
-                    <% } %>
+                   
                     <a href="/Adaptive_Elearning/about" class="nav-link">Giới thiệu</a>
                     <a href="/Adaptive_Elearning/contact" class="nav-link">Liên hệ</a>
                 </div>
@@ -448,7 +446,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <h3>EduHub</h3>
+                    <h3>FlyUp</h3>
                     <p>Nền tảng học trực tuyến hàng đầu Việt Nam, mang đến những khóa học chất lượng cao với chi phí hợp lý.</p>
                 </div>
                 
@@ -484,7 +482,7 @@
             </div>
             
             <div style="text-align: center; padding-top: 2rem; border-top: 1px solid #374151;">
-                <p>&copy; 2024 EduHub. Tất cả quyền được bảo lưu.</p>
+                <p>&copy; 2024 FlyUp. Tất cả quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>

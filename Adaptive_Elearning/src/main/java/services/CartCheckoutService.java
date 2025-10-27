@@ -200,7 +200,7 @@ public class CartCheckoutService {
             // Fallback direct connection
             String url = "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=false;trustServerCertificate=true";
             String username = "sa";
-            String password = "123456";
+            String password = "1234";  // ← FIXED: Match with persistence.xml
             return DriverManager.getConnection(url, username, password);
         }
     }

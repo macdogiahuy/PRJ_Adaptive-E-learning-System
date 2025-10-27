@@ -36,14 +36,14 @@ public class HomeServlet extends HttpServlet {
             String logoutParam = request.getParameter("logout");
             if ("success".equals(logoutParam)) {
                 request.setAttribute("showLogoutMessage", true);
-                request.setAttribute("logoutMessage", "Đăng xuất thành công! Cảm ơn bạn đã sử dụng EduHub.");
+                request.setAttribute("logoutMessage", "Đăng xuất thành công! Cảm ơn bạn đã sử dụng FlyUp.");
             }
             
             // Kiểm tra parameter login  
             String loginParam = request.getParameter("login");
             if ("success".equals(loginParam)) {
                 request.setAttribute("showLoginMessage", true);
-                request.setAttribute("loginMessage", "Đăng nhập thành công! Chào mừng bạn trở lại EduHub.");
+                request.setAttribute("loginMessage", "Đăng nhập thành công! Chào mừng bạn trở lại FlyUp.");
             }
             
             // Get featured courses (published courses with high ratings or recent)
