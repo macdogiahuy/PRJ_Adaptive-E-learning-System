@@ -28,7 +28,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--primary-gradient);
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -53,7 +53,7 @@
         }
 
         .auth-header {
-            background: var(--primary-gradient);
+            background: #7494ec;
             color: var(--white);
             padding: 2rem;
             text-align: center;
@@ -133,7 +133,7 @@
         .btn-primary {
             width: 100%;
             padding: 0.75rem;
-            background: var(--primary-gradient);
+            background: #7494ec;
             border: none;
             border-radius: 10px;
             color: var(--white);

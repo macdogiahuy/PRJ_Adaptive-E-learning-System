@@ -75,36 +75,8 @@
                             <span class="cart-badge" id="cartBadge"><%= cartCount %></span>
                         </div>
                     </a>
-                    <div class="user-dropdown">
-                        <button class="user-menu-btn" type="button">
-                            <div class="user-avatar">
-                                <% if (u.getAvatarUrl() != null && !u.getAvatarUrl().isEmpty()) { %>
-                                    <img src="<%= u.getAvatarUrl() %>" alt="Avatar" class="avatar-img">
-                                <% } else { %>
-                                    <i class="fas fa-user-circle"></i>
-                                <% } %>
-                            </div>
-                            <div class="user-info">
-                                <span class="user-name"><%= u.getUserName() %></span>
-                                <i class="fas fa-chevron-down dropdown-arrow"></i>
-                            </div>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a href="/Adaptive_Elearning/profile" class="dropdown-item">
-                                <i class="fas fa-user"></i> Hồ sơ
-                            </a>
-                            <a href="/Adaptive_Elearning/my-courses" class="dropdown-item">
-                                <i class="fas fa-book"></i> Khóa học của tôi
-                            </a>
-                            <a href="/Adaptive_Elearning/settings" class="dropdown-item">
-                                <i class="fas fa-cog"></i> Cài đặt
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="/Adaptive_Elearning/logout" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </a>
-                        </div>
-                    </div>
+                    <%-- User Dropdown Menu with Role-Based Access --%>
+                    <%@ include file="/WEB-INF/includes/user-dropdown.jsp" %>
                 </div>
             </nav>
         </div>
