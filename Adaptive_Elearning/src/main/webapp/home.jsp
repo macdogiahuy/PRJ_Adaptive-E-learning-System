@@ -147,68 +147,9 @@
                                 <span class="cart-badge" <% if (cartCount == 0) { %>style="display: none;"<% } %>><%= cartCount %></span>
                             </div>
                         </a>
-                        <div class="user-dropdown">
-                            <button class="user-menu-btn" type="button">
-                                <div class="user-avatar">
-                                    <% if (u.getAvatarUrl() != null && !u.getAvatarUrl().isEmpty()) { %>
-                                        <img src="<%= u.getAvatarUrl() %>" alt="Avatar" class="avatar-img">
-                                    <% } else { %>
-                                        <i class="fas fa-user-circle"></i>
-                                    <% } %>
-                                </div>
-                                <div class="user-info">
-                                    <span class="user-name"><%= u.getUserName() %></span>
-                                    <i class="fas fa-chevron-down dropdown-arrow"></i>
-                                </div>
-                            </button>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-header">
-                                    <div class="user-details">
-                                        <% if (u.getAvatarUrl() != null && !u.getAvatarUrl().isEmpty()) { %>
-                                            <img src="<%= u.getAvatarUrl() %>" alt="Avatar" class="dropdown-avatar">
-                                        <% } else { %>
-                                            <div class="dropdown-avatar-placeholder">
-                                                <i class="fas fa-user-circle"></i>
-                                            </div>
-                                        <% } %>
-                                        <div class="user-text">
-                                            <div class="user-fullname"><%= u.getUserName() %></div>
-                                            <div class="user-email"><%= u.getEmail() %></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <div class="dropdown-items">
-                                    <a href="/Adaptive_Elearning/dashboard" class="dropdown-item">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                        <span>Dashboard</span>
-                                    </a>
-                                    <a href="/Adaptive_Elearning/my-courses" class="dropdown-item">
-                                        <i class="fas fa-book"></i>
-                                        <span>Khóa học đã đăng ký</span>
-                                    </a>
-                                    <a href="/Adaptive_Elearning/profile" class="dropdown-item">
-                                        <i class="fas fa-user-edit"></i>
-                                        <span>Chỉnh sửa hồ sơ</span>
-                                    </a>
-                                    <a href="/Adaptive_Elearning/settings" class="dropdown-item">
-                                        <i class="fas fa-cog"></i>
-                                        <span>Cài đặt</span>
-                                    </a>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <div class="dropdown-items">
-                                    <a href="/Adaptive_Elearning/logout" class="dropdown-item logout-item">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        <span>Đăng xuất</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    <% } else { %>
-                        <a href="/Adaptive_Elearning/login" class="login-btn">Đăng nhập</a>
-                        <a href="/Adaptive_Elearning/register" class="register-btn">Đăng ký</a>
                     <% } %>
+                    <%-- User Dropdown Menu with Role-Based Access (includes login/register buttons) --%>
+                    <%@ include file="/WEB-INF/includes/user-dropdown.jsp" %>
                 </div>
             </nav>
         </div>

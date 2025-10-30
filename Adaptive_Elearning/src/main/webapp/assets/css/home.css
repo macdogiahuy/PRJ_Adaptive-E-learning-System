@@ -323,6 +323,12 @@ body {
     text-decoration: none;
     transition: all var(--animate-duration);
     font-size: 0.875rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 500;
+}
+
+.dropdown-item span {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .dropdown-item:hover {
@@ -357,19 +363,41 @@ body {
     color: var(--danger-600);
 }
 
-.login-btn {
-    background: var(--gradient-primary);
-    color: white;
-    text-decoration: none;
+/* Login & Register Buttons */
+.login-btn,
+.register-btn {
+    display: inline-block;
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius-full);
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
     transition: all var(--animate-duration);
+    border: 2px solid transparent;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.login-btn {
+    background: transparent;
+    color: var(--primary-600);
+    border-color: var(--primary-600);
+    margin-right: 0.75rem;
 }
 
 .login-btn:hover {
+    background: var(--primary-50);
+    transform: translateY(-1px);
+}
+
+.register-btn {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.register-btn:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
+    opacity: 0.9;
 }
 
 /* Hero Section */

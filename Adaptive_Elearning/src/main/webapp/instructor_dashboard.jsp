@@ -1,12 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.Users"%>
-<%@page import="java.util.*"%>
 
 <%
-    // Get user from session
     Users user = (Users) session.getAttribute("account");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
+    if (user == null || !"Instructor".equalsIgnoreCase(user.getRole())) {
+        response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
 %>
@@ -16,410 +14,533 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng điều khiển Giảng viên - FlyUp</title>
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/Adaptive_Elearning/assets/css/instructor-dashboard-modern.css">
+    <title>Tổng Quan - Instructor Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar - Same as instructor_courses.jsp */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .logo:hover {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            margin: 5px 0;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 30px;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .stat-icon.blue { background: #e3f2fd; color: #2196F3; }
+        .stat-icon.green { background: #e8f5e9; color: #4CAF50; }
+        .stat-icon.orange { background: #fff3e0; color: #FF9800; }
+        .stat-icon.purple { background: #f3e5f5; color: #9C27B0; }
+        
+        .stat-info h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #1e3c72;
+        }
+        
+        .stat-info p {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        .stat-change.positive {
+            color: #4CAF50;
+        }
+        
+        .stat-change.negative {
+            color: #f44336;
+        }
+        
+        /* Content Sections */
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+        
+        /* Quick Actions Grid */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .action-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .action-card i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .action-card span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .action-card:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .action-card:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .action-card:nth-child(3) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .action-card:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .action-card:nth-child(5) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .action-card:nth-child(6) { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: start;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s;
+        }
+        
+        .activity-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon.blue { background: #e3f2fd; color: #2196F3; }
+        .activity-icon.green { background: #e8f5e9; color: #4CAF50; }
+        .activity-icon.orange { background: #fff3e0; color: #FF9800; }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .activity-desc {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: #999;
+            white-space: nowrap;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <a href="/Adaptive_Elearning/" class="logo">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>FlyUp</span>
-                </a>
-            </div>
-            
-            <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <a href="#dashboard" class="nav-link active">
-                            <i class="fas fa-home"></i>
-                            <span class="nav-text">Tổng quan</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#courses" class="nav-link">
-                            <i class="fas fa-book"></i>
-                            <span class="nav-text">Khóa học</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#students" class="nav-link">
-                            <i class="fas fa-users"></i>
-                            <span class="nav-text">Học viên</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#assignments" class="nav-link">
-                            <i class="fas fa-tasks"></i>
-                            <span class="nav-text">Bài tập</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#discussions" class="nav-link">
-                            <i class="fas fa-comments"></i>
-                            <span class="nav-text">Thảo luận</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#analytics" class="nav-link">
-                            <i class="fas fa-chart-bar"></i>
-                            <span class="nav-text">Phân tích</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#resources" class="nav-link">
-                            <i class="fas fa-folder"></i>
-                            <span class="nav-text">Tài liệu</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#calendar" class="nav-link">
-                            <i class="fas fa-calendar"></i>
-                            <span class="nav-text">Lịch học</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#settings" class="nav-link">
-                            <i class="fas fa-cog"></i>
-                            <span class="nav-text">Cài đặt</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
+        <%@ include file="/WEB-INF/includes/instructor-sidebar.jsp" %>
+        
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
-            <header class="dashboard-header">
-                <div class="header-left">
-                    <button class="sidebar-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="page-title">Bảng điều khiển</h1>
-                </div>
-                
-                <div class="header-right">
-                    <!-- Search Box -->
-                    <div class="search-container">
-                        <div class="search-box">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="search-input" placeholder="Tìm kiếm khóa học, học viên... (Ctrl+K)">
-                        </div>
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Tổng quan</h1>
+                <p class="page-subtitle">Chào mừng trở lại, <%= user.getUserName() %>! Đây là tổng quan về hoạt động giảng dạy của bạn.</p>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
                     </div>
-                    
-                    <!-- Notifications -->
-                    <div class="notifications">
-                        <button class="notification-btn">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge">3</span>
-                        </button>
-                    </div>
-                    
-                    <!-- User Menu -->
-                    <div class="user-menu">
-                        <div class="user-avatar">
-                            <% 
-                                String fullName = user.getFullName();
-                                String initial = "U"; // Default initial
-                                if (fullName != null && !fullName.trim().isEmpty()) {
-                                    initial = fullName.substring(0, 1).toUpperCase();
-                                } else if (user.getUserName() != null && !user.getUserName().trim().isEmpty()) {
-                                    initial = user.getUserName().substring(0, 1).toUpperCase();
-                                }
-                            %>
-                            <%= initial %>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Dashboard Content -->
-            <div class="dashboard-content">
-                <!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Tổng học viên</div>
+                    <div class="stat-info">
+                        <h3>1,247</h3>
+                        <p>Tổng học viên</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>
                             <span>+12%</span>
                         </div>
                     </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-book"></i>
-                            </div>
-                        </div>
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Khóa học hoạt động</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>23</h3>
+                        <p>Khóa học hoạt động</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>
                             <span>+5%</span>
                         </div>
                     </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                        </div>
-                        <div class="stat-number">0%</div>
-                        <div class="stat-label">Tỷ lệ hoàn thành</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>87%</h3>
+                        <p>Tỷ lệ hoàn thành</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>
                             <span>+8%</span>
                         </div>
                     </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-dollar-sign"></i>
-                            </div>
-                        </div>
-                        <div class="stat-number">0 VNĐ</div>
-                        <div class="stat-label">Doanh thu tháng</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>45.600 đ</h3>
+                        <p>Doanh thu tháng</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>
                             <span>+15%</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Charts Section -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Tiến độ học viên</h3>
-                        <div class="chart-filters">
-                            <button class="filter-btn active" data-filter="week">Tuần</button>
-                            <button class="filter-btn" data-filter="month">Tháng</button>
-                            <button class="filter-btn" data-filter="year">Năm</button>
-                        </div>
-                    </div>
-                    <div class="chart-content">
-                        <canvas id="studentProgressChart" width="800" height="300"></canvas>
-                    </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Hành động nhanh</h2>
                 </div>
-
-                <!-- Course Management -->
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3 class="table-title">Khóa học của tôi</h3>
-                        <div class="table-actions">
-                            <button class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Tạo khóa học mới
-                            </button>
-                            <button class="btn btn-secondary" onclick="dashboard.exportData('csv')">
-                                <i class="fas fa-download"></i>
-                                Xuất dữ liệu
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-content">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Tên khóa học</th>
-                                    <th>Học viên</th>
-                                    <th>Tiến độ</th>
-                                    <th>Đánh giá</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="courseTableBody">
-                                <tr>
-                                    <td colspan="6" style="text-align: center; padding: 2rem;">
-                                        <div class="spinner"></div>
-                                        <p>Đang tải dữ liệu...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="quick-actions-grid">
+                    <button class="action-card" onclick="window.location.href='http://localhost:8080/Adaptive_Elearning/instructor-courses'">
+                        <i class="fas fa-plus"></i>
+                        <span>Tạo khóa học</span>
+                    </button>
+                    <button class="action-card" onclick="window.location.href='<%= request.getContextPath() %>/upload-resource'">
+                        <i class="fas fa-upload"></i>
+                        <span>Tải lên tài liệu</span>
+                    </button>
+                    <button class="action-card" onclick="window.location.href='<%= request.getContextPath() %>/create-assignment'">
+                        <i class="fas fa-tasks"></i>
+                        <span>Tạo bài tập</span>
+                    </button>
+                    <button class="action-card" onclick="window.location.href='<%= request.getContextPath() %>/send-notification'">
+                        <i class="fas fa-envelope"></i>
+                        <span>Gửi thông báo</span>
+                    </button>
+                    <button class="action-card" onclick="window.location.href='<%= request.getContextPath() %>/view-reports'">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Xem báo cáo</span>
+                    </button>
+                    <button class="action-card" onclick="window.location.href='<%= request.getContextPath() %>/schedule'">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Lên lịch học</span>
+                    </button>
                 </div>
-
-                <!-- Recent Activity -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Hoạt động gần đây</h3>
-                        <button class="btn btn-secondary" onclick="dashboard.refreshData()">
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Hoạt động gần đây</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary">
                             <i class="fas fa-sync-alt"></i>
-                            Làm mới
+                            <span>Làm mới</span>
                         </button>
                     </div>
-                    <div class="activity-list">
-                        <div style="text-align: center; padding: 2rem;">
-                            <div class="spinner"></div>
-                            <p>Đang tải hoạt động...</p>
+                </div>
+                <ul class="activity-list">
+                    <li class="activity-item">
+                        <div class="activity-icon blue">
+                            <i class="fas fa-user-plus"></i>
                         </div>
+                        <div class="activity-content">
+                            <div class="activity-title">15 học viên mới đăng ký</div>
+                            <div class="activity-desc">Khóa học "Java Programming Basics"</div>
+                        </div>
+                        <div class="activity-time">2 giờ trước</div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">23 bài tập đã được nộp</div>
+                            <div class="activity-desc">Assignment #5 - React Hooks</div>
+                        </div>
+                        <div class="activity-time">4 giờ trước</div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon orange">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">8 đánh giá mới</div>
+                            <div class="activity-desc">Trung bình 4.8/5 sao</div>
+                        </div>
+                        <div class="activity-time">1 ngày trước</div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon blue">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">12 câu hỏi mới trong diễn đàn</div>
+                            <div class="activity-desc">Python Data Science Course</div>
+                        </div>
+                        <div class="activity-time">2 ngày trước</div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Navigation to Courses -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Khóa học của bạn</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" onclick="window.location.href='/Adaptive_Elearning/instructor-courses'">
+                            <i class="fas fa-book"></i>
+                            <span>Xem tất cả khóa học</span>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <h3>Hành động nhanh</h3>
-                    <div class="action-grid">
-                        <button class="action-card">
-                            <i class="fas fa-plus"></i>
-                            <span>Tạo khóa học</span>
-                        </button>
-                        <button class="action-card">
-                            <i class="fas fa-upload"></i>
-                            <span>Tải lên tài liệu</span>
-                        </button>
-                        <button class="action-card">
-                            <i class="fas fa-tasks"></i>
-                            <span>Tạo bài tập</span>
-                        </button>
-                        <button class="action-card">
-                            <i class="fas fa-envelope"></i>
-                            <span>Gửi thông báo</span>
-                        </button>
-                        <button class="action-card">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Xem báo cáo</span>
-                        </button>
-                        <button class="action-card">
-                            <i class="fas fa-calendar-plus"></i>
-                            <span>Lên lịch học</span>
-                        </button>
-                    </div>
-                </div>
+                <p style="color: #666; font-size: 14px;">
+                    Click vào "Khóa học" trong menu bên trái hoặc nút "Xem tất cả khóa học" để quản lý các khóa học của bạn.
+                </p>
             </div>
         </main>
     </div>
-
-    <!-- JavaScript - Optimized loading -->
-    <script defer src="/Adaptive_Elearning/assets/js/performance-optimizer.js"></script>
-    <script defer src="/Adaptive_Elearning/assets/js/instructor-dashboard-modern.js"></script>
-    
-    <!-- Initialize Dashboard -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set global user name for JavaScript
-            window.userName = '<%= (user.getFullName() != null && !user.getFullName().trim().isEmpty()) ? user.getFullName() : user.getUserName() %>';
-            
-            console.log('Dashboard initialized for user:', window.userName);
-            
-            // Populate course table with sample data - reduced delay
-            setTimeout(() => {
-                if (typeof populateCourseTable === 'function') {
-                    populateCourseTable();
-                }
-            }, 800);
-        });
-        
-        function populateCourseTable() {
-            const tableBody = document.getElementById('courseTableBody');
-            const sampleCourses = [
-                {
-                    name: 'Lap trinh JavaScript co ban',
-                    students: 156,
-                    progress: 78,
-                    rating: 4.8,
-                    status: 'active',
-                    id: 1
-                },
-                {
-                    name: 'React JS Advanced',
-                    students: 89,
-                    progress: 65,
-                    rating: 4.6,
-                    status: 'active',
-                    id: 2
-                },
-                {
-                    name: 'Node.js Backend Development',
-                    students: 123,
-                    progress: 82,
-                    rating: 4.9,
-                    status: 'active',
-                    id: 3
-                },
-                {
-                    name: 'Python Data Science',
-                    students: 234,
-                    progress: 91,
-                    rating: 4.7,
-                    status: 'completed',
-                    id: 4
-                }
-            ];
-            
-            tableBody.innerHTML = sampleCourses.map(course => `
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
-                                <i class="fas fa-book"></i>
-                            </div>
-                            <div>
-                                <div style="font-weight: 600; color: #0f172a;">${course.name}</div>
-                                <small style="color: #64748b;">Cap nhat 2 ngay truoc</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span style="font-weight: 600; color: #0f172a;">${course.students}</span> hoc vien
-                    </td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <div class="progress-bar" style="flex: 1;">
-                                <div class="progress-fill" style="width: ${course.progress}%;"></div>
-                            </div>
-                            <span style="font-weight: 600; min-width: 40px; color: #0f172a;">${course.progress}%</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 0.25rem;">
-                            <i class="fas fa-star" style="color: #f59e0b;"></i>
-                            <span style="font-weight: 600; color: #0f172a;">${course.rating}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="status-badge ${course.status}">
-                          
-                        </span>
-                    </td>
-                    <td>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button class="btn btn-sm btn-secondary" data-action="view" data-id="${course.id}">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-primary" data-action="edit" data-id="${course.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" data-action="delete" data-id="${course.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-    </script>
 </body>
 </html>
-
