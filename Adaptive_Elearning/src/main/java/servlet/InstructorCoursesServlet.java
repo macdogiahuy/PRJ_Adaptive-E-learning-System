@@ -1,220 +1,451 @@
 package servlet;
 
+import model.Courses;
+import model.Categories;
+import model.Sections;
+import model.Users;
+import services.CourseService;
+import services.ServiceResults.OperationResult;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.Users;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
-import jakarta.persistence.Query;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Servlet hiển thị danh sách khóa học của instructor
+ * Servlet for managing instructor courses
+ * Handles CRUD operations for courses
+ * @author LP
  */
-@WebServlet(name = "InstructorCoursesServlet", urlPatterns = {"/instructor-courses"})
+@WebServlet(urlPatterns = {"/instructor-courses", "/instructor-courses/*"})
 public class InstructorCoursesServlet extends HttpServlet {
     
-    private static final Logger logger = Logger.getLogger(InstructorCoursesServlet.class.getName());
-    private EntityManagerFactory emf;
+    private static final Logger LOGGER = Logger.getLogger(InstructorCoursesServlet.class.getName());
+    private CourseService courseService;
     
     @Override
     public void init() throws ServletException {
-        emf = Persistence.createEntityManagerFactory("Adaptive_ElearningPU");
+        super.init();
+        courseService = new CourseService();
     }
     
     @Override
-    public void destroy() {
-        if (emf != null && emf.isOpen()) {
-            emf.close();
-        }
-    }
-    
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession();
-        Users user = (Users) session.getAttribute("account");
+        HttpSession session = request.getSession(false);
+        Users user = (session != null) ? (Users) session.getAttribute("account") : null;
         
-        // Check if user is logged in and is an instructor
-        if (user == null) {
+        // Check if user is logged in and is instructor
+        if (user == null || !"Instructor".equalsIgnoreCase(user.getRole())) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        if (!"Instructor".equalsIgnoreCase(user.getRole())) {
-            response.sendRedirect(request.getContextPath() + "/access-denied.jsp");
-            return;
-        }
-        
-        logger.info("=== INSTRUCTOR COURSES SERVLET ===");
-        logger.info("Loading courses for instructor: " + user.getUserName());
-        logger.info("Instructor ID: " + user.getId());
+        String pathInfo = request.getPathInfo();
         
         try {
-            // Get all courses created by this instructor
-            List<CourseInfo> courses = getInstructorCourses(user.getId());
-            
-            // Get statistics
-            int totalCourses = courses.size();
-            int activeCourses = (int) courses.stream().filter(c -> "Active".equalsIgnoreCase(c.status)).count();
-            int draftCourses = (int) courses.stream().filter(c -> "Draft".equalsIgnoreCase(c.status)).count();
-            int totalStudents = courses.stream().mapToInt(c -> c.learnerCount).sum();
-            
-            // Set attributes
-            request.setAttribute("courses", courses);
-            request.setAttribute("totalCourses", totalCourses);
-            request.setAttribute("activeCourses", activeCourses);
-            request.setAttribute("draftCourses", draftCourses);
-            request.setAttribute("totalStudents", totalStudents);
-            
-            logger.info("Found " + totalCourses + " courses for instructor");
-            logger.info("Active: " + activeCourses + ", Draft: " + draftCourses);
-            
-            // Forward to JSP
-            request.getRequestDispatcher("/manage_courses.jsp").forward(request, response);
-            
+            if (pathInfo == null || pathInfo.equals("/")) {
+                // List all courses for instructor
+                handleListCourses(request, response, user);
+            } else if (pathInfo.equals("/create")) {
+                // Show create course form
+                handleShowCreateForm(request, response, user);
+            } else if (pathInfo.startsWith("/edit/")) {
+                // Show edit course form
+                String courseId = pathInfo.substring(6);
+                handleShowEditForm(request, response, user, courseId);
+            } else if (pathInfo.startsWith("/view/")) {
+                // View course details
+                String courseId = pathInfo.substring(6);
+                handleViewCourse(request, response, user, courseId);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
         } catch (Exception e) {
-            logger.severe("Error loading instructor courses: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "Không thể tải danh sách khóa học: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error in doGet", e);
+            request.setAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
     
-    /**
-     * Lấy danh sách khóa học của instructor từ database
-     */
-    private List<CourseInfo> getInstructorCourses(String instructorId) {
-        EntityManager em = emf.createEntityManager();
-        List<CourseInfo> result = new ArrayList<>();
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
         
-        try {
-            logger.info("=== QUERYING INSTRUCTOR COURSES ===");
-            logger.info("Instructor ID: " + instructorId);
-            
-            // First, let's check total courses in database
-            Query countQuery = em.createNativeQuery("SELECT COUNT(*) FROM Courses");
-            Object countResult = countQuery.getSingleResult();
-            logger.info("Total courses in database: " + countResult);
-            
-            // Check courses with this creator
-            Query creatorCountQuery = em.createNativeQuery("SELECT COUNT(*) FROM Courses WHERE CreatorId = ?");
-            creatorCountQuery.setParameter(1, instructorId);
-            Object creatorCount = creatorCountQuery.getSingleResult();
-            logger.info("Courses with CreatorId = " + instructorId + ": " + creatorCount);
-            
-            String sql = """
-                SELECT 
-                    c.Id,
-                    c.Title,
-                    c.ThumbUrl,
-                    c.Price,
-                    c.Level,
-                    c.LearnerCount,
-                    c.Status,
-                    c.CreationTime,
-                    c.LastModificationTime,
-                    CAST(c.TotalRating AS FLOAT) / NULLIF(c.RatingCount, 0) as Rating,
-                    c.RatingCount,
-                    c.Discount,
-                    c.DiscountExpiry,
-                    cat.Title as CategoryTitle
-                FROM Courses c
-                LEFT JOIN Categories cat ON c.LeafCategoryId = cat.Id
-                WHERE c.CreatorId = ?
-                ORDER BY c.CreationTime DESC
-                """;
-            
-            Query query = em.createNativeQuery(sql);
-            query.setParameter(1, instructorId);
-            
-            List<Object[]> results = query.getResultList();
-            logger.info("Query returned " + results.size() + " courses");
-            
-            for (Object[] row : results) {
-                try {
-                    CourseInfo info = new CourseInfo();
-                    info.id = row[0] != null ? row[0].toString() : null;
-                    info.title = row[1] != null ? row[1].toString() : "Untitled Course";
-                    info.thumbUrl = row[2] != null ? row[2].toString() : null;
-                    info.price = row[3] != null ? ((Number) row[3]).doubleValue() : 0.0;
-                    info.level = row[4] != null ? row[4].toString() : "Beginner";
-                    info.learnerCount = row[5] != null ? ((Number) row[5]).intValue() : 0;
-                    info.status = row[6] != null ? row[6].toString() : "Draft";
-                    info.creationTime = row[7] != null ? row[7].toString() : "";
-                    info.lastModificationTime = row[8] != null ? row[8].toString() : "";
-                    info.rating = row[9] != null ? ((Number) row[9]).doubleValue() : 0.0;
-                    info.reviewCount = row[10] != null ? ((Number) row[10]).intValue() : 0;
-                    info.discount = row[11] != null ? ((Number) row[11]).doubleValue() : 0.0;
-                    info.discountExpiry = row[12] != null ? row[12].toString() : null;
-                    info.categoryTitle = row[13] != null ? row[13].toString() : "Uncategorized";
-                    
-                    result.add(info);
-                    logger.info("Added course: " + info.title + " (Status: " + info.status + ")");
-                    
-                } catch (Exception e) {
-                    logger.warning("Error processing course row: " + e.getMessage());
-                }
-            }
-            
-            logger.info("Successfully processed " + result.size() + " courses");
-            
-        } catch (Exception e) {
-            logger.severe("Error querying instructor courses: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
+        request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession(false);
+        Users user = (session != null) ? (Users) session.getAttribute("account") : null;
+        
+        // Check if user is logged in and is instructor
+        if (user == null || !"Instructor".equalsIgnoreCase(user.getRole())) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
         
-        return result;
+        String action = request.getParameter("action");
+        
+        try {
+            switch (action != null ? action : "") {
+                case "create":
+                    handleCreateCourse(request, response, user);
+                    break;
+                case "update":
+                    handleUpdateCourse(request, response, user);
+                    break;
+                case "delete":
+                    handleDeleteCourse(request, response, user);
+                    break;
+                case "createSection":
+                    handleCreateSection(request, response, user);
+                    break;
+                default:
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error in doPost", e);
+            sendJsonResponse(response, false, "Có lỗi xảy ra: " + e.getMessage());
+        }
     }
     
     /**
-     * DTO class for course information
+     * List all courses for instructor
      */
-    public static class CourseInfo {
-        public String id;
-        public String title;
-        public String thumbUrl;
-        public double price;
-        public String level;
-        public int learnerCount;
-        public String status;
-        public String creationTime;
-        public String lastModificationTime;
-        public double rating;
-        public int reviewCount;
-        public double discount;
-        public String discountExpiry;
-        public String categoryTitle;
+    private void handleListCourses(HttpServletRequest request, HttpServletResponse response, Users user) 
+            throws ServletException, IOException {
         
-        // Getters
-        public String getId() { return id; }
-        public String getTitle() { return title; }
-        public String getThumbUrl() { return thumbUrl; }
-        public double getPrice() { return price; }
-        public String getLevel() { return level; }
-        public int getLearnerCount() { return learnerCount; }
-        public String getStatus() { return status; }
-        public String getCreationTime() { return creationTime; }
-        public String getLastModificationTime() { return lastModificationTime; }
-        public double getRating() { return rating; }
-        public int getReviewCount() { return reviewCount; }
-        public double getDiscount() { return discount; }
-        public String getDiscountExpiry() { return discountExpiry; }
-        public String getCategoryTitle() { return categoryTitle; }
+        // IMPORTANT: InstructorId in Users table points to Instructors.Id
+        // Courses.InstructorId references Instructors.Id (NOT Users.Id)
+        String instructorId = user.getInstructorId();
+        
+        LOGGER.log(Level.INFO, "User ID: {0}", user.getId());
+        LOGGER.log(Level.INFO, "Instructor ID from Users.InstructorId: {0}", instructorId);
+        
+        // Verify we have a valid instructor ID
+        if (instructorId == null || instructorId.trim().isEmpty()) {
+            LOGGER.log(Level.WARNING, "No InstructorId found for user: {0}", user.getUserName());
+            instructorId = user.getId(); // Fallback to User ID
+        }
+        
+        LOGGER.log(Level.INFO, "Fetching courses for instructor: {0}", instructorId);
+        
+        // Get courses
+        List<Courses> courses = courseService.getInstructorCourses(instructorId);
+        
+        LOGGER.log(Level.INFO, "Found {0} courses", courses.size());
+        
+        // Get categories for filter
+        List<Categories> categories = courseService.getAllCategories();
+        
+        // Set attributes
+        request.setAttribute("courses", courses);
+        request.setAttribute("categories", categories);
+        request.setAttribute("totalCourses", courses.size());
+        
+        // Forward to JSP
+        request.getRequestDispatcher("/instructor_courses.jsp").forward(request, response);
+    }
+    
+    /**
+     * Show create course form
+     */
+    private void handleShowCreateForm(HttpServletRequest request, HttpServletResponse response, Users user) 
+            throws ServletException, IOException {
+        
+        // Get categories for dropdown
+        List<Categories> categories = courseService.getAllCategories();
+        request.setAttribute("categories", categories);
+        request.setAttribute("action", "create");
+        
+        // Forward to form JSP
+        request.getRequestDispatcher("/instructor_course_form.jsp").forward(request, response);
+    }
+    
+    /**
+     * Show edit course form
+     */
+    private void handleShowEditForm(HttpServletRequest request, HttpServletResponse response, Users user, String courseId) 
+            throws ServletException, IOException {
+        
+        // Get course
+        Courses course = courseService.getCourseById(courseId);
+        
+        if (course == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Course not found");
+            return;
+        }
+        
+        // Get sections
+        List<Sections> sections = courseService.getCourseSections(courseId);
+        
+        // Get categories
+        List<Categories> categories = courseService.getAllCategories();
+        
+        // Set attributes
+        request.setAttribute("course", course);
+        request.setAttribute("sections", sections);
+        request.setAttribute("categories", categories);
+        request.setAttribute("action", "update");
+        
+        // Forward to form JSP
+        request.getRequestDispatcher("/instructor_course_form.jsp").forward(request, response);
+    }
+    
+    /**
+     * View course details
+     */
+    private void handleViewCourse(HttpServletRequest request, HttpServletResponse response, Users user, String courseId) 
+            throws ServletException, IOException {
+        
+        Courses course = courseService.getCourseById(courseId);
+        
+        if (course == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Course not found");
+            return;
+        }
+        
+        List<Sections> sections = courseService.getCourseSections(courseId);
+        
+        request.setAttribute("course", course);
+        request.setAttribute("sections", sections);
+        request.setAttribute("averageRating", courseService.calculateAverageRating(course));
+        
+        request.getRequestDispatcher("/instructor_course_view.jsp").forward(request, response);
+    }
+    
+    /**
+     * Handle create course
+     */
+    private void handleCreateCourse(HttpServletRequest request, HttpServletResponse response, Users user) 
+            throws ServletException, IOException {
+        
+        // Parse course data
+        Courses course = new Courses();
+        course.setTitle(request.getParameter("title"));
+        course.setThumbUrl(request.getParameter("thumbUrl"));
+        course.setIntro(request.getParameter("intro"));
+        course.setDescription(request.getParameter("description"));
+        
+        try {
+            String priceStr = request.getParameter("price");
+            String discountStr = request.getParameter("discount");
+            
+            LOGGER.log(Level.INFO, "Price parameter: {0}", priceStr);
+            LOGGER.log(Level.INFO, "Discount parameter: {0}", discountStr);
+            
+            // Parse price
+            if (priceStr == null || priceStr.trim().isEmpty()) {
+                throw new NumberFormatException("Price is required");
+            }
+            course.setPrice(Double.parseDouble(priceStr.trim()));
+            
+            // Parse discount
+            if (discountStr != null && !discountStr.trim().isEmpty()) {
+                course.setDiscount(Double.parseDouble(discountStr.trim()));
+            } else {
+                course.setDiscount(0);
+            }
+        } catch (NumberFormatException e) {
+            LOGGER.log(Level.SEVERE, "Error parsing price/discount", e);
+            request.setAttribute("errorMessage", "Giá hoặc giảm giá không hợp lệ. Vui lòng nhập số.");
+            request.setAttribute("course", course);
+            List<Categories> categories = courseService.getAllCategories();
+            request.setAttribute("categories", categories);
+            request.setAttribute("action", "create");
+            request.getRequestDispatcher("/instructor_course_form.jsp").forward(request, response);
+            return;
+        }
+        
+        course.setLevel(request.getParameter("level"));
+        course.setOutcomes(request.getParameter("outcomes"));
+        course.setRequirements(request.getParameter("requirements"));
+        course.setStatus(request.getParameter("status"));
+        
+        // Set category
+        String categoryId = request.getParameter("categoryId");
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            Categories category = new Categories();
+            category.setId(categoryId);
+            course.setLeafCategoryId(category);
+        }
+        
+        // Get correct InstructorId from Users table
+        String instructorId = user.getInstructorId();
+        if (instructorId == null || instructorId.trim().isEmpty()) {
+            LOGGER.log(Level.SEVERE, "No InstructorId found for user: {0}", user.getUserName());
+            request.setAttribute("errorMessage", "Không tìm thấy InstructorId. Vui lòng liên hệ admin.");
+            request.setAttribute("course", course);
+            List<Categories> categories = courseService.getAllCategories();
+            request.setAttribute("categories", categories);
+            request.setAttribute("action", "create");
+            request.getRequestDispatcher("/instructor_course_form.jsp").forward(request, response);
+            return;
+        }
+        
+        LOGGER.log(Level.INFO, "Creating course with InstructorId: {0}", instructorId);
+        
+        // Create course (InstructorId for Courses.InstructorId, UserId for CreatorId/LastModifierId)
+        OperationResult<Courses> result = courseService.createCourse(course, instructorId, user.getId());
+        
+        if (result.isSuccess()) {
+            // Handle sections if provided
+            String[] sectionTitles = request.getParameterValues("sectionTitles[]");
+            if (sectionTitles != null && sectionTitles.length > 0) {
+                for (int i = 0; i < sectionTitles.length; i++) {
+                    if (sectionTitles[i] != null && !sectionTitles[i].trim().isEmpty()) {
+                        courseService.createSection(result.getData().getId(), sectionTitles[i], i + 1, user.getId());
+                    }
+                }
+            }
+            
+            response.sendRedirect(request.getContextPath() + "/instructor-courses?success=created");
+        } else {
+            request.setAttribute("errorMessage", result.getMessage());
+            request.setAttribute("course", course);
+            List<Categories> categories = courseService.getAllCategories();
+            request.setAttribute("categories", categories);
+            request.getRequestDispatcher("/instructor_course_form.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+     * Handle update course
+     */
+    private void handleUpdateCourse(HttpServletRequest request, HttpServletResponse response, Users user) 
+            throws ServletException, IOException {
+        
+        String courseId = request.getParameter("courseId");
+        
+        if (courseId == null || courseId.trim().isEmpty()) {
+            sendJsonResponse(response, false, "Course ID is required");
+            return;
+        }
+        
+        // Get existing course
+        Courses course = courseService.getCourseById(courseId);
+        
+        if (course == null) {
+            sendJsonResponse(response, false, "Course not found");
+            return;
+        }
+        
+        // Update course data
+        course.setTitle(request.getParameter("title"));
+        course.setThumbUrl(request.getParameter("thumbUrl"));
+        course.setIntro(request.getParameter("intro"));
+        course.setDescription(request.getParameter("description"));
+        
+        try {
+            String priceStr = request.getParameter("price");
+            String discountStr = request.getParameter("discount");
+            
+            // Parse price
+            if (priceStr == null || priceStr.trim().isEmpty()) {
+                throw new NumberFormatException("Price is required");
+            }
+            course.setPrice(Double.parseDouble(priceStr.trim()));
+            
+            // Parse discount
+            if (discountStr != null && !discountStr.trim().isEmpty()) {
+                course.setDiscount(Double.parseDouble(discountStr.trim()));
+            } else {
+                course.setDiscount(0);
+            }
+        } catch (NumberFormatException e) {
+            LOGGER.log(Level.SEVERE, "Error parsing price/discount", e);
+            request.setAttribute("errorMessage", "Giá hoặc giảm giá không hợp lệ. Vui lòng nhập số.");
+            request.setAttribute("course", course);
+            List<Categories> categories = courseService.getAllCategories();
+            request.setAttribute("categories", categories);
+            request.setAttribute("action", "update");
+            request.getRequestDispatcher("/instructor_course_form.jsp").forward(request, response);
+            return;
+        }
+        
+        course.setLevel(request.getParameter("level"));
+        course.setOutcomes(request.getParameter("outcomes"));
+        course.setRequirements(request.getParameter("requirements"));
+        course.setStatus(request.getParameter("status"));
+        
+        // Update category
+        String categoryId = request.getParameter("categoryId");
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            Categories category = new Categories();
+            category.setId(categoryId);
+            course.setLeafCategoryId(category);
+        }
+        
+        // Update course
+        OperationResult<Courses> result = courseService.updateCourse(course, user.getId(), user.getId());
+        
+        if (result.isSuccess()) {
+            response.sendRedirect(request.getContextPath() + "/instructor-courses?success=updated");
+        } else {
+            request.setAttribute("errorMessage", result.getMessage());
+            request.setAttribute("course", course);
+            List<Categories> categories = courseService.getAllCategories();
+            request.setAttribute("categories", categories);
+            request.getRequestDispatcher("/instructor_course_form.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+     * Handle delete course
+     */
+    private void handleDeleteCourse(HttpServletRequest request, HttpServletResponse response, Users user) 
+            throws ServletException, IOException {
+        
+        String courseId = request.getParameter("courseId");
+        
+        if (courseId == null || courseId.trim().isEmpty()) {
+            sendJsonResponse(response, false, "Course ID is required");
+            return;
+        }
+        
+        OperationResult<Void> result = courseService.deleteCourse(courseId, user.getId());
+        
+        sendJsonResponse(response, result.isSuccess(), result.getMessage());
+    }
+    
+    /**
+     * Handle create section
+     */
+    private void handleCreateSection(HttpServletRequest request, HttpServletResponse response, Users user) 
+            throws ServletException, IOException {
+        
+        String courseId = request.getParameter("courseId");
+        String title = request.getParameter("title");
+        String indexStr = request.getParameter("index");
+        
+        if (courseId == null || title == null) {
+            sendJsonResponse(response, false, "Missing required parameters");
+            return;
+        }
+        
+        int index = indexStr != null ? Integer.parseInt(indexStr) : 1;
+        
+        OperationResult<Void> result = courseService.createSection(courseId, title, index, user.getId());
+        
+        sendJsonResponse(response, result.isSuccess(), result.getMessage());
+    }
+    
+    /**
+     * Send JSON response
+     */
+    private void sendJsonResponse(HttpServletResponse response, boolean success, String message) 
+            throws IOException {
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        String json = String.format("{\"success\": %b, \"message\": \"%s\"}", success, message);
+        response.getWriter().write(json);
     }
 }

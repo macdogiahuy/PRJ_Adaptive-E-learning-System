@@ -1,9 +1,9 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="servlet.InstructorCoursesServlet.CourseInfo"%>
-<%@page import="java.util.List"%>
 <%@page import="model.Users"%>
-<%@page import="java.text.NumberFormat"%>
-<%@page import="java.util.Locale"%>
+<%@page import="model.Courses"%>
+<%@page import="model.Categories"%>
+<%@page import="java.util.List"%>
+<%@page import="java.text.DecimalFormat"%>
 
 <%
     Users user = (Users) session.getAttribute("account");
@@ -13,19 +13,12 @@
     }
     
     @SuppressWarnings("unchecked")
-    List<CourseInfo> courses = (List<CourseInfo>) request.getAttribute("courses");
+    List<Courses> courses = (List<Courses>) request.getAttribute("courses");
+    @SuppressWarnings("unchecked")
+    List<Categories> categories = (List<Categories>) request.getAttribute("categories");
     Integer totalCourses = (Integer) request.getAttribute("totalCourses");
-    Integer activeCourses = (Integer) request.getAttribute("activeCourses");
-    Integer draftCourses = (Integer) request.getAttribute("draftCourses");
-    Integer totalStudents = (Integer) request.getAttribute("totalStudents");
     
-    if (courses == null) courses = new java.util.ArrayList<>();
-    if (totalCourses == null) totalCourses = 0;
-    if (activeCourses == null) activeCourses = 0;
-    if (draftCourses == null) draftCourses = 0;
-    if (totalStudents == null) totalStudents = 0;
-    
-    NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+    DecimalFormat df = new DecimalFormat("#,###");
 %>
 
 <!DOCTYPE html>
@@ -33,7 +26,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khóa Học Của Tôi - Instructor Dashboard</title>
+    <title>Quản lý Khóa học - Instructor Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -48,72 +41,9 @@
             color: #333;
         }
         
-        /* Layout */
         .dashboard-container {
             display: flex;
             min-height: 100vh;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-        
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: white;
-            text-decoration: none;
-        }
-        
-        .logo:hover {
-            color: white;
-            text-decoration: none;
-        }
-        
-        .nav-menu {
-            list-style: none;
-            padding: 20px 0;
-        }
-        
-        .nav-item {
-            margin: 5px 0;
-        }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .nav-link:hover,
-        .nav-link.active {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left: 3px solid #4CAF50;
-        }
-        
-        .nav-link i {
-            width: 20px;
-            text-align: center;
         }
         
         /* Main Content */
@@ -124,14 +54,17 @@
         }
         
         .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
         }
         
-        .page-title {
+        .page-title-section h1 {
             font-size: 28px;
             font-weight: 700;
             color: #1e3c72;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         
         .page-subtitle {
@@ -139,10 +72,35 @@
             font-size: 14px;
         }
         
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
         /* Stats Cards */
-        .stats-grid {
+        .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -170,12 +128,11 @@
         .stat-icon.blue { background: #e3f2fd; color: #2196F3; }
         .stat-icon.green { background: #e8f5e9; color: #4CAF50; }
         .stat-icon.orange { background: #fff3e0; color: #FF9800; }
-        .stat-icon.purple { background: #f3e5f5; color: #9C27B0; }
         
         .stat-info h3 {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 5px;
+            color: #1e3c72;
         }
         
         .stat-info p {
@@ -183,212 +140,167 @@
             color: #666;
         }
         
-        /* Action Bar */
-        .action-bar {
+        /* Filters */
+        .filters-section {
             background: white;
             padding: 20px;
             border-radius: 12px;
+            margin-bottom: 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
-        }
-        
-        .search-box {
-            flex: 1;
-            max-width: 400px;
-            position: relative;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 10px 15px 10px 40px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
         }
         
         .filter-group {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
         
-        .filter-btn {
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .filter-group input,
+        .filter-group select {
             padding: 10px 15px;
             border: 1px solid #ddd;
-            background: white;
             border-radius: 8px;
-            cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
         }
         
-        .filter-btn:hover {
-            border-color: #2196F3;
-            color: #2196F3;
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        .btn-primary {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-        }
-        
-        /* Courses Grid */
-        .courses-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        
-        .course-card {
+        /* Courses Table */
+        .courses-section {
             background: white;
             border-radius: 12px;
-            overflow: hidden;
+            padding: 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            cursor: pointer;
         }
         
-        .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-        
-        .course-thumbnail {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .course-body {
-            padding: 20px;
-        }
-        
-        .course-header {
+        .section-header {
             display: flex;
             justify-content: space-between;
-            align-items: start;
-            margin-bottom: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
         }
         
-        .course-status {
-            padding: 4px 12px;
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+        
+        .courses-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .courses-table thead {
+            background: #f8f9fa;
+        }
+        
+        .courses-table th {
+            padding: 15px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .courses-table td {
+            padding: 15px;
+            border-top: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        
+        .courses-table tbody tr {
+            transition: all 0.3s;
+        }
+        
+        .courses-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .course-thumb {
+            width: 80px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .course-title {
+            font-weight: 600;
+            color: #1e3c72;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
         
-        .status-active {
-            background: #e8f5e9;
-            color: #4CAF50;
+        .badge-ongoing { background: #e3f2fd; color: #2196F3; }
+        .badge-completed { background: #e8f5e9; color: #4CAF50; }
+        .badge-draft { background: #fff3e0; color: #FF9800; }
+        
+        .rating-stars {
+            color: #ffc107;
         }
         
-        .status-draft {
-            background: #fff3e0;
-            color: #FF9800;
-        }
-        
-        .status-inactive {
-            background: #ffebee;
-            color: #f44336;
-        }
-        
-        .course-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #1e3c72;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .course-meta {
+        .action-buttons {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #666;
-        }
-        
-        .course-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .course-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .course-price {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2196F3;
-        }
-        
-        .course-actions {
-            display: flex;
-            gap: 10px;
+            gap: 8px;
         }
         
         .btn-icon {
             width: 35px;
             height: 35px;
             border-radius: 8px;
-            border: 1px solid #ddd;
-            background: white;
+            border: none;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             transition: all 0.3s;
         }
         
+        .btn-view { background: #e3f2fd; color: #2196F3; }
+        .btn-edit { background: #fff3e0; color: #FF9800; }
+        .btn-delete { background: #ffebee; color: #f44336; }
+        
         .btn-icon:hover {
-            border-color: #2196F3;
-            color: #2196F3;
-            background: #f0f7ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
         }
         
         .empty-state i {
@@ -399,36 +311,84 @@
         
         .empty-state h3 {
             font-size: 20px;
+            color: #666;
             margin-bottom: 10px;
-            color: #333;
         }
         
         .empty-state p {
-            color: #666;
-            margin-bottom: 25px;
+            color: #999;
+            margin-bottom: 20px;
         }
         
         /* Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
             .main-content {
                 margin-left: 0;
+                padding: 15px;
             }
             
-            .stats-grid {
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .courses-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .stats-row {
                 grid-template-columns: 1fr;
             }
-            
-            .action-bar {
-                flex-direction: column;
-                align-items: stretch;
+        }
+        
+        /* Success Message */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInDown 0.4s ease-out;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+        
+        .alert.fade-out {
+            animation: fadeOut 0.4s ease-out forwards;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
             }
-            
-            .search-box {
-                max-width: 100%;
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
             }
         }
     </style>
@@ -436,279 +396,307 @@
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                
-                <div class="logo">
-                     <a href="<%= request.getContextPath() %>/" class="logo">
-                    <i class="fas fa-graduation-cap"></i>
-                    
-                    <span>FlyUp Instructor</span>
-                </div>
-            </div>
-            
-            <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <a href="<%= request.getContextPath() %>/instructor_dashboard.jsp" class="nav-link">
-                            <i class="fas fa-home"></i>
-                            <span class="nav-text">Tổng quan</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="<%= request.getContextPath() %>/instructor-courses" class="nav-link active">
-                            <i class="fas fa-book"></i>
-                            <span class="nav-text">Tạo Khóa Học Mới</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#students" class="nav-link">
-                            <i class="fas fa-users"></i>
-                            <span class="nav-text">Học viên</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#assignments" class="nav-link">
-                            <i class="fas fa-tasks"></i>
-                            <span class="nav-text">Bài tập</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#discussions" class="nav-link">
-                            <i class="fas fa-comments"></i>
-                            <span class="nav-text">Thảo luận</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#analytics" class="nav-link">
-                            <i class="fas fa-chart-line"></i>
-                            <span class="nav-text">Phân tích</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#resources" class="nav-link">
-                            <i class="fas fa-folder"></i>
-                            <span class="nav-text">Tài liệu</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#calendar" class="nav-link">
-                            <i class="fas fa-calendar"></i>
-                            <span class="nav-text">Lịch học</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#settings" class="nav-link">
-                            <i class="fas fa-cog"></i>
-                            <span class="nav-text">Cài đặt</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+        <%@ include file="/WEB-INF/includes/instructor-sidebar.jsp" %>
         
         <!-- Main Content -->
         <main class="main-content">
             <!-- Page Header -->
             <div class="page-header">
-                <h1 class="page-title">Khóa Học Của Tôi</h1>
-                <p class="page-subtitle">Quản lý và theo dõi tất cả các khóa học bạn đang giảng dạy</p>
+                <div class="page-title-section">
+                    <h1>Quản lý Khóa học</h1>
+                    <p class="page-subtitle">Tạo và quản lý các khóa học của bạn</p>
+                </div>
+                <a href="<%= request.getContextPath() %>/instructor-courses/create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Tạo khóa học mới
+                </a>
             </div>
             
+            <!-- Success/Error Messages -->
+            <% if (request.getParameter("success") != null) { %>
+                <div class="alert alert-success" id="successAlert">
+                    <i class="fas fa-check-circle"></i>
+                    <% if ("created".equals(request.getParameter("success"))) { %>
+                        Khóa học đã được tạo thành công!
+                    <% } else if ("updated".equals(request.getParameter("success"))) { %>
+                        Khóa học đã được cập nhật thành công!
+                    <% } else if ("deleted".equals(request.getParameter("success"))) { %>
+                        Khóa học đã được xóa thành công!
+                    <% } %>
+                </div>
+            <% } %>
+            
             <!-- Stats Cards -->
-            <div class="stats-grid">
+            <div class="stats-row">
                 <div class="stat-card">
                     <div class="stat-icon blue">
                         <i class="fas fa-book"></i>
                     </div>
                     <div class="stat-info">
-                        <h3><%= totalCourses %></h3>
+                        <h3><%= totalCourses != null ? totalCourses : 0 %></h3>
                         <p>Tổng khóa học</p>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-icon green">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-info">
-                        <h3><%= activeCourses %></h3>
-                        <p>Đang hoạt động</p>
+                        <h3><%
+                            int totalStudents = 0;
+                            if (courses != null) {
+                                for (Courses c : courses) {
+                                    totalStudents += c.getLearnerCount();
+                                }
+                            }
+                            out.print(totalStudents);
+                        %></h3>
+                        <p>Tổng học viên</p>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-icon orange">
-                        <i class="fas fa-edit"></i>
+                        <i class="fas fa-star"></i>
                     </div>
                     <div class="stat-info">
-                        <h3><%= draftCourses %></h3>
-                        <p>Bản nháp</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon purple">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><%= formatter.format(totalStudents) %></h3>
-                        <p>Tổng học viên</p>
+                        <h3><%
+                            double avgRating = 0.0;
+                            int ratingCount = 0;
+                            if (courses != null) {
+                                for (Courses c : courses) {
+                                    if (c.getRatingCount() > 0) {
+                                        avgRating += (double) c.getTotalRating() / c.getRatingCount();
+                                        ratingCount++;
+                                    }
+                                }
+                                if (ratingCount > 0) {
+                                    avgRating = avgRating / ratingCount;
+                                }
+                            }
+                            out.print(String.format("%.1f", avgRating));
+                        %></h3>
+                        <p>Đánh giá trung bình</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Action Bar -->
-            <div class="action-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Tìm kiếm khóa học..." id="searchInput">
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Tìm kiếm</label>
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm khóa học...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Danh mục</label>
+                        <select id="categoryFilter">
+                            <option value="">Tất cả danh mục</option>
+                            <% if (categories != null) {
+                                for (Categories cat : categories) { %>
+                                    <option value="<%= cat.getId() %>"><%= cat.getTitle() %></option>
+                            <%  }
+                            } %>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Trạng thái</label>
+                        <select id="statusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Ongoing">Đang diễn ra</option>
+                            <option value="Completed">Hoàn thành</option>
+                            <option value="Draft">Nháp</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Cấp độ</label>
+                        <select id="levelFilter">
+                            <option value="">Tất cả cấp độ</option>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                            <option value="All">All</option>
+                        </select>
+                    </div>
                 </div>
-                
-                <div class="filter-group">
-                    <select class="filter-btn" id="statusFilter">
-                        <option value="all">Tất cả trạng thái</option>
-                        <option value="Active">Đang hoạt động</option>
-                        <option value="Draft">Bản nháp</option>
-                        <option value="Inactive">Không hoạt động</option>
-                    </select>
-                    
-                    <select class="filter-btn" id="sortFilter">
-                        <option value="newest">Mới nhất</option>
-                        <option value="oldest">Cũ nhất</option>
-                        <option value="popular">Phổ biến nhất</option>
-                        <option value="rating">Đánh giá cao</option>
-                    </select>
-                </div>
-                
-                <button class="btn-primary" onclick="window.location.href='<%= request.getContextPath() %>/create-course'">
-                    <i class="fas fa-plus"></i>
-                    <span>Tạo khóa học mới</span>
-                </button>
             </div>
             
-            <!-- Courses Grid -->
-            <% if (courses.isEmpty()) { %>
-                <div class="empty-state">
-                    <i class="fas fa-book-open"></i>
-                    <h3>Chưa có khóa học nào</h3>
-                    <p>Bắt đầu tạo khóa học đầu tiên của bạn để chia sẻ kiến thức với học viên</p>
-                    <button class="btn-primary" onclick="window.location.href='<%= request.getContextPath() %>/create-course'">
-                        <i class="fas fa-plus"></i>
-                        <span>Tạo khóa học đầu tiên</span>
-                    </button>
+            <!-- Courses Table -->
+            <div class="courses-section">
+                <div class="section-header">
+                    <h2 class="section-title">Danh sách khóa học (<%= totalCourses != null ? totalCourses : 0 %>)</h2>
                 </div>
-            <% } else { %>
-                <div class="courses-grid" id="coursesGrid">
-                    <% for (CourseInfo course : courses) { 
-                        String statusClass = "status-draft";
-                        String statusText = "Bản nháp";
-                        
-                        if ("Active".equalsIgnoreCase(course.status)) {
-                            statusClass = "status-active";
-                            statusText = "Hoạt động";
-                        } else if ("Inactive".equalsIgnoreCase(course.status)) {
-                            statusClass = "status-inactive";
-                            statusText = "Tạm dừng";
-                        }
-                    %>
-                        <div class="course-card" data-status="<%= course.status %>" data-title="<%= course.title.toLowerCase() %>">
-                            <% if (course.thumbUrl != null && !course.thumbUrl.isEmpty()) { %>
-                                <img src="<%= course.thumbUrl %>" alt="<%= course.title %>" class="course-thumbnail">
-                            <% } else { %>
-                                <div class="course-thumbnail"></div>
+                
+                <% if (courses != null && !courses.isEmpty()) { %>
+                    <table class="courses-table">
+                        <thead>
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Tiêu đề</th>
+                                <th>Trạng thái</th>
+                                <th>Giá</th>
+                                <th>Giảm giá</th>
+                                <th>Cấp độ</th>
+                                <th>Học viên</th>
+                                <th>Đánh giá</th>
+                                <th>Danh mục</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for (Courses course : courses) { 
+                                double rating = course.getRatingCount() > 0 ? 
+                                               (double) course.getTotalRating() / course.getRatingCount() : 0.0;
+                            %>
+                                <tr data-category="<%= course.getLeafCategoryId() != null ? course.getLeafCategoryId().getId() : "" %>" 
+                                    data-status="<%= course.getStatus() %>" 
+                                    data-level="<%= course.getLevel() %>"
+                                    data-title="<%= course.getTitle().toLowerCase() %>">
+                                    <td>
+                                        <img src="<%= course.getThumbUrl() != null && !course.getThumbUrl().isEmpty() ? 
+                                                    course.getThumbUrl() : request.getContextPath() + "/assets/images/default-course.jpg" %>" 
+                                             alt="<%= course.getTitle() %>" 
+                                             class="course-thumb">
+                                    </td>
+                                    <td>
+                                        <div class="course-title" title="<%= course.getTitle() %>">
+                                            <%= course.getTitle() %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= "Ongoing".equals(course.getStatus()) ? "badge-ongoing" : 
+                                                               "Completed".equals(course.getStatus()) ? "badge-completed" : 
+                                                               "badge-draft" %>">
+                                            <%= course.getStatus() %>
+                                        </span>
+                                    </td>
+                                    <td><%= df.format(course.getPrice()) %> VNĐ</td>
+                                    <td><%= course.getDiscount() > 0 ? (int)course.getDiscount() + "%" : "-" %></td>
+                                    <td><%= course.getLevel() %></td>
+                                    <td><%= course.getLearnerCount() %></td>
+                                    <td>
+                                        <span class="rating-stars">
+                                            <% for (int i = 1; i <= 5; i++) { %>
+                                                <i class="<%= i <= rating ? "fas" : "far" %> fa-star"></i>
+                                            <% } %>
+                                        </span>
+                                        (<%= String.format("%.1f", rating) %>)
+                                    </td>
+                                    <td><%= course.getLeafCategoryId() != null ? course.getLeafCategoryId().getTitle() : "-" %></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-view" title="Xem" 
+                                                    onclick="viewCourse('<%= course.getId() %>')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn-icon btn-edit" title="Sửa" 
+                                                    onclick="editCourse('<%= course.getId() %>')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon btn-delete" title="Xóa" 
+                                                    onclick="deleteCourse('<%= course.getId() %>', '<%= course.getTitle() %>')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
                             <% } %>
-                            
-                            <div class="course-body">
-                                <div class="course-header">
-                                    <span class="course-status <%= statusClass %>"><%= statusText %></span>
-                                </div>
-                                
-                                <h3 class="course-title"><%= course.title %></h3>
-                                
-                                <div class="course-meta">
-                                    <div class="course-meta-item">
-                                        <i class="fas fa-users"></i>
-                                        <span><%= course.learnerCount %> học viên</span>
-                                    </div>
-                                    <div class="course-meta-item">
-                                        <i class="fas fa-star"></i>
-                                        <span><%= String.format("%.1f", course.rating) %> (<%= course.reviewCount %>)</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="course-footer">
-                                    <div class="course-price">
-                                        <%= formatter.format(course.price) %> đ
-                                    </div>
-                                    
-                                    <div class="course-actions">
-                                        <button class="btn-icon" title="Chỉnh sửa" onclick="editCourse('<%= course.id %>')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn-icon" title="Xem chi tiết" onclick="viewCourse('<%= course.id %>')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn-icon" title="Thống kê" onclick="viewStats('<%= course.id %>')">
-                                            <i class="fas fa-chart-bar"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <% } %>
-                </div>
-            <% } %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Chưa có khóa học nào</h3>
+                        <p>Bắt đầu tạo khóa học đầu tiên của bạn!</p>
+                        <a href="<%= request.getContextPath() %>/instructor-courses/create" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Tạo khóa học mới
+                        </a>
+                    </div>
+                <% } %>
+            </div>
         </main>
     </div>
     
     <script>
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            filterCourses();
+        // Auto-hide success alert after 5 seconds
+        window.addEventListener('DOMContentLoaded', function() {
+            const successAlert = document.getElementById('successAlert');
+            
+            if (successAlert) {
+                setTimeout(function() {
+                    successAlert.classList.add('fade-out');
+                    setTimeout(function() {
+                        successAlert.remove();
+                    }, 400);
+                }, 5000);
+            }
         });
         
-        // Filter functionality
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', filterCourses);
+        document.getElementById('categoryFilter').addEventListener('change', filterCourses);
         document.getElementById('statusFilter').addEventListener('change', filterCourses);
-        document.getElementById('sortFilter').addEventListener('change', sortCourses);
+        document.getElementById('levelFilter').addEventListener('change', filterCourses);
         
         function filterCourses() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const cards = document.querySelectorAll('.course-card');
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const categoryValue = document.getElementById('categoryFilter').value;
+            const statusValue = document.getElementById('statusFilter').value;
+            const levelValue = document.getElementById('levelFilter').value;
             
-            cards.forEach(card => {
-                const title = card.getAttribute('data-title');
-                const status = card.getAttribute('data-status');
+            const rows = document.querySelectorAll('.courses-table tbody tr');
+            
+            rows.forEach(row => {
+                const title = row.getAttribute('data-title');
+                const category = row.getAttribute('data-category');
+                const status = row.getAttribute('data-status');
+                const level = row.getAttribute('data-level');
                 
-                const matchesSearch = title.includes(searchTerm);
-                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                const matchSearch = !searchValue || title.includes(searchValue);
+                const matchCategory = !categoryValue || category === categoryValue;
+                const matchStatus = !statusValue || status === statusValue;
+                const matchLevel = !levelValue || level === levelValue;
                 
-                if (matchesSearch && matchesStatus) {
-                    card.style.display = 'block';
+                if (matchSearch && matchCategory && matchStatus && matchLevel) {
+                    row.style.display = '';
                 } else {
-                    card.style.display = 'none';
+                    row.style.display = 'none';
                 }
             });
         }
         
-        function sortCourses() {
-            // TODO: Implement sorting
-            const sortValue = document.getElementById('sortFilter').value;
-            console.log('Sorting by:', sortValue);
+        function viewCourse(courseId) {
+            window.location.href = '<%= request.getContextPath() %>/instructor-courses/view/' + courseId;
         }
         
         function editCourse(courseId) {
-            window.location.href = '<%= request.getContextPath() %>/edit-course?id=' + courseId;
+            window.location.href = '<%= request.getContextPath() %>/instructor-courses/edit/' + courseId;
         }
         
-        function viewCourse(courseId) {
-            window.location.href = '<%= request.getContextPath() %>/course-detail?id=' + courseId;
-        }
-        
-        function viewStats(courseId) {
-            window.location.href = '<%= request.getContextPath() %>/course-analytics?id=' + courseId;
+        function deleteCourse(courseId, courseTitle) {
+            if (confirm('Bạn có chắc chắn muốn xóa khóa học "' + courseTitle + '"?\nHành động này không thể hoàn tác!')) {
+                fetch('<%= request.getContextPath() %>/instructor-courses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=delete&courseId=' + courseId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '<%= request.getContextPath() %>/instructor-courses?success=deleted';
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Có lỗi xảy ra khi xóa khóa học');
+                    console.error('Error:', error);
+                });
+            }
         }
     </script>
 </body>
