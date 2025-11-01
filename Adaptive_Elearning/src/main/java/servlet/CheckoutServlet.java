@@ -8,19 +8,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Users;
 import model.CartItem;
+import services.VNPayService;
 import services.VietQRService;
-import services.EmailService;
 import services.CartCheckoutService;
+import services.EmailService;
 import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.UUID;
 
 @WebServlet(name = "CheckoutServlet", urlPatterns = {"/checkout"})
 public class CheckoutServlet extends HttpServlet {
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         String method = request.getParameter("method");
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("account");
@@ -30,7 +32,7 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
         
-        // Lấy thông tin giỏ hàng và totalAmount từ session
+        // Lấy thông tin giỏ hàng từ session
         Double totalAmountObj = (Double) session.getAttribute("totalAmount");
         @SuppressWarnings("unchecked")
         List<CartItem> cartItems = (List<CartItem>) session.getAttribute("cartItems");
@@ -41,12 +43,12 @@ public class CheckoutServlet extends HttpServlet {
         }
         
         double totalAmount = totalAmountObj;
-        String orderId = UUID.randomUUID().toString();
         
-        if ("online".equals(method)) {
-            // Thanh toán online - hiển thị VietQR
+        // VietQR payment
+        if ("vietqr".equals(method)) {
+            String orderId = UUID.randomUUID().toString();
             VietQRService vietQR = new VietQRService();
-            String qrUrl = vietQR.generateQRUrl(totalAmount, orderId, "Thanh toán khóa học");
+            String qrUrl = vietQR.generateQRUrl(totalAmount, orderId, "Thanh toan khoa hoc");
             request.setAttribute("qrUrl", qrUrl);
             request.setAttribute("orderId", orderId);
             request.setAttribute("totalAmount", totalAmount);
@@ -54,14 +56,53 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
         
-        // COD: Xử lý checkout sử dụng stored procedure
-        processCheckoutWithStoredProcedure(user, cartItems, totalAmount, "COD", session.getId(), request, response);
+        // VNPay payment
+        if ("vnpay".equals(method)) {
+            try {
+                System.out.println("=== REDIRECTING TO VNPAY ===");
+                System.out.println("User: " + user.getUserName());
+                System.out.println("Amount: " + totalAmount);
+                
+                // Generate transaction reference
+                String txnRef = utils.VNPayConfig.getRandomNumber(8);
+                session.setAttribute("vnpTxnRef", txnRef);
+                
+                // Get client IP
+                String ipAddress = getClientIP(request);
+                System.out.println("IP Address: " + ipAddress);
+                
+                // Create payment URL
+                VNPayService vnpayService = new VNPayService();
+                String orderInfo = "Thanh toan khoa hoc - " + user.getUserName();
+                String paymentUrl = vnpayService.createPaymentUrl(
+                    (long) totalAmount, 
+                    orderInfo, 
+                    txnRef, 
+                    ipAddress
+                );
+                
+                System.out.println("Redirecting to: " + paymentUrl);
+                
+                // Redirect to VNPay
+                response.sendRedirect(paymentUrl);
+                return;
+                
+            } catch (Exception e) {
+                System.err.println("Error creating VNPay URL: " + e.getMessage());
+                e.printStackTrace();
+                response.sendRedirect(request.getContextPath() + "/cart?error=vnpay_error");
+                return;
+            }
+        }
+        
+        // Default: redirect to cart
+        response.sendRedirect(request.getContextPath() + "/cart");
     }
-
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Xử lý callback sau khi thanh toán online thành công
+        // Handle VietQR callback
         String orderId = request.getParameter("orderId");
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("account");
@@ -71,7 +112,6 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
         
-        // Lấy thông tin từ session
         Double totalAmountObj = (Double) session.getAttribute("totalAmount");
         @SuppressWarnings("unchecked")
         List<CartItem> cartItems = (List<CartItem>) session.getAttribute("cartItems");
@@ -83,25 +123,38 @@ public class CheckoutServlet extends HttpServlet {
         
         double totalAmount = totalAmountObj;
         
-        // Online: Xử lý checkout sử dụng stored procedure
-        processCheckoutWithStoredProcedure(user, cartItems, totalAmount, "Online", session.getId(), request, response);
+        // Process checkout with stored procedure
+        processCheckoutWithStoredProcedure(user, cartItems, totalAmount, "VietQR Banking", orderId, request, response);
     }
     
     /**
-     * Xử lý checkout sử dụng stored procedure và trigger
+     * Get client IP address
+     */
+    private String getClientIP(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        if (ipAddress == null || ipAddress.isEmpty()) {
+            ipAddress = request.getRemoteAddr();
+        }
+        // Convert IPv6 localhost to IPv4
+        if ("0:0:0:0:0:0:0:1".equals(ipAddress)) {
+            ipAddress = "127.0.0.1";
+        }
+        return ipAddress;
+    }
+    
+    /**
+     * Process checkout with stored procedure
      */
     private void processCheckoutWithStoredProcedure(Users user, List<CartItem> cartItems, double totalAmount, 
                                                   String paymentMethod, String sessionId, 
                                                   HttpServletRequest request, HttpServletResponse response) 
                                                   throws IOException {
         try {
-            System.out.println("=== PROCESSING CHECKOUT WITH STORED PROCEDURE ===");
+            System.out.println("=== PROCESSING CHECKOUT ===");
             System.out.println("User: " + user.getUserName());
             System.out.println("Payment Method: " + paymentMethod);
             System.out.println("Total Amount: " + totalAmount);
-            System.out.println("Cart Items: " + cartItems.size());
             
-            // Sử dụng CartCheckoutService để xử lý với stored procedure
             CartCheckoutService checkoutService = new CartCheckoutService();
             CartCheckoutService.CheckoutResult result = checkoutService.processCheckout(
                 user, cartItems, totalAmount, paymentMethod, sessionId
@@ -110,19 +163,16 @@ public class CheckoutServlet extends HttpServlet {
             if (result.isSuccess()) {
                 System.out.println("=== CHECKOUT SUCCESSFUL ===");
                 System.out.println("Bill ID: " + result.getBillId());
-                System.out.println("Checkout ID: " + result.getCheckoutId());
-                System.out.println("Message: " + result.getMessage());
                 
-                // Gửi email xác nhận
+                // Send email
                 try {
                     EmailService emailService = new EmailService();
                     emailService.sendOrderConfirmationEmail(user, result.getBillId(), totalAmount, paymentMethod);
-                    System.out.println("Confirmation email sent successfully");
-                } catch (Exception emailError) {
-                    System.err.println("Email sending failed: " + emailError.getMessage());
+                } catch (Exception e) {
+                    System.err.println("Email error: " + e.getMessage());
                 }
                 
-                // Lưu thông tin checkout thành công vào session
+                // Save to session
                 HttpSession session = request.getSession();
                 session.setAttribute("checkoutSuccess", true);
                 session.setAttribute("checkoutBillId", result.getBillId());
@@ -130,28 +180,23 @@ public class CheckoutServlet extends HttpServlet {
                 session.setAttribute("checkoutMethod", paymentMethod);
                 session.setAttribute("checkoutMessage", result.getMessage());
                 
-                // XÓA TẤT CẢ CÁC LOẠI CART khỏi session sau khi checkout thành công
-                session.removeAttribute("cartItems");  // List cart cho checkout
-                session.removeAttribute("cart");       // Map cart cho badge
+                // Clear cart
+                session.removeAttribute("cartItems");
+                session.removeAttribute("cart");
                 session.removeAttribute("totalAmount");
                 
-                System.out.println("=== CART CLEARED FROM SESSION ===");
-                
-                // Chuyển hướng đến trang "Thanh toán thành công"
+                // Redirect to success page
                 response.sendRedirect(request.getContextPath() + "/checkout-success.jsp");
                 
             } else {
-                System.err.println("=== CHECKOUT FAILED ===");
-                System.err.println("Error: " + result.getMessage());
-                response.sendRedirect(request.getContextPath() + "/checkout.jsp?method=error&message=" + 
-                                    java.net.URLEncoder.encode(result.getMessage(), "UTF-8"));
+                System.err.println("Checkout failed: " + result.getMessage());
+                response.sendRedirect(request.getContextPath() + "/cart?error=checkout_failed");
             }
             
         } catch (Exception e) {
-            System.err.println("=== CHECKOUT EXCEPTION ===");
+            System.err.println("Checkout exception: " + e.getMessage());
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/checkout.jsp?method=error&message=" + 
-                                java.net.URLEncoder.encode("Lỗi xử lý checkout: " + e.getMessage(), "UTF-8"));
+            response.sendRedirect(request.getContextPath() + "/cart?error=system_error");
         }
     }
 }

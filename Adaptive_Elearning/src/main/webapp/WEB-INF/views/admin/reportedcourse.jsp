@@ -34,6 +34,7 @@
     <title>Quản lý nhóm bị báo cáo - CourseHub Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="${pageContext.request.contextPath}/assests/css/universe-background.css" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin-performance.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -1256,5 +1257,8 @@
             });
         });
     </script>
+    
+    <!-- Admin Performance Optimizer -->
+    <script src="${pageContext.request.contextPath}/assets/js/admin-performance.js"></script>
 </body>
 </html>
