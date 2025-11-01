@@ -317,7 +317,7 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #4caf50;
             color: white;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }

@@ -257,28 +257,28 @@
             </div>
             <div class="payment-modal-body">
                 <div class="payment-options">
-                    <div class="payment-option" onclick="selectPaymentMethod('cod')">
+                    <div class="payment-option" onclick="selectPaymentMethod('vnpay')">
                         <div class="payment-option-icon">
-                            <i class="fas fa-truck"></i>
+                            <i class="fas fa-credit-card"></i>
                         </div>
                         <div class="payment-option-content">
-                            <h4>Thanh toán khi nhận hàng (COD)</h4>
-                            <p>Thanh toán bằng tiền mặt khi nhận khóa học</p>
-                            <span class="payment-option-badge">Miễn phí</span>
+                            <h4>Thanh toán VNPay</h4>
+                            <p>Thanh toán an toàn qua cổng VNPay - Hỗ trợ tất cả ngân hàng</p>
+                            <span class="payment-option-badge popular">Được đề xuất</span>
                         </div>
                         <div class="payment-option-arrow">
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
                     
-                    <div class="payment-option" onclick="selectPaymentMethod('online')">
+                    <div class="payment-option" onclick="selectPaymentMethod('vietqr')">
                         <div class="payment-option-icon">
                             <i class="fas fa-qrcode"></i>
                         </div>
                         <div class="payment-option-content">
-                            <h4>Thanh toán online (VietQR)</h4>
-                            <p>Thanh toán ngay bằng mã QR qua ứng dụng ngân hàng</p>
-                            <span class="payment-option-badge popular">Phổ biến</span>
+                            <h4>Thanh toán VietQR</h4>
+                            <p>Quét mã QR để thanh toán qua ứng dụng ngân hàng</p>
+                            <span class="payment-option-badge">Nhanh chóng</span>
                         </div>
                         <div class="payment-option-arrow">
                             <i class="fas fa-chevron-right"></i>
@@ -372,10 +372,10 @@
         
         // Chọn phương thức thanh toán
         function selectPaymentMethod(method) {
-            if (method === 'cod') {
-                window.location.href = '/Adaptive_Elearning/checkout?method=cod';
-            } else if (method === 'online') {
-                window.location.href = '/Adaptive_Elearning/checkout?method=online';
+            if (method === 'vnpay') {
+                window.location.href = '/Adaptive_Elearning/checkout?method=vnpay';
+            } else if (method === 'vietqr') {
+                window.location.href = '/Adaptive_Elearning/checkout?method=vietqr';
             }
         }
         
