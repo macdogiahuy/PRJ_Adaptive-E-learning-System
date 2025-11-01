@@ -21,7 +21,7 @@ public class UserDAO {
             + "VALUES (NEWID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, GETDATE(), GETDATE(), 0)";
 
     private static final String LOGIN_SQL
-            = "SELECT Id, UserName, Role FROM Users WHERE (UserName=? OR Email=?) AND Password=?";
+            = "SELECT Id, UserName, Role, InstructorId FROM Users WHERE (UserName=? OR Email=?) AND Password=?";
 
     public boolean registerUser(Users user) {
         try (Connection con = DBConnection.getConnection()) {
@@ -78,6 +78,7 @@ public class UserDAO {
                     us.setId(rs.getString("Id"));
                     us.setUserName(rs.getString("UserName"));
                     us.setRole(rs.getString("Role"));
+                    us.setInstructorId(rs.getString("InstructorId")); // Load InstructorId
                 }
             }
         } catch (Exception e) {

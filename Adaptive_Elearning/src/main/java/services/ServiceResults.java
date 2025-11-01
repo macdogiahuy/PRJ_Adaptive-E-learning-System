@@ -168,4 +168,66 @@ public class ServiceResults {
             return result;
         }
     }
+    
+    /**
+     * Generic result object for service operations
+     */
+    public static class OperationResult<T> {
+        private boolean success;
+        private String message;
+        private T data;
+        private String errorCode;
+        
+        public OperationResult(boolean success, String message, T data) {
+            this.success = success;
+            this.message = message;
+            this.data = data;
+        }
+        
+        public OperationResult(boolean success, String message, T data, String errorCode) {
+            this.success = success;
+            this.message = message;
+            this.data = data;
+            this.errorCode = errorCode;
+        }
+        
+        // Getters
+        public boolean isSuccess() {
+            return success;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+        
+        public T getData() {
+            return data;
+        }
+        
+        public String getErrorCode() {
+            return errorCode;
+        }
+        
+        // Static factory methods
+        public static <T> OperationResult<T> success(String message, T data) {
+            return new OperationResult<>(true, message, data);
+        }
+        
+        public static <T> OperationResult<T> failure(String message) {
+            return new OperationResult<>(false, message, null);
+        }
+        
+        public static <T> OperationResult<T> failure(String message, String errorCode) {
+            return new OperationResult<>(false, message, null, errorCode);
+        }
+    }
+    
+    // Convenience methods at class level
+    public static <T> OperationResult<T> success(String message, T data) {
+        return OperationResult.success(message, data);
+    }
+    
+    public static <T> OperationResult<T> failure(String message) {
+        return OperationResult.failure(message);
+    }
 }
