@@ -84,7 +84,7 @@
         
         /* Page Header */
         .page-header {
-            background: var(--gradient-primary);
+            background: #ff9e4f;
             color: white;
             padding: 4rem 0 3rem;
             margin-bottom: 3rem;
@@ -135,7 +135,7 @@
         
         /* Stats Section */
         .stats-section {
-            background: var(--gradient-primary);
+            background: #fac601;
             color: white;
             padding: 2.5rem;
             border-radius: var(--radius-xl);
@@ -333,7 +333,7 @@
         .btn-continue {
             display: block;
             width: 100%;
-            background: var(--gradient-primary);
+            background: #92da62;
             color: white;
             padding: 0.875rem 1.5rem;
             border-radius: var(--radius-md);
@@ -406,6 +406,13 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 1rem;
+        }
+        
+        /* Fix dropdown menu display */
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
         }
         
         /* Responsive */
@@ -497,7 +504,7 @@
                     <p style="margin: 0; font-size: 1.125rem;">Quản lý và theo dõi tiến trình học tập của bạn</p>
                 </div>
                 <div>
-                    <a href="/Adaptive_Elearning/" class="btn-explore" style="background: white; color: var(--primary-600);">
+                    <a href="/Adaptive_Elearning/" class="btn-explore" style="background: white; color: #1f2937;">
                         <i class="fas fa-search"></i>
                         Khám phá thêm
                     </a>

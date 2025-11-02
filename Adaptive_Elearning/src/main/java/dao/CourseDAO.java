@@ -50,6 +50,35 @@ public class CourseDAO {
     }
     
     /**
+     * Get all courses in the system (for admin use)
+     */
+    public List<Courses> getAllCourses() {
+        List<Courses> courses = new ArrayList<>();
+        String sql = "SELECT c.*, cat.Title as CategoryTitle, cat.Id as CategoryId " +
+                     "FROM Courses c " +
+                     "LEFT JOIN Categories cat ON c.LeafCategoryId = cat.Id " +
+                     "ORDER BY c.CreationTime DESC";
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Courses course = mapResultSetToCourse(rs);
+                courses.add(course);
+            }
+            
+            LOGGER.log(Level.INFO, "Found {0} total courses in system", courses.size());
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting all courses", e);
+        }
+        
+        return courses;
+    }
+    
+    /**
      * Get course by ID
      */
     public Courses getCourseById(String courseId) {

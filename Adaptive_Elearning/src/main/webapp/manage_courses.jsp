@@ -7,7 +7,7 @@
 
 <%
     Users user = (Users) session.getAttribute("account");
-    if (user == null || !"Instructor".equalsIgnoreCase(user.getRole())) {
+    if (user == null || (!("Instructor".equalsIgnoreCase(user.getRole()) || "Admin".equalsIgnoreCase(user.getRole())))) {
         response.sendRedirect(request.getContextPath() + "/login");
         return;
     }

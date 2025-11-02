@@ -11,7 +11,7 @@
     <nav>
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="<%= request.getContextPath() %>/instructor_dashboard.jsp" class="nav-link <%= request.getRequestURI().contains("instructor_dashboard") ? "active" : "" %>">
+                <a href="<%= request.getContextPath() %>/instructor-dashboard" class="nav-link <%= request.getRequestURI().contains("instructor_dashboard") ? "active" : "" %>">
                     <i class="fas fa-home"></i>
                     <span class="nav-text">Tổng quan</span>
                 </a>
