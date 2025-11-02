@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="model.Users" %>
 <%
-    Users currentUser = (Users) session.getAttribute("currentUser");
+    Users currentUser = (Users) session.getAttribute("account");
 %>
 <!DOCTYPE html>
 <html>

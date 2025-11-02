@@ -34,6 +34,35 @@ public class CourseService {
     }
     
     /**
+     * Get all courses for admin (can see all courses)
+     */
+    public List<Courses> getAllCoursesForAdmin() {
+        try {
+            // Admin can see all courses in the system
+            return courseDAO.getAllCourses();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error getting all courses for admin", e);
+            return List.of();
+        }
+    }
+    
+    /**
+     * Get courses based on user role
+     * Admin: All courses
+     * Instructor: Only their courses
+     */
+    public List<Courses> getCoursesByUserRole(String userId, String userRole) {
+        if ("Admin".equalsIgnoreCase(userRole)) {
+            return getAllCoursesForAdmin();
+        } else if ("Instructor".equalsIgnoreCase(userRole)) {
+            return getInstructorCourses(userId);
+        } else {
+            LOGGER.log(Level.WARNING, "Invalid role for course access: " + userRole);
+            return List.of();
+        }
+    }
+    
+    /**
      * Get course by ID with validation
      */
     public Courses getCourseById(String courseId) {

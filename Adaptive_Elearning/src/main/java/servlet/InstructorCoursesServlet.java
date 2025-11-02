@@ -43,8 +43,8 @@ public class InstructorCoursesServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         Users user = (session != null) ? (Users) session.getAttribute("account") : null;
         
-        // Check if user is logged in and is instructor
-        if (user == null || !"Instructor".equalsIgnoreCase(user.getRole())) {
+        // Check if user is logged in and has instructor or admin role
+        if (user == null || (!("Instructor".equalsIgnoreCase(user.getRole()) || "Admin".equalsIgnoreCase(user.getRole())))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -84,8 +84,8 @@ public class InstructorCoursesServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         Users user = (session != null) ? (Users) session.getAttribute("account") : null;
         
-        // Check if user is logged in and is instructor
-        if (user == null || !"Instructor".equalsIgnoreCase(user.getRole())) {
+        // Check if user is logged in and has instructor or admin role
+        if (user == null || (!("Instructor".equalsIgnoreCase(user.getRole()) || "Admin".equalsIgnoreCase(user.getRole())))) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -121,25 +121,33 @@ public class InstructorCoursesServlet extends HttpServlet {
     private void handleListCourses(HttpServletRequest request, HttpServletResponse response, Users user) 
             throws ServletException, IOException {
         
-        // IMPORTANT: InstructorId in Users table points to Instructors.Id
-        // Courses.InstructorId references Instructors.Id (NOT Users.Id)
-        String instructorId = user.getInstructorId();
+        String userRole = user.getRole();
+        List<Courses> courses;
         
-        LOGGER.log(Level.INFO, "User ID: {0}", user.getId());
-        LOGGER.log(Level.INFO, "Instructor ID from Users.InstructorId: {0}", instructorId);
-        
-        // Verify we have a valid instructor ID
-        if (instructorId == null || instructorId.trim().isEmpty()) {
-            LOGGER.log(Level.WARNING, "No InstructorId found for user: {0}", user.getUserName());
-            instructorId = user.getId(); // Fallback to User ID
+        if ("Admin".equalsIgnoreCase(userRole)) {
+            // Admin can see all courses
+            LOGGER.log(Level.INFO, "Admin user: {0} - getting all courses", user.getUserName());
+            courses = courseService.getAllCoursesForAdmin();
+        } else {
+            // Instructor sees only their courses
+            // IMPORTANT: InstructorId in Users table points to Instructors.Id
+            // Courses.InstructorId references Instructors.Id (NOT Users.Id)
+            String instructorId = user.getInstructorId();
+            
+            LOGGER.log(Level.INFO, "User ID: {0}", user.getId());
+            LOGGER.log(Level.INFO, "Instructor ID from Users.InstructorId: {0}", instructorId);
+            
+            // Verify we have a valid instructor ID
+            if (instructorId == null || instructorId.trim().isEmpty()) {
+                LOGGER.log(Level.WARNING, "No InstructorId found for user: {0}", user.getUserName());
+                instructorId = user.getId(); // Fallback to User ID
+            }
+            
+            LOGGER.log(Level.INFO, "Fetching courses for instructor: {0}", instructorId);
+            courses = courseService.getInstructorCourses(instructorId);
         }
         
-        LOGGER.log(Level.INFO, "Fetching courses for instructor: {0}", instructorId);
-        
-        // Get courses
-        List<Courses> courses = courseService.getInstructorCourses(instructorId);
-        
-        LOGGER.log(Level.INFO, "Found {0} courses", courses.size());
+        LOGGER.log(Level.INFO, "Found {0} courses for user {1}", new Object[]{courses.size(), user.getUserName()});
         
         // Get categories for filter
         List<Categories> categories = courseService.getAllCategories();

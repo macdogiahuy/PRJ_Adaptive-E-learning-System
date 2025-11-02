@@ -63,23 +63,25 @@
         <!-- Menu Items Based on Role -->
         <div class="dropdown-items">
             <%
-                // Dashboard - Only for Instructor and Admin
-                if ("Instructor".equalsIgnoreCase(userRole) || "Admin".equalsIgnoreCase(userRole)) {
-                    String dashboardUrl = "";
-                    String dashboardIcon = "fas fa-tachometer-alt";
-                    String dashboardLabel = "Dashboard";
-                    
-                    if ("Admin".equalsIgnoreCase(userRole)) {
-                        dashboardUrl = request.getContextPath() + "/admin_dashboard.jsp";
-                        dashboardLabel = "Admin Dashboard";
-                    } else if ("Instructor".equalsIgnoreCase(userRole)) {
-                        dashboardUrl = request.getContextPath() + "/instructor_dashboard.jsp";
-                        dashboardLabel = "Instructor Dashboard";
-                    }
+                // Dashboard Links Based on Role
+                if ("Admin".equalsIgnoreCase(userRole)) {
+                    // Admin has access to both Admin and Instructor dashboards
             %>
-                <a href="<%= dashboardUrl %>" class="dropdown-item">
-                    <i class="<%= dashboardIcon %>"></i>
-                    <span><%= dashboardLabel %></span>
+                <a href="<%= request.getContextPath() %>/admin_dashboard.jsp" class="dropdown-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+                <a href="<%= request.getContextPath() %>/instructor-dashboard" class="dropdown-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Instructor Dashboard</span>
+                </a>
+            <%
+                } else if ("Instructor".equalsIgnoreCase(userRole)) {
+                    // Instructor only has access to Instructor dashboard
+            %>
+                <a href="<%= request.getContextPath() %>/instructor-dashboard" class="dropdown-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Instructor Dashboard</span>
                 </a>
             <% } %>
             
