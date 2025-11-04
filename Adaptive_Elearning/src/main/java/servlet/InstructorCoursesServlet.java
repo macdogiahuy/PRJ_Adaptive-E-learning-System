@@ -5,6 +5,7 @@ import model.Categories;
 import model.Sections;
 import model.Users;
 import services.CourseService;
+import services.CourseApprovalService;
 import services.ServiceResults.OperationResult;
 
 import jakarta.servlet.ServletException;
@@ -29,11 +30,13 @@ public class InstructorCoursesServlet extends HttpServlet {
     
     private static final Logger LOGGER = Logger.getLogger(InstructorCoursesServlet.class.getName());
     private CourseService courseService;
+    private CourseApprovalService approvalService;
     
     @Override
     public void init() throws ServletException {
         super.init();
         courseService = new CourseService();
+        approvalService = new CourseApprovalService();
     }
     
     @Override
@@ -274,7 +277,9 @@ public class InstructorCoursesServlet extends HttpServlet {
         course.setLevel(request.getParameter("level"));
         course.setOutcomes(request.getParameter("outcomes"));
         course.setRequirements(request.getParameter("requirements"));
-        course.setStatus(request.getParameter("status"));
+        
+        // IMPORTANT: Set status to "pending" for new courses - admin approval required
+        course.setStatus("pending");
         
         // Set category
         String categoryId = request.getParameter("categoryId");
@@ -303,6 +308,22 @@ public class InstructorCoursesServlet extends HttpServlet {
         OperationResult<Courses> result = courseService.createCourse(course, instructorId, user.getId());
         
         if (result.isSuccess()) {
+            // Create notification for admin approval
+            // FIXED: Pass user.getId() instead of instructorId because FK_CourseNotifications_Instructor points to Users.Id
+            boolean notificationCreated = approvalService.createCourseNotification(
+                result.getData().getId(),
+                user.getId(),  // Changed from instructorId to user.getId()
+                user.getUserName(),
+                course.getTitle(),
+                course.getPrice()
+            );
+            
+            if (notificationCreated) {
+                LOGGER.log(Level.INFO, "Course notification created for admin approval: {0}", course.getTitle());
+            } else {
+                LOGGER.log(Level.WARNING, "Failed to create notification for course: {0}", course.getTitle());
+            }
+            
             // Handle sections if provided
             String[] sectionTitles = request.getParameterValues("sectionTitles[]");
             if (sectionTitles != null && sectionTitles.length > 0) {
@@ -313,6 +334,8 @@ public class InstructorCoursesServlet extends HttpServlet {
                 }
             }
             
+            request.getSession().setAttribute("successMessage", 
+                "Khóa học đã được tạo thành công và đang chờ admin phê duyệt!");
             response.sendRedirect(request.getContextPath() + "/instructor-courses?success=created");
         } else {
             request.setAttribute("errorMessage", result.getMessage());
