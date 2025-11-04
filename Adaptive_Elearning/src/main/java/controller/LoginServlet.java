@@ -45,6 +45,9 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("account", user);
             session.setAttribute("role", user.getRole());
+            
+            // Increment online users counter
+            listener.OnlineUserListener.userLoggedIn(session);
 
             if ("yes".equalsIgnoreCase(rememberMe)) {
                 Cookie usernameCookie = new Cookie("username", username);

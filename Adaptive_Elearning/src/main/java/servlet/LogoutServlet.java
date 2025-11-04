@@ -53,6 +53,9 @@ public class LogoutServlet extends HttpServlet {
             
             logger.info("User logout: " + userName + " (Session: " + session.getId() + ")");
             
+            // Decrement online users counter before session invalidation
+            listener.OnlineUserListener.userLoggedOut(session);
+            
             // Xóa tất cả attributes khỏi session
             session.removeAttribute("account");
             session.removeAttribute("user");

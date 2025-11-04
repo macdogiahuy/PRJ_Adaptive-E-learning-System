@@ -57,6 +57,7 @@ public class CourseDAO {
         String sql = "SELECT c.*, cat.Title as CategoryTitle, cat.Id as CategoryId " +
                      "FROM Courses c " +
                      "LEFT JOIN Categories cat ON c.LeafCategoryId = cat.Id " +
+                     "WHERE c.Status = 'ongoing' " +
                      "ORDER BY c.CreationTime DESC";
         
         try (Connection con = DBConnection.getConnection();
@@ -69,10 +70,39 @@ public class CourseDAO {
                 courses.add(course);
             }
             
-            LOGGER.log(Level.INFO, "Found {0} total courses in system", courses.size());
+            LOGGER.log(Level.INFO, "Found {0} active courses (status=ongoing)", courses.size());
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error getting all courses", e);
+        }
+        
+        return courses;
+    }
+    
+    /**
+     * Get all courses for admin (including pending/off status)
+     */
+    public List<Courses> getAllCoursesForAdmin() {
+        List<Courses> courses = new ArrayList<>();
+        String sql = "SELECT c.*, cat.Title as CategoryTitle, cat.Id as CategoryId " +
+                     "FROM Courses c " +
+                     "LEFT JOIN Categories cat ON c.LeafCategoryId = cat.Id " +
+                     "ORDER BY c.CreationTime DESC";
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Courses course = mapResultSetToCourse(rs);
+                courses.add(course);
+            }
+            
+            LOGGER.log(Level.INFO, "Found {0} total courses for admin", courses.size());
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting all courses for admin", e);
         }
         
         return courses;
@@ -127,7 +157,7 @@ public class CourseDAO {
             ps.setString(4, course.getThumbUrl() != null ? course.getThumbUrl() : "");
             ps.setString(5, course.getIntro() != null ? course.getIntro() : "");
             ps.setString(6, course.getDescription() != null ? course.getDescription() : "");
-            ps.setString(7, "Ongoing"); // Default status
+                ps.setString(7, course.getStatus()); // Use status from course object
             ps.setDouble(8, course.getPrice());
             ps.setDouble(9, course.getDiscount() > 0 ? course.getDiscount() : 0);
             ps.setTimestamp(10, discountExpiry);

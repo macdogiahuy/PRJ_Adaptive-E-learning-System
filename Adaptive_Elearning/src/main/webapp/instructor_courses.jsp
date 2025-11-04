@@ -267,6 +267,19 @@
         .badge-ongoing { background: #e3f2fd; color: #2196F3; }
         .badge-completed { background: #e8f5e9; color: #4CAF50; }
         .badge-draft { background: #fff3e0; color: #FF9800; }
+        .badge-off { background: #ffebee; color: #f44336; }
+        
+        .approval-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .approval-pending { background: #fff3cd; color: #856404; }
+        .approval-approved { background: #d4edda; color: #155724; }
+        .approval-rejected { background: #f8d7da; color: #721c24; }
         
         .rating-stars {
             color: #ffc107;
@@ -535,6 +548,7 @@
                                 <th>Hình ảnh</th>
                                 <th>Tiêu đề</th>
                                 <th>Trạng thái</th>
+                                <th>Phê duyệt</th>
                                 <th>Giá</th>
                                 <th>Giảm giá</th>
                                 <th>Cấp độ</th>
@@ -565,11 +579,53 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge <%= "Ongoing".equals(course.getStatus()) ? "badge-ongoing" : 
-                                                               "Completed".equals(course.getStatus()) ? "badge-completed" : 
+                                        <span class="badge <%= "ongoing".equalsIgnoreCase(course.getStatus()) ? "badge-ongoing" : 
+                                                               "completed".equalsIgnoreCase(course.getStatus()) ? "badge-completed" :
+                                                               "off".equalsIgnoreCase(course.getStatus()) ? "badge-off" :
                                                                "badge-draft" %>">
                                             <%= course.getStatus() %>
                                         </span>
+                                    </td>
+                                    <td>
+                                        <%
+                                            String approvalStatus = "pending"; // Default
+                                            String rejectionReason = "";
+                                            try {
+                                                // Try to get approval status using reflection (will work after adding fields)
+                                                java.lang.reflect.Method getApprovalStatus = course.getClass().getMethod("getApprovalStatus");
+                                                approvalStatus = (String) getApprovalStatus.invoke(course);
+                                                if (approvalStatus == null) approvalStatus = "pending";
+                                            } catch (Exception e) {
+                                                // Field not yet added, use default
+                                            }
+                                            
+                                            try {
+                                                java.lang.reflect.Method getRejectionReason = course.getClass().getMethod("getRejectionReason");
+                                                rejectionReason = (String) getRejectionReason.invoke(course);
+                                                if (rejectionReason == null) rejectionReason = "";
+                                            } catch (Exception e) {
+                                                // Field not yet added
+                                            }
+                                        %>
+                                        <span class="approval-badge <%= "approved".equalsIgnoreCase(approvalStatus) ? "approval-approved" : 
+                                                                         "rejected".equalsIgnoreCase(approvalStatus) ? "approval-rejected" :
+                                                                         "approval-pending" %>">
+                                            <% if ("approved".equalsIgnoreCase(approvalStatus)) { %>
+                                                <i class="fas fa-check-circle"></i> Đã duyệt
+                                            <% } else if ("rejected".equalsIgnoreCase(approvalStatus)) { %>
+                                                <i class="fas fa-times-circle"></i> Từ chối
+                                            <% } else { %>
+                                                <i class="fas fa-clock"></i> Chờ duyệt
+                                            <% } %>
+                                        </span>
+                                        <% if ("rejected".equalsIgnoreCase(approvalStatus) && rejectionReason != null && !rejectionReason.isEmpty()) { %>
+                                            <button class="btn-icon btn-view" title="Xem lý do từ chối" 
+                                                    data-course-title="<%= course.getTitle() %>"
+                                                    data-rejection-reason="<%= rejectionReason %>"
+                                                    onclick="showRejectionReasonModal(this)">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                        <% } %>
                                     </td>
                                     <td><%= df.format(course.getPrice()) %> VNĐ</td>
                                     <td><%= course.getDiscount() > 0 ? (int)course.getDiscount() + "%" : "-" %></td>
@@ -696,6 +752,188 @@
                     alert('Có lỗi xảy ra khi xóa khóa học');
                     console.error('Error:', error);
                 });
+            }
+        }
+        
+        // Rejection Reason Modal
+        function showRejectionReasonModal(button) {
+            const courseTitle = button.getAttribute('data-course-title');
+            const rejectionReason = button.getAttribute('data-rejection-reason');
+            
+            const modal = document.createElement('div');
+            modal.className = 'rejection-modal';
+            modal.innerHTML = `
+                <div class="rejection-modal-overlay" onclick="this.parentElement.remove()"></div>
+                <div class="rejection-modal-content">
+                    <div class="rejection-modal-header">
+                        <h3><i class="fas fa-times-circle"></i> Lý do từ chối khóa học</h3>
+                        <button class="rejection-close-btn" onclick="this.closest('.rejection-modal').remove()">×</button>
+                    </div>
+                    <div class="rejection-modal-body">
+                        <div class="rejection-course-title">
+                            <strong>Khóa học:</strong> ${courseTitle}
+                        </div>
+                        <div class="rejection-reason-box">
+                            <strong>Lý do từ chối:</strong>
+                            <p>${rejectionReason}</p>
+                        </div>
+                    </div>
+                    <div class="rejection-modal-footer">
+                        <button class="btn-modal-close" onclick="this.closest('.rejection-modal').remove()">
+                            <i class="fas fa-times"></i> Đóng
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add modal styles if not exist
+            if (!document.getElementById('rejectionModalStyles')) {
+                const style = document.createElement('style');
+                style.id = 'rejectionModalStyles';
+                style.textContent = `
+                    .rejection-modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        z-index: 10000;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: fadeIn 0.3s;
+                    }
+                    
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    
+                    .rejection-modal-overlay {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.6);
+                        backdrop-filter: blur(5px);
+                    }
+                    
+                    .rejection-modal-content {
+                        position: relative;
+                        background: white;
+                        border-radius: 15px;
+                        max-width: 600px;
+                        width: 90%;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                        animation: slideUp 0.3s;
+                    }
+                    
+                    @keyframes slideUp {
+                        from {
+                            transform: translateY(50px);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateY(0);
+                            opacity: 1;
+                        }
+                    }
+                    
+                    .rejection-modal-header {
+                        padding: 25px;
+                        border-bottom: 2px solid #f0f0f0;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    
+                    .rejection-modal-header h3 {
+                        margin: 0;
+                        color: #dc3545;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        font-size: 1.3rem;
+                    }
+                    
+                    .rejection-close-btn {
+                        background: none;
+                        border: none;
+                        font-size: 2rem;
+                        color: #999;
+                        cursor: pointer;
+                        line-height: 1;
+                        transition: color 0.3s;
+                    }
+                    
+                    .rejection-close-btn:hover {
+                        color: #333;
+                    }
+                    
+                    .rejection-modal-body {
+                        padding: 25px;
+                    }
+                    
+                    .rejection-course-title {
+                        margin-bottom: 20px;
+                        padding: 15px;
+                        background: #f8f9fa;
+                        border-radius: 10px;
+                        color: #333;
+                    }
+                    
+                    .rejection-reason-box {
+                        padding: 20px;
+                        background: #fff3cd;
+                        border-left: 4px solid #ffc107;
+                        border-radius: 8px;
+                    }
+                    
+                    .rejection-reason-box strong {
+                        display: block;
+                        margin-bottom: 10px;
+                        color: #856404;
+                        font-size: 1rem;
+                    }
+                    
+                    .rejection-reason-box p {
+                        margin: 0;
+                        color: #856404;
+                        line-height: 1.6;
+                        white-space: pre-wrap;
+                    }
+                    
+                    .rejection-modal-footer {
+                        padding: 20px 25px;
+                        border-top: 2px solid #f0f0f0;
+                        text-align: right;
+                    }
+                    
+                    .btn-modal-close {
+                        padding: 10px 25px;
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.3s;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    
+                    .btn-modal-close:hover {
+                        background: #5a6268;
+                        transform: translateY(-2px);
+                    }
+                `;
+                document.head.appendChild(style);
             }
         }
     </script>

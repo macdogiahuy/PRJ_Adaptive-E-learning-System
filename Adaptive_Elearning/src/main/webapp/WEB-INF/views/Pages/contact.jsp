@@ -686,8 +686,9 @@
                 </div>
             </div>
             
-            <div style="text-align: center; padding-top: 2rem; border-top: 1px solid #374151;">
+            <div style="text-align: center; padding-top: 2rem; border-top: 1px solid #374151; display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap;">
                 <p>&copy; 2024 FlyUp. Tất cả quyền được bảo lưu.</p>
+                <%@ include file="/WEB-INF/components/online-users-counter.jsp" %>
             </div>
         </div>
     </footer>

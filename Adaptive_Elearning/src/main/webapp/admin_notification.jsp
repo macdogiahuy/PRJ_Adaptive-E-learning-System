@@ -1,33 +1,31 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="model.Users"%>
+<%@page import="model.CourseNotification"%>
+<%@page import="services.CourseApprovalService"%>
+<%@page import="java.util.List"%>
+<%@page import="java.text.DecimalFormat"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%
-    // Handle POST requests for status updates
-    String action = request.getParameter("action");
-    if ("updateStatus".equals(action)) {
-        String notificationIdParam = request.getParameter("notificationId");
-        String newStatus = request.getParameter("newStatus");
-        
-        if (notificationIdParam != null && newStatus != null) {
-            try {
-                controller.NotificationController controller = new controller.NotificationController();
-                
-                boolean success = controller.updateNotificationStatus(notificationIdParam, newStatus);
-                if (success) {
-                    // Redirect back with success message
-                    response.sendRedirect("notification.jsp?updated=success");
-                    return;
-                } else {
-                    // Redirect back with error message
-                    response.sendRedirect("notification.jsp?updated=error");
-                    return;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.sendRedirect("notification.jsp?updated=error");
-                return;
-            }
-        }
+    Users user = (Users) session.getAttribute("account");
+    if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
     }
-    
-    // Forward to notification JSP in views
+    CourseApprovalService approvalService = new CourseApprovalService();
+    List<CourseNotification> pendingNotifications = approvalService.getPendingNotifications();
+    int pendingCount = pendingNotifications != null ? pendingNotifications.size() : 0;
+    int dismissedCount = 0;
+    String successMessage = (String) session.getAttribute("successMessage");
+    String errorMessage = (String) session.getAttribute("errorMessage");
+    session.removeAttribute("successMessage");
+    session.removeAttribute("errorMessage");
+    DecimalFormat priceFormat = new DecimalFormat("#,###");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    request.setAttribute("pendingNotifications", pendingNotifications);
+    request.setAttribute("pendingCount", pendingCount);
+    request.setAttribute("dismissedCount", dismissedCount);
+    request.setAttribute("successMessage", successMessage);
+    request.setAttribute("errorMessage", errorMessage);
+    request.setAttribute("priceFormat", priceFormat);
+    request.setAttribute("dateFormat", dateFormat);
     request.getRequestDispatcher("/WEB-INF/views/admin/notification.jsp").forward(request, response);
 %>

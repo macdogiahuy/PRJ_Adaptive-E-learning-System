@@ -1,118 +1,38 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="controller.NotificationController"%>
+<%@page import="model.CourseNotification"%>
+<%@page import="services.CourseApprovalService"%>
 <%@page import="java.util.Map"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.text.SimpleDateFormat"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.text.DecimalFormat"%>
 <%
-    // Get parameters
-    String pageParam = request.getParameter("page");
-    String searchType = request.getParameter("type");
-    String entriesParam = request.getParameter("entries");
-
-    int currentPage = 1;
-    if (pageParam != null && !pageParam.trim().isEmpty()) {
-        try {
-            currentPage = Integer.parseInt(pageParam);
-        } catch (NumberFormatException e) {
-            currentPage = 1;
-        }
-    }
-
-    int recordsPerPage = 10; // default
-    if (entriesParam != null && !entriesParam.trim().isEmpty()) {
-        try {
-            int entries = Integer.parseInt(entriesParam);
-            if (entries == 5 || entries == 7 || entries == 10) {
-                recordsPerPage = entries;
-            }
-        } catch (NumberFormatException e) {
-            recordsPerPage = 10;
-        }
-    }
-
-    if (searchType == null) {
-        searchType = "";
-    }
-
-    // Initialize variables
-    Map<String, Object> notificationData = null;
-    List<String> notificationTypes = null;
-    String error = null;
-
-    // Load data using NotificationController
-    try {
-        NotificationController controller = new NotificationController();
-
-        // Test connection first
-        if (controller.testDatabaseConnection()) {
-            // Load notifications with pagination and search
-            notificationData = controller.getNotifications(currentPage, searchType, recordsPerPage);
-            notificationTypes = controller.getNotificationTypes();
-        } else {
-            error = "Không thể kết nối tới database CourseHubDB";
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-        error = "Lỗi: " + e.getMessage();
-    }
-
-    // Set default values if data loading failed
-    if (notificationData == null) {
-        notificationData = new java.util.HashMap<>();
-        notificationData.put("notifications", new ArrayList<>());
-        notificationData.put("currentPage", 1);
-        notificationData.put("totalPages", 0);
-        notificationData.put("totalRecords", 0);
-        notificationData.put("recordsPerPage", recordsPerPage);
-    }
-
-    if (notificationTypes == null) {
-        notificationTypes = new ArrayList<>();
-    }
-
-    // Extract data for easy access
-    @SuppressWarnings(
+    // Get course approval notifications from request attributes
+    @SuppressWarnings("unchecked")
+    List<CourseNotification> pendingNotifications = (List<CourseNotification>) request.getAttribute("pendingNotifications");
+    Integer pendingCount = (Integer) request.getAttribute("pendingCount");
+    Integer dismissedCount = (Integer) request.getAttribute("dismissedCount");
+    String successMessage = (String) request.getAttribute("successMessage");
+    String errorMessage = (String) request.getAttribute("errorMessage");
+    DecimalFormat priceFormat = (DecimalFormat) request.getAttribute("priceFormat");
+    SimpleDateFormat dateFormat = (SimpleDateFormat) request.getAttribute("dateFormat");
     
-    "unchecked")
-    List<Map<String, Object>> notifications = (List<Map<String, Object>>) notificationData.get("notifications");
-
-    int totalPages = (Integer) notificationData.get("totalPages");
-    int totalRecords = (Integer) notificationData.get("totalRecords");
-
-    // Date formatter
-    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-%>
-<%
-    // Handle POST requests for status updates
-    String action = request.getParameter("action");
-    if ("updateStatus".equals(action)) {
-        String notificationIdParam = request.getParameter("notificationId");
-        String newStatus = request.getParameter("newStatus");
-
-        if (notificationIdParam != null && newStatus != null) {
-            try {
-                controller.NotificationController controller = new controller.NotificationController();
-
-                boolean success = controller.updateNotificationStatus(notificationIdParam, newStatus);
-                if (success) {
-                    // Redirect back with success message
-                    response.sendRedirect("notification.jsp?updated=success");
-                    return;
-                } else {
-                    // Redirect back with error message
-                    response.sendRedirect("notification.jsp?updated=error");
-                    return;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.sendRedirect("notification.jsp?updated=error");
-                return;
-            }
-        }
+    if (pendingNotifications == null) {
+        pendingNotifications = new ArrayList<>();
     }
-
-
+    if (pendingCount == null) {
+        pendingCount = 0;
+    }
+    if (dismissedCount == null) {
+        dismissedCount = 0;
+    }
+    if (priceFormat == null) {
+        priceFormat = new DecimalFormat("#,###");
+    }
+    if (dateFormat == null) {
+        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -1782,6 +1702,63 @@
             .pagination-controls a:hover::before {
                 left: 100%;
             }
+
+            /* Modal Styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 10000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(5px);
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .modal-content {
+                background: linear-gradient(145deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 40, 0.95));
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                width: 90%;
+                max-width: 600px;
+                animation: slideDown 0.3s ease;
+            }
+
+            @keyframes slideDown {
+                from {
+                    transform: translateY(-50px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-footer {
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
         </style>
         <script src="${pageContext.request.contextPath}/assests/js/universe-theme.js"></script>
     </head>
@@ -1859,70 +1836,51 @@
 
             <!-- Main Content -->
             <main class="main-content">
-                <% if (error != null) {%>
+                <% if (errorMessage != null) {%>
                 <div class="error-message">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <%= error%>
+                    <%= errorMessage%>
                 </div>
                 <% } %>
 
                 <!-- Success/Error Messages -->
-                <% if (request.getParameter("updated") != null) { %>
-                <% if ("success".equals(request.getParameter("updated"))) { %>
+                <% if (successMessage != null) { %>
                 <div class="success-message">
-                    <i class="fas fa-check-circle"></i> Cập nhật trạng thái thông báo thành công!
-                </div>
-                <% } else { %>
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i> Không thể cập nhật trạng thái thông báo. Vui lòng thử lại!
+                    <i class="fas fa-check-circle"></i> <%= successMessage %>
                 </div>
                 <% } %>
+                
+                <% if (errorMessage != null) { %>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i> <%= errorMessage %>
+                </div>
                 <% } %>
 
                 <!-- Page Header -->
                 <div class="page-header">
-                    <h2><i class="fas fa-bell"></i> Quản lý Thông báo</h2>
-                    <p>Quản lý và theo dõi tất cả thông báo trong hệ thống CourseHub</p>
+                    <h2><i class="fas fa-bell"></i> Thông báo phê duyệt khóa học</h2>
+                    <p>Quản lý và phê duyệt khóa học mới từ giảng viên</p>
                 </div>
 
                 <!-- Statistics Cards -->
-                <%
-                    // Calculate notification statistics from total records
-                    int totalNotifications = totalRecords;
-                    int pendingCount = 0;
-                    int approvedCount = 0;
-                    int dismissedCount = 0;
-
-                    // Count from current page notifications for display
-                    for (Map<String, Object> notification : notifications) {
-                        String status = (String) notification.get("status");
-                        if (status == null || "Pending".equals(status)) {
-                            pendingCount++;
-                        } else if ("Approved".equals(status)) {
-                            approvedCount++;
-                        } else if ("Dismissed".equals(status)) {
-                            dismissedCount++;
-                        }
-                    }
-                %>
                 <div class="stats-container">
-                    <div class="stat-card total">
-                        <div class="icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div>
-                            <h3>Tổng số thông báo</h3>
-                            <div class="value"><%= totalNotifications%></div>
-                        </div>
-                    </div>
-
                     <div class="stat-card pending">
                         <div class="icon">
                             <i class="fas fa-clock"></i>
                         </div>
                         <div>
-                            <h3>Đang chờ xử lý</h3>
-                            <div class="value"><%= pendingCount%></div>
+                            <h3>Đang chờ phê duyệt</h3>
+                            <div class="value"><%= pendingCount %></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card total">
+                        <div class="icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h3>Khóa học mới hôm nay</h3>
+                            <div class="value"><%= pendingCount %></div>
                         </div>
                     </div>
 
@@ -1931,8 +1889,8 @@
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div>
-                            <h3>Đã phê duyệt</h3>
-                            <div class="value"><%= approvedCount%></div>
+                            <h3>Chờ xem xét</h3>
+                            <div class="value"><%= pendingCount %></div>
                         </div>
                     </div>
 
@@ -1947,154 +1905,99 @@
                     </div>
                 </div>
 
-                <!-- Advanced Search & Filter Section -->
-                <div class="content-card modern-filter-card">
-                    <div class="card-header filter-header">
-                        <div class="header-content">
-                            <div class="header-title">
-                                <div class="icon-wrapper">
-                                    <i class="fas fa-filter"></i>
-                                </div>
-                                <h2>Bộ lọc & Tìm kiếm thông minh</h2>
-                            </div>
-                            <div class="filter-status">
-                                <span class="status-badge">
-                                    <i class="fas fa-circle-check"></i>
-                                    Đang hiển thị <%= notifications.size()%>/<%= totalRecords%> thông báo
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body filter-body">
-                        <form class="filters modern-filters" method="GET" action="admin_notification.jsp">
-                            <div class="filter-row primary-filters">
-                                <div class="filter-group">
-                                    <div class="form-group enhanced-select">
-                                        <label for="entries" class="modern-label">
-                                            <i class="fas fa-list-ol"></i>
-                                            <span>Số lượng hiển thị</span>
-                                        </label>
-                                        <div class="select-wrapper">
-                                            <select name="entries" id="entries" onchange="updateEntries()" class="modern-select">
-                                                <option value="5" <%= recordsPerPage == 5 ? "selected" : ""%>>5 mục</option>
-                                                <option value="7" <%= recordsPerPage == 7 ? "selected" : ""%>>7 mục</option>
-                                                <option value="10" <%= recordsPerPage == 10 ? "selected" : ""%>>10 mục</option>
-                                            </select>
-                                            <div class="select-arrow">
-                                                <i class="fas fa-chevron-down"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="filter-group">
-                                    <div class="form-group enhanced-select">
-                                        <label for="type" class="modern-label">
-                                            <i class="fas fa-tag"></i>
-                                            <span>Loại thông báo</span>
-                                        </label>
-                                        <div class="select-wrapper">
-                                            <select name="type" id="type" class="modern-select">
-                                                <option value="">Tất cả loại</option>
-                                                <% for (String type : notificationTypes) {%>
-                                                <option value="<%= type%>" <%= searchType.equals(type) ? "selected" : ""%>>
-                                                    <%= type%>
-                                                </option>
-                                                <% }%>
-                                            </select>
-                                            <div class="select-arrow">
-                                                <i class="fas fa-chevron-down"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <input type="hidden" name="page" value="1">
-                                <button type="submit" class="btn btn-primary modern-search-btn">
-                                    <div class="btn-content">
-                                        <i class="fas fa-search"></i>
-                                        <span>Áp dụng bộ lọc</span>
-                                    </div>
-                                    <div class="btn-glow"></div>
-                                </button>
-
-                                <button type="button" class="btn btn-secondary reset-btn" onclick="resetFilters()">
-                                    <i class="fas fa-undo"></i>
-                                    <span>Đặt lại</span>
-                                </button>
-                            </div>
-
-
-                        </form>
-                    </div>
-                </div>
-
                 <!-- Notifications Table -->
                 <div class="content-card">
                     <div class="card-header">
-                        <h2><i class="fas fa-list"></i> Danh sách Thông báo</h2>
+                        <h2><i class="fas fa-graduation-cap"></i> Khóa học chờ phê duyệt</h2>
                     </div>
                     <div class="card-body">
                         <div class="pagination-info" style="margin-bottom: 1rem; color: rgba(248, 250, 252, 0.8);">
-                            Hiển thị <%= notifications.size()%> trên tổng <%= totalRecords%> thông báo
+                            Hiển thị <%= pendingNotifications.size()%> khóa học đang chờ phê duyệt
                         </div>
 
                         <div class="table-container">
-                            <% if (notifications.isEmpty()) { %>
+                            <% if (pendingNotifications.isEmpty()) { %>
                             <div class="no-data">
-                                <i class="fas fa-inbox"></i>
-                                <p>Không có thông báo nào</p>
+                                <i class="fas fa-check-circle"></i>
+                                <h3>Không có khóa học nào đang chờ phê duyệt</h3>
+                                <p>Tất cả khóa học đã được xem xét</p>
                             </div>
                             <% } else { %>
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Loại thông báo</th>
-                                        <th>Người tạo</th>
-                                        <th>Thời gian tạo</th>
-                                        <th>Trạng thái</th>
-                                        <th>Hành động</th>
+                                        <th style="width: 100px;">Hình ảnh</th>
+                                        <th>Khóa học</th>
+                                        <th style="width: 150px;">Giảng viên</th>
+                                        <th style="width: 120px;">Giá</th>
+                                        <th style="width: 150px;">Thời gian</th>
+                                        <th style="width: 100px;">Trạng thái</th>
+                                        <th style="width: 200px; text-align: center;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% for (Map<String, Object> notification : notifications) {
-                                            String status = (String) notification.get("status");
-                                            String statusClass = "status-pending";
-                                            if ("Approved".equals(status)) {
-                                                statusClass = "status-approved";
-                                            } else if ("Dismissed".equals(status)) {
-                                                statusClass = "status-dismissed";
-                                            }
-                                    %>
+                                    <% for (CourseNotification notification : pendingNotifications) { %>
                                     <tr>
-                                        <td><%= notification.get("type")%></td>
-                                        <td><%= notification.get("creatorId")%></td>
                                         <td>
-                                            <% if (notification.get("creationTime") != null) {%>
-                                            <%= dateFormat.format(notification.get("creationTime"))%>
+                                            <% if (notification.getThumbUrl() != null && !notification.getThumbUrl().isEmpty()) { %>
+                                                <img src="<%= notification.getThumbUrl() %>" 
+                                                     alt="<%= notification.getCourseTitle() %>" 
+                                                     style="width: 80px; height: 50px; object-fit: cover; border-radius: 8px;">
                                             <% } else { %>
-                                            N/A
-                                            <% }%>
+                                                <div style="width: 80px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-book" style="font-size: 24px; color: white;"></i>
+                                                </div>
+                                            <% } %>
                                         </td>
                                         <td>
-                                            <span class="status-badge <%= statusClass%>">
-                                                <%= status != null ? status : "Pending"%>
+                                            <strong style="color: #F8FAFC; font-size: 15px;"><%= notification.getCourseTitle() %></strong>
+                                            <% if (notification.getLevel() != null) { %>
+                                                <div style="margin-top: 5px;">
+                                                    <span style="font-size: 12px; color: rgba(248, 250, 252, 0.7);">
+                                                        <i class="fas fa-signal"></i> <%= notification.getLevel() %>
+                                                    </span>
+                                                </div>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-user-tie" style="color: #06B6D4;"></i>
+                                                <strong><%= notification.getInstructorName() %></strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span style="color: #10B981; font-weight: 600; font-size: 15px;">
+                                                <%= priceFormat.format(notification.getCoursePrice()) %> VNĐ
                                             </span>
                                         </td>
                                         <td>
-                                            <div class="action-buttons">
-                                                <%
-                                                    String notificationId = (String) notification.get("id");
-                                                    if (!"Approved".equals(status)) {%>
-                                                <button class="btn btn-success" onclick="updateStatus('<%= notificationId%>', 'Approved')">
-                                                    <i class="fas fa-check"></i> Phê duyệt
-                                                </button>
-                                                <% } %>
-                                                <% if (!"Dismissed".equals(status)) {%>
-                                                <button class="btn btn-danger" onclick="updateStatus('<%= notificationId%>', 'Dismissed')">
+                                            <div style="font-size: 13px;">
+                                                <i class="fas fa-clock" style="color: #8B5CF6;"></i>
+                                                <%= dateFormat.format(notification.getCreationTime()) %>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-pending">
+                                                <i class="fas fa-hourglass-half"></i> Chờ duyệt
+                                            </span>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <div class="action-buttons" style="display: flex; gap: 8px; justify-content: center;">
+                                                <form method="POST" action="<%= request.getContextPath() %>/admin/course-approval" style="display: inline;">
+                                                    <input type="hidden" name="action" value="approve">
+                                                    <input type="hidden" name="notificationId" value="<%= notification.getId() %>">
+                                                    <button type="submit" class="btn btn-success" 
+                                                            onclick="return confirm('Bạn có chắc muốn phê duyệt khóa học này?')"
+                                                            style="padding: 8px 16px; font-size: 13px;">
+                                                        <i class="fas fa-check"></i> Duyệt
+                                                    </button>
+                                                </form>
+                                                
+                                                <button type="button" class="btn btn-danger" 
+                                                        onclick="openRejectModal('<%= notification.getId() %>', '<%= notification.getCourseTitle().replace("'", "\\'") %>')"
+                                                        style="padding: 8px 16px; font-size: 13px;">
                                                     <i class="fas fa-times"></i> Từ chối
                                                 </button>
-                                                <% } %>
                                             </div>
                                         </td>
                                     </tr>
@@ -2103,55 +2006,82 @@
                             </table>
                             <% } %>
                         </div>
-
-                        <!-- Pagination -->
-                        <% if (totalPages > 1) {%>
-                        <div class="pagination">
-                            <div class="pagination-info">
-                                Trang <%= currentPage%> trên <%= totalPages%>
-                            </div>
-                            <div class="pagination-controls">
-                                <% if (currentPage > 1) {%>
-                                <a href="?page=<%= currentPage - 1%>&type=<%= searchType%>&entries=<%= recordsPerPage%>">
-                                    <i class="fas fa-chevron-left"></i> Trang trước
-                                </a>
-                                <% } else { %>
-                                <span class="disabled">
-                                    <i class="fas fa-chevron-left"></i> Trang trước
-                                </span>
-                                <% } %>
-
-                                <%
-                                    int startPage = Math.max(1, currentPage - 2);
-                                    int endPage = Math.min(totalPages, currentPage + 2);
-
-                                    for (int i = startPage; i <= endPage; i++) { %>
-                                <% if (i == currentPage) {%>
-                                <span class="current"><%= i%></span>
-                                <% } else {%>
-                                <a href="?page=<%= i%>&type=<%= searchType%>&entries=<%= recordsPerPage%>"><%= i%></a>
-                                <% } %>
-                                <% } %>
-
-                                <% if (currentPage < totalPages) {%>
-                                <a href="?page=<%= currentPage + 1%>&type=<%= searchType%>&entries=<%= recordsPerPage%>">
-                                    Trang sau <i class="fas fa-chevron-right"></i>
-                                </a>
-                                <% } else { %>
-                                <span class="disabled">
-                                    Trang sau <i class="fas fa-chevron-right"></i>
-                                </span>
-                                <% } %>
-                            </div>
-                        </div>
-                        <% }%>
                     </div>
                 </div>
             </main>
         </div>
 
+        <!-- Rejection Reason Modal -->
+        <div id="rejectModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px 12px 0 0;">
+                    <h2 style="color: white; margin: 0; font-size: 20px;">
+                        <i class="fas fa-times-circle"></i> Từ chối khóa học
+                    </h2>
+                    <button onclick="closeRejectModal()" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 24px; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        &times;
+                    </button>
+                </div>
+                <form method="POST" action="<%= request.getContextPath() %>/admin/course-approval">
+                    <div class="modal-body" style="padding: 24px;">
+                        <input type="hidden" name="action" value="reject">
+                        <input type="hidden" name="notificationId" id="rejectNotificationId">
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #F8FAFC; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-book"></i> Khóa học:
+                            </label>
+                            <div id="rejectCourseTitle" style="padding: 12px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; color: #F8FAFC; font-size: 15px;"></div>
+                        </div>
+                        
+                        <div>
+                            <label for="rejectionReason" style="display: block; color: #F8FAFC; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-comment-dots"></i> Lý do từ chối: <span style="color: #EF4444;">*</span>
+                            </label>
+                            <textarea name="rejectionReason" id="rejectionReason" required
+                                      rows="5"
+                                      placeholder="Vui lòng nhập lý do từ chối khóa học..."
+                                      style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #F8FAFC; font-size: 14px; resize: vertical; font-family: inherit;"
+                                      onkeyup="this.style.borderColor = this.value.trim().length > 0 ? '#10B981' : 'rgba(255, 255, 255, 0.2)'"></textarea>
+                            <div style="margin-top: 6px; font-size: 12px; color: rgba(248, 250, 252, 0.6);">
+                                <i class="fas fa-info-circle"></i> Lý do từ chối sẽ được gửi đến giảng viên để họ có thể chỉnh sửa
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 12px; justify-content: flex-end;">
+                        <button type="button" onclick="closeRejectModal()" class="btn btn-secondary" style="padding: 10px 20px;">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-danger" style="padding: 10px 20px;">
+                            <i class="fas fa-ban"></i> Xác nhận từ chối
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Universe Theme Script -->
         <script>
+            // Rejection Modal Functions
+            function openRejectModal(notificationId, courseTitle) {
+                document.getElementById('rejectNotificationId').value = notificationId;
+                document.getElementById('rejectCourseTitle').textContent = courseTitle;
+                document.getElementById('rejectionReason').value = '';
+                document.getElementById('rejectModal').style.display = 'flex';
+            }
+
+            function closeRejectModal() {
+                document.getElementById('rejectModal').style.display = 'none';
+            }
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                const modal = document.getElementById('rejectModal');
+                if (event.target === modal) {
+                    closeRejectModal();
+                }
+            };
+
             document.addEventListener('DOMContentLoaded', function () {
                 // Add universe theme class to body
                 document.body.classList.add('universe-theme');
@@ -2310,116 +2240,6 @@
                         this.style.boxShadow = '';
                     });
                 });
-            });
-
-            function updateStatus(notificationId, status) {
-                if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái này?')) {
-                    // Create form to submit POST request
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/Adaptive_Elearning/admin_notification.jsp';
-
-                    const idInput = document.createElement('input');
-                    idInput.type = 'hidden';
-                    idInput.name = 'notificationId';
-                    idInput.value = notificationId;
-
-                    const statusInput = document.createElement('input');
-                    statusInput.type = 'hidden';
-                    statusInput.name = 'newStatus';
-                    statusInput.value = status;
-
-                    const actionInput = document.createElement('input');
-                    actionInput.type = 'hidden';
-                    actionInput.name = 'action';
-                    actionInput.value = 'updateStatus';
-
-                    form.appendChild(idInput);
-                    form.appendChild(statusInput);
-                    form.appendChild(actionInput);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            }
-
-            function updateEntries() {
-                const entriesSelect = document.getElementById('entries');
-                const typeSelect = document.getElementById('type');
-                const selectedEntries = entriesSelect.value;
-                const selectedType = typeSelect.value;
-
-                // Redirect with new entries parameter
-                const url = 'admin_notification.jsp?page=1&entries=' + selectedEntries + '&type=' + encodeURIComponent(selectedType);
-                window.location.href = url;
-            }
-
-            // Enhanced filter functions
-            function resetFilters() {
-                window.location.href = 'admin_notification.jsp?page=1';
-            }
-
-            function removeFilter(filterType) {
-                const currentUrl = new URL(window.location);
-                const params = new URLSearchParams(currentUrl.search);
-
-                if (filterType === 'entries') {
-                    params.set('entries', '10'); // Reset to default
-                } else if (filterType === 'type') {
-                    params.delete('type');
-                }
-
-                params.set('page', '1'); // Reset to first page
-
-                const newUrl = 'admin_notification.jsp?' + params.toString();
-                window.location.href = newUrl;
-            }
-
-            // Enhanced dropdown interactions
-            document.addEventListener('DOMContentLoaded', function () {
-                // Add click animation to filter elements
-                const selectWrappers = document.querySelectorAll('.select-wrapper');
-                selectWrappers.forEach(wrapper => {
-                    const select = wrapper.querySelector('.modern-select');
-                    const arrow = wrapper.querySelector('.select-arrow');
-
-                    select.addEventListener('focus', () => {
-                        arrow.style.transform = 'translateY(-50%) rotate(180deg)';
-                    });
-
-                    select.addEventListener('blur', () => {
-                        arrow.style.transform = 'translateY(-50%) rotate(0deg)';
-                    });
-                });
-
-                // Add hover effects to filter tags
-                const filterTags = document.querySelectorAll('.filter-tag');
-                filterTags.forEach(tag => {
-                    tag.addEventListener('mouseenter', () => {
-                        tag.style.transform = 'translateY(-2px)';
-                        tag.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
-                    });
-
-                    tag.addEventListener('mouseleave', () => {
-                        tag.style.transform = 'translateY(0)';
-                        tag.style.boxShadow = 'none';
-                    });
-                });
-
-                // Add loading state to search button
-                const searchBtn = document.querySelector('.modern-search-btn');
-                if (searchBtn) {
-                    searchBtn.addEventListener('click', function () {
-                        const btnContent = this.querySelector('.btn-content span');
-                        const originalText = btnContent.textContent;
-                        btnContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...';
-
-                        // Reset after form submission (fallback)
-                        setTimeout(() => {
-                            btnContent.textContent = originalText;
-                        }, 2000);
-                    });
-                }
             });
         </script>
         
