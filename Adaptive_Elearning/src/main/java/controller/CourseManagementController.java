@@ -201,31 +201,34 @@ public class CourseManagementController {
         sql.append("u.FullName as InstructorName ");
         sql.append("FROM Courses c ");
         sql.append("LEFT JOIN Users u ON c.InstructorId = u.Id ");
-        
+
         List<Object> params = new ArrayList<>();
-        
-        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            sql.append("WHERE LOWER(c.Title) LIKE LOWER(?) ");
+
+        boolean hasSearch = (searchTerm != null && !searchTerm.trim().isEmpty());
+        if (hasSearch) {
+            sql.append("WHERE LOWER(c.Status) = 'ongoing' AND LOWER(c.ApprovalStatus) = 'approved' AND LOWER(c.Title) LIKE LOWER(?) ");
             params.add("%" + searchTerm.trim() + "%");
+        } else {
+            sql.append("WHERE LOWER(c.Status) = 'ongoing' AND LOWER(c.ApprovalStatus) = 'approved' ");
         }
-        
+
         sql.append("ORDER BY c.CreationTime DESC ");
-        
+
         if (limit > 0) {
             sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
             params.add(offset);
             params.add(limit);
         }
-        
+
         List<Course> courses = new ArrayList<>();
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
-            
+
             for (int i = 0; i < params.size(); i++) {
                 pstmt.setObject(i + 1, params.get(i));
             }
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     courses.add(new Course(
@@ -245,7 +248,7 @@ public class CourseManagementController {
                 }
             }
         }
-        
+
         return courses;
     }
     
@@ -254,9 +257,12 @@ public class CourseManagementController {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Courses ");
         List<Object> params = new ArrayList<>();
         
-        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            sql.append("WHERE LOWER(Title) LIKE LOWER(?) ");
+        boolean hasSearch = (searchTerm != null && !searchTerm.trim().isEmpty());
+        if (hasSearch) {
+            sql.append("WHERE LOWER(Status) = 'ongoing' AND LOWER(ApprovalStatus) = 'approved' AND LOWER(Title) LIKE LOWER(?) ");
             params.add("%" + searchTerm.trim() + "%");
+        } else {
+            sql.append("WHERE LOWER(Status) = 'ongoing' AND LOWER(ApprovalStatus) = 'approved' ");
         }
         
         try (Connection conn = DBConnection.getConnection();
