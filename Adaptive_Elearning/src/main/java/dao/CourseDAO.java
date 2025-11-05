@@ -410,6 +410,16 @@ public class CourseDAO {
         course.setIntro(rs.getString("Intro"));
         course.setDescription(rs.getString("Description"));
         course.setStatus(rs.getString("Status"));
+        
+        // Set approval status and rejection reason if available
+        try {
+            course.setApprovalStatus(rs.getString("ApprovalStatus"));
+            course.setRejectionReason(rs.getString("RejectionReason"));
+        } catch (SQLException e) {
+            // Columns might not exist in some queries
+            course.setApprovalStatus("pending");
+        }
+        
         course.setPrice(rs.getDouble("Price"));
         course.setDiscount(rs.getDouble("Discount"));
         course.setDiscountExpiry(rs.getTimestamp("DiscountExpiry"));

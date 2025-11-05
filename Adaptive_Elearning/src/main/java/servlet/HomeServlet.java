@@ -68,10 +68,10 @@ public class HomeServlet extends HttpServlet {
     private List<Courses> getFeaturedCourses() {
         EntityManager em = emf.createEntityManager();
         try {
-            // Get approved courses (status = 'ongoing' or 'Ongoing') ordered by learner count and rating
+            // Get approved courses (status = 'ongoing' AND approvalStatus = 'approved')
             Query query = em.createQuery(
                 "SELECT c FROM Courses c " +
-                "WHERE LOWER(c.status) = 'ongoing' " +
+                "WHERE LOWER(c.status) = 'ongoing' AND LOWER(c.approvalStatus) = 'approved' " +
                 "ORDER BY c.learnerCount DESC, c.totalRating DESC, c.creationTime DESC"
             );
             query.setMaxResults(8); // Limit to 8 featured courses

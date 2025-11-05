@@ -74,6 +74,10 @@ public class Courses implements Serializable {
     @Basic(optional = false)
     @Column(name = "Status")
     private String status;
+    @Column(name = "ApprovalStatus")
+    private String approvalStatus;
+    @Column(name = "RejectionReason")
+    private String rejectionReason;
     @Basic(optional = false)
     @Column(name = "Price")
     private double price;
@@ -218,6 +222,22 @@ public class Courses implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(String approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public double getPrice() {
