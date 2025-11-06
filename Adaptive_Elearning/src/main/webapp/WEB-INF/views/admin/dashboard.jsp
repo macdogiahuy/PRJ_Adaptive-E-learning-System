@@ -135,6 +135,67 @@
             gap: 0.5rem;
         }
         
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            margin-right: 20px;
+        }
+        
+        .notification-bell button {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #F8FAFC;
+            font-size: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notification-bell button:hover {
+            background: rgba(139, 92, 246, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.6);
+            animation: pulse 2s infinite;
+        }
+        
+        .notification-badge.hidden {
+            display: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+        
       .user-info {
             color: #F8FAFC;
             display: flex;
@@ -545,7 +606,14 @@
             <i class="fas fa-tachometer-alt"></i>
             Dashboard CourseHub E-Learning
         </h1>
-         
+        
+        <!-- Notification Bell -->
+        <div class="notification-bell">
+            <button onclick="window.location.href='${pageContext.request.contextPath}/admin_notification.jsp'" title="Khóa học chờ duyệt">
+                <i class="fas fa-bell"></i>
+            </button>
+            <span class="notification-badge hidden" id="pendingCourseBadge">0</span>
+        </div>
     </div>
 
     <div class="container">
@@ -947,6 +1015,39 @@
         
         // Initialize Charts when page loads
         initializeCharts();
+    </script>
+    
+    <!-- Real-time Pending Courses Notification -->
+    <script>
+        // Function to update notification badge
+        function updatePendingCoursesBadge() {
+            fetch('${pageContext.request.contextPath}/api/admin/pending-courses-count')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.count !== undefined) {
+                        const badge = document.getElementById('pendingCourseBadge');
+                        if (badge) {
+                            badge.textContent = data.count;
+                            
+                            // Show/hide badge based on count
+                            if (data.count > 0) {
+                                badge.classList.remove('hidden');
+                            } else {
+                                badge.classList.add('hidden');
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching pending courses count:', error);
+                });
+        }
+        
+        // Update immediately on page load
+        updatePendingCoursesBadge();
+        
+        // Poll every 30 seconds
+        setInterval(updatePendingCoursesBadge, 30000);
     </script>
     
     <!-- Admin Performance Optimizer -->
