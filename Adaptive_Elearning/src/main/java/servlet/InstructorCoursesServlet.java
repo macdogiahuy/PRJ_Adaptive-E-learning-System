@@ -127,10 +127,15 @@ public class InstructorCoursesServlet extends HttpServlet {
         String userRole = user.getRole();
         List<Courses> courses;
         
+        LOGGER.log(Level.WARNING, "=== DEBUG: handleListCourses called ===");
+        LOGGER.log(Level.WARNING, "User: {0}, Role: {1}, InstructorId: {2}", 
+                   new Object[]{user.getUserName(), user.getRole(), user.getInstructorId()});
+        
         if ("Admin".equalsIgnoreCase(userRole)) {
             // Admin can see all courses
-            LOGGER.log(Level.INFO, "Admin user: {0} - getting all courses", user.getUserName());
+            LOGGER.log(Level.WARNING, "=== Admin user detected - getting ALL courses ===");
             courses = courseService.getAllCoursesForAdmin();
+            LOGGER.log(Level.WARNING, "=== Retrieved {0} courses for admin ===", courses.size());
         } else {
             // Instructor sees only their courses
             // IMPORTANT: InstructorId in Users table points to Instructors.Id
@@ -291,6 +296,16 @@ public class InstructorCoursesServlet extends HttpServlet {
         
         // Get correct InstructorId from Users table
         String instructorId = user.getInstructorId();
+        
+        // Special handling for Admin: If admin creates course, use a default instructor or create one
+        if ((instructorId == null || instructorId.trim().isEmpty()) && "Admin".equalsIgnoreCase(user.getRole())) {
+            // For admin, we'll use their own UserId as InstructorId
+            // This requires that admin account also exists in Instructors table
+            // Or we can find the first instructor in system
+            LOGGER.log(Level.INFO, "Admin creating course, using UserId as InstructorId: {0}", user.getId());
+            instructorId = user.getId();
+        }
+        
         if (instructorId == null || instructorId.trim().isEmpty()) {
             LOGGER.log(Level.SEVERE, "No InstructorId found for user: {0}", user.getUserName());
             request.setAttribute("errorMessage", "Không tìm thấy InstructorId. Vui lòng liên hệ admin.");

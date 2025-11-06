@@ -620,8 +620,8 @@
                                         </span>
                                         <% if ("rejected".equalsIgnoreCase(approvalStatus) && rejectionReason != null && !rejectionReason.isEmpty()) { %>
                                             <button class="btn-icon btn-view" title="Xem lý do từ chối" 
-                                                    data-course-title="<%= course.getTitle() %>"
-                                                    data-rejection-reason="<%= rejectionReason %>"
+                                                    data-course-title="<%= course.getTitle().replace("\"", "&quot;") %>"
+                                                    data-rejection-reason="<%= rejectionReason.replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;") %>"
                                                     onclick="showRejectionReasonModal(this)">
                                                 <i class="fas fa-info-circle"></i>
                                             </button>
@@ -760,31 +760,50 @@
             const courseTitle = button.getAttribute('data-course-title');
             const rejectionReason = button.getAttribute('data-rejection-reason');
             
+            // Decode HTML entities
+            const decodeHTML = (html) => {
+                const txt = document.createElement('textarea');
+                txt.innerHTML = html;
+                return txt.value;
+            };
+            
+            const decodedTitle = decodeHTML(courseTitle || '');
+            const decodedReason = decodeHTML(rejectionReason || 'Không có lý do cụ thể');
+            
             const modal = document.createElement('div');
             modal.className = 'rejection-modal';
             modal.innerHTML = `
-                <div class="rejection-modal-overlay" onclick="this.parentElement.remove()"></div>
+                <div class="rejection-modal-overlay"></div>
                 <div class="rejection-modal-content">
                     <div class="rejection-modal-header">
                         <h3><i class="fas fa-times-circle"></i> Lý do từ chối khóa học</h3>
-                        <button class="rejection-close-btn" onclick="this.closest('.rejection-modal').remove()">×</button>
+                        <button class="rejection-close-btn">×</button>
                     </div>
                     <div class="rejection-modal-body">
                         <div class="rejection-course-title">
-                            <strong>Khóa học:</strong> ${courseTitle}
+                            <strong>Khóa học:</strong> <span class="course-title-text"></span>
                         </div>
                         <div class="rejection-reason-box">
                             <strong>Lý do từ chối:</strong>
-                            <p>${rejectionReason}</p>
+                            <p class="rejection-reason-text"></p>
                         </div>
                     </div>
                     <div class="rejection-modal-footer">
-                        <button class="btn-modal-close" onclick="this.closest('.rejection-modal').remove()">
+                        <button class="btn-modal-close">
                             <i class="fas fa-times"></i> Đóng
                         </button>
                     </div>
                 </div>
             `;
+            
+            // Set text content safely
+            modal.querySelector('.course-title-text').textContent = decodedTitle;
+            modal.querySelector('.rejection-reason-text').textContent = decodedReason;
+            
+            // Add event listeners
+            modal.querySelector('.rejection-modal-overlay').addEventListener('click', () => modal.remove());
+            modal.querySelector('.rejection-close-btn').addEventListener('click', () => modal.remove());
+            modal.querySelector('.btn-modal-close').addEventListener('click', () => modal.remove());
             
             document.body.appendChild(modal);
             
