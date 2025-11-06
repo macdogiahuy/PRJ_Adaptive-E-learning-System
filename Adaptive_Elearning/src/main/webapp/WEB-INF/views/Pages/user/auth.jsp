@@ -62,7 +62,12 @@
                     <p>or login with social platforms</p>
 
                     <div class="social-icons">
-                        <a href="${pageContext.request.contextPath}/google-login"><i class='bx bxl-google'></i></a>
+                        <a href="${pageContext.request.contextPath}/facebook-login" class="facebook-btn" title="Login with Facebook">
+                            <i class='bx bxl-facebook'></i>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/google-login" class="google-btn" title="Login with Google">
+                            <i class='bx bxl-google'></i>
+                        </a>
                     </div>
                 </form>
             </div>
@@ -101,7 +106,12 @@
                     <button type="submit" class="btn">Register</button>
                     <p>or register with social platforms</p>
                     <div class="social-icons">
-                        <a href="${pageContext.request.contextPath}/google-login"><i class='bx bxl-google'></i></a>
+                        <a href="${pageContext.request.contextPath}/facebook-login" class="facebook-btn" title="Register with Facebook">
+                            <i class='bx bxl-facebook'></i>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/google-login" class="google-btn" title="Register with Google">
+                            <i class='bx bxl-google'></i>
+                        </a>
                     </div>
                 </form>
             </div>

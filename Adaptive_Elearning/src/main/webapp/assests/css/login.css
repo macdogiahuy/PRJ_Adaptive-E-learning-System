@@ -135,31 +135,32 @@ body {
 }
 
 .google-login {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
     margin-bottom: 20px;
 }
 
-.google-btn {
+.google-btn, .facebook-btn {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    border-radius: 30px;
-    background: #fff;
-    border: 1px solid #ccc;
-    font-weight: bold;
+    justify-content: center;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 24px;
     color: #333;
     text-decoration: none;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    background: #fff;
 }
 
-.google-btn img {
-    width: 20px;
-    height: 20px;
-}
-
-.google-btn:hover {
-    background: #f5f5f5;
+.google-btn:hover, .facebook-btn:hover {
+    border-color: #7494ec;
+    color: #7494ec;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(116, 148, 236, 0.3);
 }
 
 .top {
