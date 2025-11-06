@@ -1367,13 +1367,13 @@
                                 <!-- Course Actions -->
                                 <div class="course-actions">
                                     <% if ("Ongoing".equalsIgnoreCase(status)) { %>
-                                        <a href="course_ban_handler.jsp?action=ban&courseId=<%= course.getId() %>&currentPage=<%= currentPage %>&searchQuery=<%= java.net.URLEncoder.encode(searchQuery, "UTF-8") %>" 
+                                        <a href="${pageContext.request.contextPath}/course-ban?action=ban&courseId=<%= course.getId() %>&currentPage=<%= currentPage %>&searchQuery=<%= java.net.URLEncoder.encode(searchQuery, "UTF-8") %>" 
                                            class="btn-ban"
                                            onclick="return confirm('Bạn có chắc chắn muốn ban khóa học này?');">
                                             <i class="fas fa-ban"></i> Ban
                                         </a>
                                     <% } else if ("Off".equalsIgnoreCase(status)) { %>
-                                        <a href="course_ban_handler.jsp?action=unban&courseId=<%= course.getId() %>&currentPage=<%= currentPage %>&searchQuery=<%= java.net.URLEncoder.encode(searchQuery, "UTF-8") %>" 
+                                        <a href="${pageContext.request.contextPath}/course-ban?action=unban&courseId=<%= course.getId() %>&currentPage=<%= currentPage %>&searchQuery=<%= java.net.URLEncoder.encode(searchQuery, "UTF-8") %>" 
                                            class="btn-unban"
                                            onclick="return confirm('Bạn có chắc chắn muốn unban khóa học này?');">
                                             <i class="fas fa-check"></i> Unban
