@@ -3,7 +3,8 @@
 <html>
     <head>
         <title>Login</title>
-        <link rel="stylesheet" href="assests/css/login.css">
+    <!-- Added version marker for cache busting and fixed path spelling to assets -->
+    <link rel="stylesheet" href="assets/css/login.css?v=3">
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     </head>
     <body>
@@ -56,13 +57,21 @@
                     <span>Or</span>
                 </div>
 
-                <!-- Nút Google -->
-                <div class="google-login">
-                    <a href="${pageContext.request.contextPath}/google-login" class="google-btn">
-                        <img src="${pageContext.request.contextPath}/assests/img/google.png" alt="Google"> 
-                        Sign in with Google
-                    </a>
+                <!-- Social login buttons (version fb-icon-v3) -->
+                <div class="social-icons">
+                    <div class="google-login">
+                        <!-- Facebook first so we can visually confirm it appears -->
+                        <a href="${pageContext.request.contextPath}/facebook-login" class="facebook-btn" title="Login with Facebook">
+                            <i class='bx bxl-facebook'></i>
+                            <!-- fallback text -->
+                            <span class="fb-fallback" style="display:none;">FB</span>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/google-login" class="google-btn" title="Login with Google">
+                            <i class='bx bxl-google'></i>
+                        </a>
+                    </div>
                 </div>
+               
 
                 <!-- Link dưới -->
                 <div class="top">
