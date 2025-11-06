@@ -206,10 +206,10 @@ public class CourseManagementController {
 
         boolean hasSearch = (searchTerm != null && !searchTerm.trim().isEmpty());
         if (hasSearch) {
-            sql.append("WHERE LOWER(c.Status) = 'ongoing' AND LOWER(c.ApprovalStatus) = 'approved' AND LOWER(c.Title) LIKE LOWER(?) ");
+            sql.append("WHERE LOWER(c.ApprovalStatus) = 'approved' AND LOWER(c.Title) LIKE LOWER(?) ");
             params.add("%" + searchTerm.trim() + "%");
         } else {
-            sql.append("WHERE LOWER(c.Status) = 'ongoing' AND LOWER(c.ApprovalStatus) = 'approved' ");
+            sql.append("WHERE LOWER(c.ApprovalStatus) = 'approved' ");
         }
 
         sql.append("ORDER BY c.CreationTime DESC ");
@@ -259,10 +259,10 @@ public class CourseManagementController {
         
         boolean hasSearch = (searchTerm != null && !searchTerm.trim().isEmpty());
         if (hasSearch) {
-            sql.append("WHERE LOWER(Status) = 'ongoing' AND LOWER(ApprovalStatus) = 'approved' AND LOWER(Title) LIKE LOWER(?) ");
+            sql.append("WHERE LOWER(ApprovalStatus) = 'approved' AND LOWER(Title) LIKE LOWER(?) ");
             params.add("%" + searchTerm.trim() + "%");
         } else {
-            sql.append("WHERE LOWER(Status) = 'ongoing' AND LOWER(ApprovalStatus) = 'approved' ");
+            sql.append("WHERE LOWER(ApprovalStatus) = 'approved' ");
         }
         
         try (Connection conn = DBConnection.getConnection();
