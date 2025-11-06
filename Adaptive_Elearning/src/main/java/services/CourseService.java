@@ -34,12 +34,12 @@ public class CourseService {
     }
     
     /**
-     * Get all courses for admin (can see all courses)
+     * Get all courses for admin (can see all courses including pending)
      */
     public List<Courses> getAllCoursesForAdmin() {
         try {
-            // Admin can see all courses in the system
-            return courseDAO.getAllCourses();
+            // Admin can see all courses in the system (including pending)
+            return courseDAO.getAllCoursesForAdmin();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error getting all courses for admin", e);
             return List.of();
