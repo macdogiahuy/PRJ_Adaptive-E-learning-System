@@ -4,126 +4,117 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.WebListener;
 import jakarta.servlet.http.HttpSessionEvent;
 import jakarta.servlet.http.HttpSessionListener;
+import jakarta.servlet.http.HttpSessionAttributeListener;
+import jakarta.servlet.http.HttpSessionBindingEvent;
 import jakarta.servlet.http.HttpSession;
 import model.Users;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Listener to track online users
- * Increments counter when user logs in (session created with user attribute)
- * Decrements counter when user logs out or session expires
- * @author LP
+ * Refactored listener to reliably track logged-in users only.
+ * Increments when the "account" attribute is first added to a session;
+ * decrements when it is removed or the session is destroyed (if still present).
+ * Avoids fragile beforeunload beacons and manual servlet decrement endpoints.
  */
 @WebListener
-public class OnlineUserListener implements HttpSessionListener {
-    
+public class OnlineUserListener implements HttpSessionListener, HttpSessionAttributeListener {
+
     private static final Logger LOGGER = Logger.getLogger(OnlineUserListener.class.getName());
-    public static final String ONLINE_USERS_KEY = "onlineUsersCount";
-    public static final String USER_COUNTED_KEY = "userCounted";
-    
-    @Override
-    public void sessionCreated(HttpSessionEvent se) {
-        HttpSession session = se.getSession();
-        ServletContext context = session.getServletContext();
-        
-        // Initialize counter if not exists and increment immediately
-        synchronized (context) {
-            Integer count = (Integer) context.getAttribute(ONLINE_USERS_KEY);
-            if (count == null) {
-                count = 0;
+
+    // Context attribute keys
+    public static final String LOGGED_IN_USERS_KEY = "loggedInUsersCount"; // AtomicInteger stored in context
+    public static final String ACCOUNT_ATTR = "account";                  // Session attribute holding Users object
+    public static final String ACCOUNT_COUNTED_ATTR = "accountCounted";   // Boolean flag per session
+
+    /** Initialize AtomicInteger container if absent */
+    private AtomicInteger getOrInitCounter(ServletContext context) {
+        synchronized (context) { // minimal sync only during init retrieval
+            AtomicInteger ctr = (AtomicInteger) context.getAttribute(LOGGED_IN_USERS_KEY);
+            if (ctr == null) {
+                ctr = new AtomicInteger(0);
+                context.setAttribute(LOGGED_IN_USERS_KEY, ctr);
+                LOGGER.log(Level.INFO, "Initialized logged-in user counter.");
             }
-            
-            // Increment counter for new session (visitor accessing site)
-            count++;
-            context.setAttribute(ONLINE_USERS_KEY, count);
-            session.setAttribute(USER_COUNTED_KEY, true);
-            
-            LOGGER.log(Level.INFO, "New visitor session created. Online users: {0}", count);
+            return ctr;
         }
     }
-    
+
+    @Override
+    public void sessionCreated(HttpSessionEvent se) {
+        // Do not increment here; we only count authenticated users.
+        LOGGER.log(Level.FINE, "Session created: {0}", se.getSession().getId());
+        // Ensure counter exists early to avoid later sync contention.
+        getOrInitCounter(se.getSession().getServletContext());
+    }
+
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
         HttpSession session = se.getSession();
         ServletContext context = session.getServletContext();
-        
-        // Check if this session had a logged-in user
-        Boolean userCounted = (Boolean) session.getAttribute(USER_COUNTED_KEY);
-        
-        if (userCounted != null && userCounted) {
-            // Decrement online users count
-            synchronized (context) {
-                Integer count = (Integer) context.getAttribute(ONLINE_USERS_KEY);
-                if (count == null) {
-                    count = 0;
-                }
-                
-                if (count > 0) {
-                    count--;
-                    context.setAttribute(ONLINE_USERS_KEY, count);
-                    LOGGER.log(Level.INFO, "User session destroyed. Online users: {0}", count);
-                }
+        Boolean counted = (Boolean) session.getAttribute(ACCOUNT_COUNTED_ATTR);
+        Object acc = session.getAttribute(ACCOUNT_ATTR);
+        if (Boolean.TRUE.equals(counted) && acc != null) {
+            AtomicInteger ctr = getOrInitCounter(context);
+            int newVal = ctr.updateAndGet(v -> v > 0 ? v - 1 : 0); // guard against negative
+            LOGGER.log(Level.INFO, "Session destroyed; decremented logged-in users to {0} (session {1})", new Object[]{newVal, session.getId()});
+        } else {
+            LOGGER.log(Level.FINE, "Session destroyed without logged-in user counted: {0}", session.getId());
+        }
+    }
+
+    // Attribute listener methods
+    @Override
+    public void attributeAdded(HttpSessionBindingEvent event) {
+        if (ACCOUNT_ATTR.equals(event.getName())) {
+            HttpSession session = event.getSession();
+            ServletContext context = session.getServletContext();
+            Boolean counted = (Boolean) session.getAttribute(ACCOUNT_COUNTED_ATTR);
+            if (!Boolean.TRUE.equals(counted) && event.getValue() instanceof Users) {
+                AtomicInteger ctr = getOrInitCounter(context);
+                int newVal = ctr.incrementAndGet();
+                session.setAttribute(ACCOUNT_COUNTED_ATTR, true);
+                Users user = (Users) event.getValue();
+                LOGGER.log(Level.INFO, "User {0} logged in; logged-in users: {1}", new Object[]{user.getUserName(), newVal});
             }
         }
-        
-        LOGGER.log(Level.FINE, "Session destroyed: {0}", session.getId());
     }
-    
-    /**
-     * Call this method when a user logs in (just for logging, counter already incremented in sessionCreated)
-     */
+
+    @Override
+    public void attributeRemoved(HttpSessionBindingEvent event) {
+        if (ACCOUNT_ATTR.equals(event.getName())) {
+            HttpSession session = event.getSession();
+            ServletContext context = session.getServletContext();
+            Boolean counted = (Boolean) session.getAttribute(ACCOUNT_COUNTED_ATTR);
+            if (Boolean.TRUE.equals(counted)) {
+                AtomicInteger ctr = getOrInitCounter(context);
+                int newVal = ctr.updateAndGet(v -> v > 0 ? v - 1 : 0);
+                session.setAttribute(ACCOUNT_COUNTED_ATTR, false);
+                LOGGER.log(Level.INFO, "Account attribute removed; logged-in users: {0}", newVal);
+            }
+        }
+    }
+
+    @Override
+    public void attributeReplaced(HttpSessionBindingEvent event) {
+        if (ACCOUNT_ATTR.equals(event.getName())) {
+            // Replacement of account (e.g., role change) should not change count.
+            LOGGER.log(Level.FINE, "Account attribute replaced for session {0}", event.getSession().getId());
+        }
+    }
+
+    /** Convenience accessor used by servlet that exposes count */
+    public static int getLoggedInUsersCount(ServletContext context) {
+        AtomicInteger ctr = (AtomicInteger) context.getAttribute(LOGGED_IN_USERS_KEY);
+        return ctr != null ? ctr.get() : 0;
+    }
+
+    // Backwards compatibility methods (now no-ops except logging)
     public static void userLoggedIn(HttpSession session) {
-        // Counter already incremented when session was created
-        // This method is now just for logging purposes
-        
-        ServletContext context = session.getServletContext();
-        Integer count = (Integer) context.getAttribute(ONLINE_USERS_KEY);
-        
-        Users user = (Users) session.getAttribute("account");
-        String username = user != null ? user.getUserName() : "Unknown";
-        
-        LOGGER.log(Level.INFO, "User {0} logged in. Online users: {1}", 
-                  new Object[]{username, count != null ? count : 0});
+        LOGGER.log(Level.FINE, "userLoggedIn() called explicitly; counting handled automatically.");
     }
-    
-    /**
-     * Call this method when a user logs out to decrement the counter
-     * Also invalidate session to trigger sessionDestroyed
-     */
     public static void userLoggedOut(HttpSession session) {
-        ServletContext context = session.getServletContext();
-        
-        // Check if user was counted for this session
-        Boolean userCounted = (Boolean) session.getAttribute(USER_COUNTED_KEY);
-        
-        if (userCounted != null && userCounted) {
-            synchronized (context) {
-                Integer count = (Integer) context.getAttribute(ONLINE_USERS_KEY);
-                if (count == null) {
-                    count = 0;
-                }
-                
-                if (count > 0) {
-                    count--;
-                    context.setAttribute(ONLINE_USERS_KEY, count);
-                    // Mark as not counted so sessionDestroyed won't decrement again
-                    session.setAttribute(USER_COUNTED_KEY, false);
-                    
-                    Users user = (Users) session.getAttribute("account");
-                    String username = user != null ? user.getUserName() : "Unknown";
-                    LOGGER.log(Level.INFO, "User {0} logged out. Online users: {1}", 
-                              new Object[]{username, count});
-                }
-            }
-        }
-    }
-    
-    /**
-     * Get current online users count
-     */
-    public static int getOnlineUsersCount(ServletContext context) {
-        Integer count = (Integer) context.getAttribute(ONLINE_USERS_KEY);
-        return count != null ? count : 0;
+        LOGGER.log(Level.FINE, "userLoggedOut() called explicitly; counting handled automatically.");
     }
 }

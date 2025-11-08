@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * Also handles beacon when user closes tab/window
  * @author LP
  */
-@WebServlet(urlPatterns = {"/api/online-users", "/api/online-users/leave"})
+@WebServlet(urlPatterns = {"/api/online-users"})
 public class OnlineUserCounterServlet extends HttpServlet {
     
     private static final Logger LOGGER = Logger.getLogger(OnlineUserCounterServlet.class.getName());
@@ -26,14 +26,6 @@ public class OnlineUserCounterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
-        String pathInfo = request.getRequestURI();
-        
-        // Handle /leave endpoint - user closing tab/window
-        if (pathInfo != null && pathInfo.endsWith("/leave")) {
-            handleUserLeave(request, response);
-            return;
-        }
         
         // Default: return online users count
         response.setContentType("application/json");
@@ -43,7 +35,7 @@ public class OnlineUserCounterServlet extends HttpServlet {
         response.setHeader("Expires", "0");
         
         try {
-            int onlineUsers = OnlineUserListener.getOnlineUsersCount(getServletContext());
+            int onlineUsers = OnlineUserListener.getLoggedInUsersCount(getServletContext());
             
             // Build JSON response
             String jsonResponse = String.format(
@@ -70,56 +62,6 @@ public class OnlineUserCounterServlet extends HttpServlet {
             PrintWriter out = response.getWriter();
             out.print(errorResponse);
             out.flush();
-        }
-    }
-    
-    /**
-     * Handle POST for beacon API when user leaves/closes tab
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        handleUserLeave(request, response);
-    }
-    
-    /**
-     * Handle user leaving page (closing tab/window)
-     * Decrements online counter directly without invalidating session
-     * Note: This allows users with multiple tabs open to keep their session alive
-     */
-    private void handleUserLeave(HttpServletRequest request, HttpServletResponse response) 
-            throws IOException {
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        
-        try {
-            // Check if user has active session and hasn't been counted yet for this tab
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                // Check if this session was counted
-                Boolean wasCounted = (Boolean) session.getAttribute(OnlineUserListener.USER_COUNTED_KEY);
-                
-                if (wasCounted != null && wasCounted) {
-                    // Decrement counter directly via ServletContext
-                    Integer count = (Integer) getServletContext().getAttribute(OnlineUserListener.ONLINE_USERS_KEY);
-                    if (count != null && count > 0) {
-                        count--;
-                        getServletContext().setAttribute(OnlineUserListener.ONLINE_USERS_KEY, count);
-                        session.setAttribute(OnlineUserListener.USER_COUNTED_KEY, false);
-                        LOGGER.log(Level.INFO, "User left - decremented counter to: {0}", count);
-                    }
-                }
-            }
-            
-            response.setStatus(HttpServletResponse.SC_OK);
-            PrintWriter out = response.getWriter();
-            out.print("{\"success\": true}");
-            out.flush();
-            
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error handling user leave", e);
-            response.setStatus(HttpServletResponse.SC_OK); // Still return OK for beacon
         }
     }
     
