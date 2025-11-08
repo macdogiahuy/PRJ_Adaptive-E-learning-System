@@ -116,13 +116,6 @@
     // Update every 1 minute (60000 milliseconds) instead of 2 minutes
     setInterval(updateOnlineUsersCount, 60000);
     
-    // Send beacon when user closes tab/window to decrement counter
-    window.addEventListener('beforeunload', function() {
-        if (navigator.sendBeacon) {
-            navigator.sendBeacon('<%= request.getContextPath() %>/api/online-users/leave');
-        }
-    });
-    
     // Also update when page becomes visible (user returns to tab)
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden) {
