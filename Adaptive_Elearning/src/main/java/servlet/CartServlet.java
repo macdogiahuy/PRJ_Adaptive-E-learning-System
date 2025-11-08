@@ -116,6 +116,17 @@ public class CartServlet extends HttpServlet {
             return;
         }
         
+        // ✅ FIX: Check if user already owns this course
+        model.Users user = (model.Users) session.getAttribute("account");
+        if (user != null) {
+            if (isAlreadyEnrolled(user.getId(), courseId)) {
+                sendJsonResponse(response, false, 
+                    "Bạn đã sở hữu khóa học này rồi! Vui lòng kiểm tra trong 'Khóa học của tôi'.", 
+                    Map.of("alreadyOwned", true));
+                return;
+            }
+        }
+        
         // Lấy giỏ hàng từ session
         Map<String, CartItem> cart = getCartFromSession(session);
         
@@ -249,6 +260,46 @@ public class CartServlet extends HttpServlet {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error getting course by ID: " + courseId, e);
             return null;
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+    
+    /**
+     * ✅ NEW: Check if user already enrolled in this course
+     */
+    private boolean isAlreadyEnrolled(String userId, String courseId) {
+        if (userId == null || courseId == null) {
+            return false;
+        }
+        
+        EntityManager em = emf.createEntityManager();
+        try {
+            String sql = """
+                SELECT COUNT(*) 
+                FROM Enrollments 
+                WHERE CAST(CreatorId AS VARCHAR(36)) = ? 
+                  AND CAST(CourseId AS VARCHAR(36)) = ?
+                """;
+            
+            Query query = em.createNativeQuery(sql);
+            query.setParameter(1, userId);
+            query.setParameter(2, courseId);
+            
+            Number count = (Number) query.getSingleResult();
+            boolean enrolled = count.intValue() > 0;
+            
+            if (enrolled) {
+                LOGGER.info("User " + userId + " already enrolled in course " + courseId);
+            }
+            
+            return enrolled;
+            
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error checking enrollment", e);
+            return false; // On error, allow add to cart (safe default)
         } finally {
             if (em != null) {
                 em.close();

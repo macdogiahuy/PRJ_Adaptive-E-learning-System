@@ -35,6 +35,25 @@
             box-sizing: border-box;
         }
         
+        /* Keyframe Animations */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(102, 126, 234, 0);
+            }
+        }
+        
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(30deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(30deg);
+            }
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #f5f7fa;
@@ -270,16 +289,33 @@
         .badge-off { background: #ffebee; color: #f44336; }
         
         .approval-badge {
-            display: inline-block;
-            padding: 5px 12px;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
+            gap: 5px;
+        }
+        
+        .approval-badge i {
+            font-size: 13px;
+        }
+        
+        .approval-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         .approval-pending { background: #fff3cd; color: #856404; }
         .approval-approved { background: #d4edda; color: #155724; }
-        .approval-rejected { background: #f8d7da; color: #721c24; }
+        .approval-rejected { 
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
         
         .rating-stars {
             color: #ffc107;
@@ -302,13 +338,72 @@
             transition: all 0.3s;
         }
         
-        .btn-view { background: #e3f2fd; color: #2196F3; }
+        .btn-view { 
+            background: #e53434;
+            color: #fff;
+            border: none;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .btn-view::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-view::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transform: translateX(-100%) translateY(-100%) rotate(30deg);
+        }
+        
+        .btn-view:hover::after {
+            animation: shine 0.8s ease-in-out;
+        }
+        
+        .btn-view:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-view i {
+            position: relative;
+            z-index: 1;
+            font-size: 15px;
+        }
+        
         .btn-edit { background: #fff3e0; color: #FF9800; }
         .btn-delete { background: #ffebee; color: #f44336; }
         
         .btn-icon:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .btn-view:hover {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            animation: none;
+            transform: translateY(-3px) scale(1.05);
         }
         
         .empty-state {
@@ -607,25 +702,27 @@
                                                 // Field not yet added
                                             }
                                         %>
-                                        <span class="approval-badge <%= "approved".equalsIgnoreCase(approvalStatus) ? "approval-approved" : 
-                                                                         "rejected".equalsIgnoreCase(approvalStatus) ? "approval-rejected" :
-                                                                         "approval-pending" %>">
-                                            <% if ("approved".equalsIgnoreCase(approvalStatus)) { %>
-                                                <i class="fas fa-check-circle"></i> Đã duyệt
-                                            <% } else if ("rejected".equalsIgnoreCase(approvalStatus)) { %>
-                                                <i class="fas fa-times-circle"></i> Từ chối
-                                            <% } else { %>
-                                                <i class="fas fa-clock"></i> Chờ duyệt
+                                        <div class="approval-cell">
+                                            <span class="approval-badge <%= "approved".equalsIgnoreCase(approvalStatus) ? "approval-approved" : 
+                                                                             "rejected".equalsIgnoreCase(approvalStatus) ? "approval-rejected" :
+                                                                             "approval-pending" %>">
+                                                <% if ("approved".equalsIgnoreCase(approvalStatus)) { %>
+                                                    <i class="fas fa-check-circle"></i> Đã duyệt
+                                                <% } else if ("rejected".equalsIgnoreCase(approvalStatus)) { %>
+                                                    <i class="fas fa-times-circle"></i> Từ chối
+                                                <% } else { %>
+                                                    <i class="fas fa-clock"></i> Chờ duyệt
+                                                <% } %>
+                                            </span>
+                                            <% if ("rejected".equalsIgnoreCase(approvalStatus) && rejectionReason != null && !rejectionReason.isEmpty()) { %>
+                                                <button class="btn-icon btn-view" title="Xem lý do từ chối" 
+                                                        data-course-title="<%= course.getTitle().replace("\"", "&quot;") %>"
+                                                        data-rejection-reason="<%= rejectionReason.replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;") %>"
+                                                        onclick="showRejectionReasonModal(this)">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
                                             <% } %>
-                                        </span>
-                                        <% if ("rejected".equalsIgnoreCase(approvalStatus) && rejectionReason != null && !rejectionReason.isEmpty()) { %>
-                                            <button class="btn-icon btn-view" title="Xem lý do từ chối" 
-                                                    data-course-title="<%= course.getTitle().replace("\"", "&quot;") %>"
-                                                    data-rejection-reason="<%= rejectionReason.replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;") %>"
-                                                    onclick="showRejectionReasonModal(this)">
-                                                <i class="fas fa-info-circle"></i>
-                                            </button>
-                                        <% } %>
+                                        </div>
                                     </td>
                                     <td><%= df.format(course.getPrice()) %> VNĐ</td>
                                     <td><%= course.getDiscount() > 0 ? (int)course.getDiscount() + "%" : "-" %></td>
@@ -642,10 +739,7 @@
                                     <td><%= course.getLeafCategoryId() != null ? course.getLeafCategoryId().getTitle() : "-" %></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn-icon btn-view" title="Xem" 
-                                                    onclick="viewCourse('<%= course.getId() %>')">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
+                                           
                                             <button class="btn-icon btn-edit" title="Sửa" 
                                                     onclick="editCourse('<%= course.getId() %>')">
                                                 <i class="fas fa-edit"></i>

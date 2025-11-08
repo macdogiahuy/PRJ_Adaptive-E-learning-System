@@ -117,14 +117,16 @@ public class MyCoursesServlet extends HttpServlet {
         try {
             logger.info("=== NATIVE QUERY FOR ENROLLMENTS ===");
             logger.info("User ID: " + userId);
+            logger.info("User ID Type: " + userId.getClass().getName());
+            logger.info("User ID Length: " + userId.length());
             
-            // Native SQL query với positional parameter
+            // Native SQL query - sử dụng CAST để đảm bảo type matching
             String sql = """
                 SELECT c.Id, c.Title, c.ThumbUrl, c.Price, c.Level, c.LearnerCount,
                        e.Status, e.CreationTime, e.BillId
                 FROM Courses c
                 INNER JOIN Enrollments e ON c.Id = e.CourseId
-                WHERE e.CreatorId = ?
+                WHERE CAST(e.CreatorId AS VARCHAR(36)) = ?
                 ORDER BY e.CreationTime DESC
                 """;
             
@@ -135,36 +137,79 @@ public class MyCoursesServlet extends HttpServlet {
             
             logger.info("Query returned " + results.size() + " rows");
             
+            // Debug: Log actual enrollments in database
+            String debugSql = "SELECT COUNT(*) FROM Enrollments WHERE CAST(CreatorId AS VARCHAR(36)) = ?";
+            Query debugQuery = em.createNativeQuery(debugSql);
+            debugQuery.setParameter(1, userId);
+            Object debugCount = debugQuery.getSingleResult();
+            logger.info("Total enrollments in DB for this user: " + debugCount);
+            
             for (Object[] row : results) {
                 try {
+                    logger.info("=== Processing row ===");
+                    logger.info("Row data: ID=" + row[0] + ", Title=" + row[1]);
+                    
+                    // Validate required fields
+                    if (row[0] == null || row[1] == null) {
+                        logger.severe("❌ SKIPPING: Missing required fields (ID or Title is NULL)");
+                        continue;
+                    }
+                    
                     CourseEnrollmentInfo info = new CourseEnrollmentInfo();
                     
-                    // Tạo course object từ raw data
+                    // Tạo course object từ raw data với NULL safety
                     Courses course = new Courses();
-                    course.setId(row[0] != null ? row[0].toString() : null);
-                    course.setTitle(row[1] != null ? row[1].toString() : "Untitled Course");
-                    course.setThumbUrl(row[2] != null ? row[2].toString() : null);
+                    course.setId(row[0].toString());
+                    course.setTitle(row[1].toString());
                     
+                    // ThumbUrl - NULL safe
+                    course.setThumbUrl(row[2] != null ? row[2].toString() : "/Adaptive_Elearning/assets/images/default-course.jpg");
+                    
+                    // Price - NULL safe with default 0
                     if (row[3] != null) {
-                        course.setPrice(((Number) row[3]).doubleValue());
+                        try {
+                            course.setPrice(((Number) row[3]).doubleValue());
+                        } catch (Exception e) {
+                            logger.warning("Price conversion failed, using 0: " + e.getMessage());
+                            course.setPrice(0.0);
+                        }
+                    } else {
+                        course.setPrice(0.0);
                     }
                     
+                    // Level - NULL safe with default
                     course.setLevel(row[4] != null ? row[4].toString() : "Beginner");
                     
+                    // LearnerCount - NULL safe with default 0
                     if (row[5] != null) {
-                        course.setLearnerCount(((Number) row[5]).intValue());
+                        try {
+                            course.setLearnerCount(((Number) row[5]).intValue());
+                        } catch (Exception e) {
+                            logger.warning("LearnerCount conversion failed, using 0: " + e.getMessage());
+                            course.setLearnerCount(0);
+                        }
+                    } else {
+                        course.setLearnerCount(0);
                     }
                     
-                    // Tạo enrollment object từ raw data
+                    // Tạo enrollment object từ raw data với NULL safety
                     Enrollments enrollment = new Enrollments();
                     enrollment.setStatus(row[6] != null ? row[6].toString() : "ACTIVE");
                     
+                    // CreationTime - NULL safe
                     if (row[7] != null) {
-                        if (row[7] instanceof java.sql.Timestamp) {
-                            enrollment.setCreationTime(new java.util.Date(((java.sql.Timestamp) row[7]).getTime()));
-                        } else if (row[7] instanceof java.util.Date) {
-                            enrollment.setCreationTime((java.util.Date) row[7]);
+                        try {
+                            if (row[7] instanceof java.sql.Timestamp) {
+                                enrollment.setCreationTime(new java.util.Date(((java.sql.Timestamp) row[7]).getTime()));
+                            } else if (row[7] instanceof java.util.Date) {
+                                enrollment.setCreationTime((java.util.Date) row[7]);
+                            }
+                        } catch (Exception e) {
+                            logger.warning("CreationTime conversion failed: " + e.getMessage());
+                            enrollment.setCreationTime(new java.util.Date()); // Use current date as fallback
                         }
+                    } else {
+                        enrollment.setCreationTime(new java.util.Date());
                     }
                     
                     info.setCourse(course);
@@ -173,10 +218,15 @@ public class MyCoursesServlet extends HttpServlet {
                     
                     result.add(info);
                     
-                    logger.info("Added course: " + course.getTitle() + " - Status: " + enrollment.getStatus());
+                    logger.info("✓ Successfully added course: " + course.getTitle() + " - Status: " + enrollment.getStatus());
                     
                 } catch (Exception rowError) {
-                    logger.log(Level.WARNING, "Error processing row", rowError);
+                    logger.log(Level.SEVERE, "❌ ERROR processing row - THIS COURSE WILL BE SKIPPED!", rowError);
+                    if (row != null && row.length > 1) {
+                        logger.severe("Row details: Title=" + row[1]);
+                    }
+                    logger.severe("Full row data: " + java.util.Arrays.toString(row));
+                    rowError.printStackTrace();
                 }
             }
             
@@ -209,13 +259,18 @@ public class MyCoursesServlet extends HttpServlet {
         CourseStats stats = new CourseStats();
         
         try {
-            // Count total enrollments
-            String countSql = "SELECT COUNT(*) FROM Enrollments WHERE CreatorId = ?";
+            logger.info("=== GETTING COURSE STATS ===");
+            logger.info("User ID: " + userId);
+            
+            // Count total enrollments - sử dụng CAST để match type
+            String countSql = "SELECT COUNT(*) FROM Enrollments WHERE CAST(CreatorId AS VARCHAR(36)) = ?";
             Query countQuery = em.createNativeQuery(countSql);
             countQuery.setParameter(1, userId);
             
             Number count = (Number) countQuery.getSingleResult();
             stats.setTotalCourses(count.intValue());
+            
+            logger.info("Total enrollments found: " + count.intValue());
             
             // Count completed courses (placeholder logic)
             stats.setCompletedCourses((int) (count.intValue() * 0.3)); // 30% completed
@@ -226,6 +281,7 @@ public class MyCoursesServlet extends HttpServlet {
             
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error calculating course stats", e);
+            e.printStackTrace();
             // Default stats
             stats.setTotalCourses(0);
             stats.setCompletedCourses(0);
