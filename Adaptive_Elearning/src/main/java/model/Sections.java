@@ -4,9 +4,6 @@
  */
 package model;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -20,13 +17,21 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  *
- * @author LP
+ * @author ADMIN
  */
 @Entity
 @Table(name = "Sections")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Sections.findAll", query = "SELECT s FROM Sections s"),
     @NamedQuery(name = "Sections.findById", query = "SELECT s FROM Sections s WHERE s.id = :id"),
@@ -40,32 +45,40 @@ public class Sections implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 36)
     @Column(name = "Id")
     private String id;
     @Basic(optional = false)
-    @Column(name = "Index")
+    @NotNull
+    @Column(name = "[Index]")
     private short index;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "Title")
     private String title;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "LectureCount")
     private short lectureCount;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "CreationTime")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "LastModificationTime")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModificationTime;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sectionId")
-    private List<Assignments> assignmentsList;
+    private Collection<Assignments> assignmentsCollection;
     @JoinColumn(name = "CourseId", referencedColumnName = "Id")
     @ManyToOne(optional = false)
     private Courses courseId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sectionId")
-    private List<Lectures> lecturesList;
+    private Collection<Lectures> lecturesCollection;
 
     public Sections() {
     }
@@ -131,12 +144,13 @@ public class Sections implements Serializable {
         this.lastModificationTime = lastModificationTime;
     }
 
-    public List<Assignments> getAssignmentsList() {
-        return assignmentsList;
+    @XmlTransient
+    public Collection<Assignments> getAssignmentsCollection() {
+        return assignmentsCollection;
     }
 
-    public void setAssignmentsList(List<Assignments> assignmentsList) {
-        this.assignmentsList = assignmentsList;
+    public void setAssignmentsCollection(Collection<Assignments> assignmentsCollection) {
+        this.assignmentsCollection = assignmentsCollection;
     }
 
     public Courses getCourseId() {
@@ -147,12 +161,13 @@ public class Sections implements Serializable {
         this.courseId = courseId;
     }
 
-    public List<Lectures> getLecturesList() {
-        return lecturesList;
+    @XmlTransient
+    public Collection<Lectures> getLecturesCollection() {
+        return lecturesCollection;
     }
 
-    public void setLecturesList(List<Lectures> lecturesList) {
-        this.lecturesList = lecturesList;
+    public void setLecturesCollection(Collection<Lectures> lecturesCollection) {
+        this.lecturesCollection = lecturesCollection;
     }
 
     @Override

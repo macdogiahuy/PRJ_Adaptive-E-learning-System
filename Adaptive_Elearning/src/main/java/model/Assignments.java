@@ -4,8 +4,6 @@
  */
 package model;
 
-import java.io.Serializable;
-import java.util.List;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,13 +15,20 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
+import java.util.Collection;
 
 /**
  *
- * @author LP
+ * @author ADMIN
  */
 @Entity
 @Table(name = "Assignments")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Assignments.findAll", query = "SELECT a FROM Assignments a"),
     @NamedQuery(name = "Assignments.findById", query = "SELECT a FROM Assignments a WHERE a.id = :id"),
@@ -36,18 +41,25 @@ public class Assignments implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 36)
     @Column(name = "Id")
     private String id;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "Name")
     private String name;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "Duration")
     private int duration;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "QuestionCount")
     private int questionCount;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "GradeToPass")
     private double gradeToPass;
     @JoinColumn(name = "SectionId", referencedColumnName = "Id")
@@ -57,9 +69,9 @@ public class Assignments implements Serializable {
     @ManyToOne(optional = false)
     private Users creatorId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignmentId")
-    private List<McqQuestions> mcqQuestionsList;
+    private Collection<McqQuestions> mcqQuestionsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignmentId")
-    private List<Submissions> submissionsList;
+    private Collection<Submissions> submissionsCollection;
 
     public Assignments() {
     }
@@ -132,20 +144,22 @@ public class Assignments implements Serializable {
         this.creatorId = creatorId;
     }
 
-    public List<McqQuestions> getMcqQuestionsList() {
-        return mcqQuestionsList;
+    @XmlTransient
+    public Collection<McqQuestions> getMcqQuestionsCollection() {
+        return mcqQuestionsCollection;
     }
 
-    public void setMcqQuestionsList(List<McqQuestions> mcqQuestionsList) {
-        this.mcqQuestionsList = mcqQuestionsList;
+    public void setMcqQuestionsCollection(Collection<McqQuestions> mcqQuestionsCollection) {
+        this.mcqQuestionsCollection = mcqQuestionsCollection;
     }
 
-    public List<Submissions> getSubmissionsList() {
-        return submissionsList;
+    @XmlTransient
+    public Collection<Submissions> getSubmissionsCollection() {
+        return submissionsCollection;
     }
 
-    public void setSubmissionsList(List<Submissions> submissionsList) {
-        this.submissionsList = submissionsList;
+    public void setSubmissionsCollection(Collection<Submissions> submissionsCollection) {
+        this.submissionsCollection = submissionsCollection;
     }
 
     @Override
