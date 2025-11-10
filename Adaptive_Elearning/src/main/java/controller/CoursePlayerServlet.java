@@ -103,6 +103,7 @@ public class CoursePlayerServlet extends HttpServlet {
 
             // 🔹 Lấy danh sách bài học đã hoàn thành từ DB
             List<String> completedLectures = completionDAO.getCompletedLectureIds(currentUser.getId(), courseId);
+            List<String> completedAssignments = completionDAO.getCompletedAssignmentIds(currentUser.getId(), courseId);
 
             // 🔹 Gán dữ liệu cho JSP
             request.setAttribute("returnCourseId", courseId);
@@ -111,6 +112,7 @@ public class CoursePlayerServlet extends HttpServlet {
             request.setAttribute("currentLecture", currentLecture);
             request.setAttribute("currentMaterials", currentMaterials);
             request.setAttribute("completedLectures", completedLectures);
+            request.setAttribute("completedAssignments", completedAssignments);
 
             request.getRequestDispatcher("course-player.jsp").forward(request, response);
 

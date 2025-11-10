@@ -32,10 +32,11 @@ public class MarkCompleteServlet extends HttpServlet {
         // 🔹 Ghi tiến độ vào DB
         try {
             CompletionDAO completionDAO = new CompletionDAO();
+            
+            // Gọi hàm đã sửa, hàm này giờ đã an toàn
             completionDAO.markAsComplete(currentUser.getId(), lectureId);
 
-            // 🕓 Tạm dừng 0.1 giây để DB chắc chắn commit
-            Thread.sleep(100);
+            // [ĐÃ XÓA] Dòng Thread.sleep(100);
 
         } catch (Exception e) {
             e.printStackTrace();
