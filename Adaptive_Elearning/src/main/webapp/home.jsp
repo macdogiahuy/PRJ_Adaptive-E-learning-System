@@ -133,7 +133,7 @@
                 
                 <div class="nav-menu">
                     <a href="/Adaptive_Elearning/" class="nav-link active">Trang chủ</a>
-                    <a href="/Adaptive_Elearning/courses" class="nav-link">Khóa học</a>
+                   
                    
                     <a href="/Adaptive_Elearning/about" class="nav-link">Giới thiệu</a>
                     <a href="/Adaptive_Elearning/contact" class="nav-link">Liên hệ</a>
@@ -257,7 +257,7 @@
                         String courseImage = (course.getThumbUrl() != null && !course.getThumbUrl().isEmpty()) 
                                            ? course.getThumbUrl() : defaultImage;
                 %>
-                    <article class="course-card">
+                    <article class="course-card" data-course-id="<%= course.getId() %>" style="cursor: pointer;">
                         <div class="course-image">
                             <img data-src="<%= courseImage %>" 
                                  alt="<%= course.getTitle() %>" 
@@ -469,6 +469,16 @@
                 setTimeout(() => alert.remove(), 300);
             }
         }
+
+        // Debug: Test course card click
+        console.log('Course cards found:', document.querySelectorAll('.course-card').length);
+        document.querySelectorAll('.course-card').forEach((card, index) => {
+            console.log(`Card ${index}:`, {
+                hasCourseId: card.hasAttribute('data-course-id'),
+                courseId: card.getAttribute('data-course-id'),
+                cursor: window.getComputedStyle(card).cursor
+            });
+        });}
     </script>
 
     <!-- Gemini  Toggle Button & Popup -->

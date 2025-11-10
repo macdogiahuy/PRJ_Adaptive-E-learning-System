@@ -98,7 +98,7 @@
                         </div>
                         <c:forEach items="${courses}" var="course">
                             <div class="col-md-4 mb-4 d-flex">
-                                <div class="card course-card h-100 w-100 shadow rounded-4">
+                                <div class="card course-card h-100 w-100 shadow rounded-4" data-course-id="${course.id}" style="cursor: pointer;">
                                     <img src="${fn:escapeXml(course.thumbUrl)}" class="card-img-top course-image rounded-top-4" alt="${fn:escapeXml(course.title)}" onerror="this.src='${pageContext.request.contextPath}/assets/img/demo/java.jpg'" />
                                     <div class="card-body">
                                         <h5 class="card-title text-truncate" title="${fn:escapeXml(course.title)}">${fn:escapeXml(course.title)}</h5>
@@ -175,6 +175,19 @@
                 } else {
                     hidden.forEach(function(el){ el.style.display = 'none'; });
                     btn.textContent = 'Show more';
+                }
+            });
+
+            // Course card click to detail page
+            document.addEventListener('click', function(e){
+                var courseCard = e.target.closest('.course-card');
+                if (courseCard && courseCard.hasAttribute('data-course-id')) {
+                    // Không chuyển hướng nếu click vào button hoặc link
+                    if (e.target.closest('button, a')) {
+                        return;
+                    }
+                    var courseId = courseCard.getAttribute('data-course-id');
+                    window.location.href = '${pageContext.request.contextPath}/detail?id=' + courseId;
                 }
             });
         })();

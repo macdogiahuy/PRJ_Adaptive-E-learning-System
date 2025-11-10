@@ -355,7 +355,7 @@
                 
                 <div class="nav-menu">
                     <a href="/Adaptive_Elearning/" class="nav-link">Trang chủ</a>
-                    <a href="/Adaptive_Elearning/courses" class="nav-link">Khóa học</a>
+                  
                     <a href="/Adaptive_Elearning/about" class="nav-link">Giới thiệu</a>
                     <a href="/Adaptive_Elearning/contact" class="nav-link active">Liên hệ</a>
                 </div>
