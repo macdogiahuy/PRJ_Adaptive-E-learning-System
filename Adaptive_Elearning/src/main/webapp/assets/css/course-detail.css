@@ -535,11 +535,35 @@ body {
     text-align: center;
     text-decoration: none;
     display: block;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary-gradient:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary-gradient.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.btn-primary-gradient.added {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.btn-primary-gradient i.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .btn-secondary {
@@ -966,5 +990,159 @@ body {
     
     .more-courses {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   NOTIFICATION STYLES
+   ============================================ */
+.notification {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    min-width: 350px;
+    max-width: 450px;
+    padding: 22px 28px;
+    border-radius: 16px;
+    display: flex !important;
+    align-items: center;
+    gap: 18px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.5;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3), 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 999999 !important;
+    opacity: 0;
+    transform: translateX(500px);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+}
+
+.notification.show {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+    pointer-events: auto;
+}
+
+.notification i {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    display: block !important;
+}
+
+.notification span {
+    flex: 1;
+    display: block !important;
+    line-height: 1.6;
+}
+
+/* Success notification - Green */
+.notification-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.notification-success i {
+    color: #ffffff !important;
+}
+
+.notification-success span {
+    color: #ffffff !important;
+}
+
+/* Warning notification - Yellow/Orange */
+.notification-warning {
+    background: linear-gradient(135deg, #f5af19 0%, #f12711 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.notification-warning i {
+    color: #ffffff !important;
+}
+
+.notification-warning span {
+    color: #ffffff !important;
+}
+
+/* Error notification - Red */
+.notification-error {
+    background: linear-gradient(135deg, #f85032 0%, #e73827 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.notification-error i {
+    color: #ffffff !important;
+}
+
+.notification-error span {
+    color: #ffffff !important;
+}
+
+/* Info notification - Blue */
+.notification-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.notification-info i {
+    color: #ffffff !important;
+}
+
+.notification-info span {
+    color: #ffffff !important;
+}
+
+/* Notification animation */
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Ripple effect for buttons */
+@keyframes ripple {
+    from {
+        transform: scale(0);
+        opacity: 0.8;
+    }
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Responsive notification */
+@media (max-width: 576px) {
+    .notification {
+        min-width: auto;
+        max-width: calc(100% - 40px);
+        right: 20px;
+        left: 20px;
+        font-size: 0.95rem;
+        padding: 16px 20px;
+    }
+    
+    .notification i {
+        font-size: 1.3rem;
     }
 }

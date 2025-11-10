@@ -270,10 +270,11 @@
                         </div>
 
                         <div class="cta-buttons">
-                            <a href="${pageContext.request.contextPath}/cart/add?courseId=${course.id}" 
-                               class="btn-primary-gradient">
+                            <button class="btn-primary-gradient add-to-cart-detail" 
+                                    data-course-id="${course.id}"
+                                    type="button">
                                 <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ hàng
-                            </a>
+                            </button>
                             <a href="${pageContext.request.contextPath}/checkout?courseId=${course.id}" 
                                class="btn-secondary">
                                 <i class="fa-solid fa-bolt"></i> Mua ngay
@@ -355,8 +356,105 @@
         });
 
         // Add to cart animation
-        document.querySelectorAll('.btn-primary-gradient').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+        console.log('🔍 Setting up add-to-cart buttons...');
+        
+        // Clean up any old notifications on page load
+        document.querySelectorAll('.custom-notification').forEach(n => n.remove());
+        
+        // Remove any stray "false" text elements (debugging artifacts)
+        document.querySelectorAll('body > *').forEach(el => {
+            if (el.textContent.trim() === 'false' && 
+                !el.classList.contains('custom-notification') &&
+                el.children.length === 0) {
+                console.log('🗑️ Removing debug element:', el);
+                el.remove();
+            }
+        });
+        
+        const cartButtons = document.querySelectorAll('.add-to-cart-detail');
+        console.log('Found buttons:', cartButtons.length);
+        
+        cartButtons.forEach((btn, index) => {
+            console.log(`Button ${index}:`, {
+                courseId: btn.getAttribute('data-course-id'),
+                className: btn.className
+            });
+            
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                console.log('🛒 Add to cart clicked!');
+                
+                const courseId = this.getAttribute('data-course-id');
+                console.log('Course ID:', courseId);
+                
+                // Prevent multiple clicks
+                if (this.classList.contains('loading')) return;
+                
+                this.classList.add('loading');
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang thêm...';
+
+                try {
+                    console.log('📤 Sending request to add to cart...');
+                    const response = await fetch('<c:url value="/cart" />', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'action=add&courseId=' + courseId
+                    });
+
+                    console.log('📥 Response status:', response.status);
+                    const result = await response.json();
+                    console.log('📦 Full Result:', JSON.stringify(result, null, 2));
+
+                    // XỬ LÝ KẾT QUẢ
+                    if (result.success === true) {
+                        // ✅ TRƯỜNG HỢP 1: THÀNH CÔNG - Màu XANH LÁ
+                        console.log('✅ SUCCESS: Added to cart');
+                        showNotification('Thêm khóa học vào giỏ hàng thành công! 🎉', 'success');
+                        
+                        this.classList.add('added');
+                        this.innerHTML = '<i class="fas fa-check"></i> Đã thêm';
+                        
+                        // Update cart badge
+                        const cartBadge = document.querySelector('.cart-badge');
+                        if (cartBadge && result.cartCount) {
+                            cartBadge.textContent = result.cartCount;
+                            cartBadge.style.display = 'flex';
+                        }
+                        
+                        setTimeout(() => {
+                            this.classList.remove('added');
+                            this.innerHTML = originalText;
+                        }, 2000);
+                        
+                    } else if (result.success === false) {
+                        // THẤT BẠI - Kiểm tra nguyên nhân
+                        
+                        if (result.alreadyOwned === true) {
+                            // 🚫 TRƯỜNG HỢP 2: ĐÃ ĐĂNG KÝ - Màu ĐỎ
+                            console.log('🚫 FAILED: Already enrolled');
+                            showNotification('Bạn đã đăng ký khóa học này rồi! Hãy kiểm tra trong mục "Khóa học của tôi". 📚', 'warning');
+                            
+                        } else {
+                            // ℹ️ TRƯỜNG HỢP 3: ĐÃ CÓ TRONG GIỎ - Màu XANH DƯƠNG
+                            console.log('ℹ️ FAILED: Already in cart or other reason');
+                            const msg = result.message || 'Khóa học này đã có trong giỏ hàng của bạn rồi!';
+                            showNotification(msg, 'info');
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('💥 Error adding to cart:', error);
+                    showNotification('Có lỗi xảy ra khi thêm vào giỏ hàng! Vui lòng thử lại.', 'error');
+                } finally {
+                    this.classList.remove('loading');
+                    if (!this.classList.contains('added')) {
+                        this.innerHTML = originalText;
+                    }
+                }
+                
                 // Add ripple effect
                 const ripple = document.createElement('span');
                 ripple.style.position = 'absolute';
@@ -373,6 +471,168 @@
                 }, 600);
             });
         });
+
+        // Notification function - DEFENSIVE VERSION
+        function showNotification(message, type = 'info') {
+            // Normalize / coerce message
+            const defaultMessages = {
+                success: 'Thêm khóa học vào giỏ hàng thành công! 🎉',
+                warning: 'Bạn đã đăng ký khóa học này rồi! Kiểm tra mục "Khóa học của tôi".',
+                info: 'Khóa học này đã có trong giỏ hàng của bạn.',
+                error: 'Có lỗi xảy ra. Vui lòng thử lại.'
+            };
+            
+            let finalMessage = message; // Use different variable to prevent override
+            
+            // Handle object parameter (legacy calls)
+            if (typeof finalMessage === 'object' && finalMessage !== null) {
+                console.warn('[notify] Object detected, extracting message:', finalMessage);
+                type = finalMessage.type || type;
+                finalMessage = finalMessage.message || finalMessage.text || defaultMessages[type];
+            }
+            
+            if (finalMessage === false || finalMessage === true) {
+                console.warn('[notify] Boolean message detected, coercing:', finalMessage);
+                finalMessage = defaultMessages[type] || defaultMessages.info;
+            } else if (typeof finalMessage !== 'string') {
+                console.warn('[notify] Non-string message detected, coercing:', finalMessage, typeof finalMessage);
+                finalMessage = defaultMessages[type] || defaultMessages.info;
+            } else if (finalMessage.trim().toLowerCase() === 'false') {
+                console.warn('[notify] Literal "false" string detected, replacing.');
+                finalMessage = defaultMessages[type] || defaultMessages.info;
+            }
+
+            console.log('🔔 Showing notification:', finalMessage, '| type:', type);
+            
+            // Remove existing notifications
+            document.querySelectorAll('.custom-notification').forEach(n => n.remove());
+
+            // Icon map
+            const iconMap = {
+                success: '✅',
+                error: '❌',
+                warning: '🚫',
+                info: 'ℹ️'
+            };
+            
+            // Background colors - SOLID COLORS
+            const bgMap = {
+                success: '#10b981',
+                warning: '#ef4444',
+                error: '#ef4444',
+                info: '#3b82f6'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = 'custom-notification';
+            Object.assign(notification.style, {
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                minWidth: '320px',
+                maxWidth: '450px',
+                padding: '20px 24px',
+                borderRadius: '12px',
+                backgroundColor: bgMap[type] || bgMap.info,
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: '600',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                zIndex: '9999999',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                opacity: '0',
+                transform: 'translateX(400px)',
+                transition: 'all 0.4s ease'
+            });
+
+            // Create elements manually to avoid template literal scope issues
+            const iconSpan = document.createElement('span');
+            iconSpan.style.fontSize = '24px';
+            iconSpan.textContent = iconMap[type] || iconMap.info;
+            
+            const textSpan = document.createElement('span');
+            textSpan.className = 'notification-text';
+            textSpan.style.flex = '1';
+            textSpan.style.color = '#fff';
+            textSpan.textContent = finalMessage; // Direct assignment
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.setAttribute('aria-label', 'Đóng');
+            closeBtn.style.cssText = 'background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px;';
+            closeBtn.textContent = '✖';
+            
+            notification.appendChild(iconSpan);
+            notification.appendChild(textSpan);
+            notification.appendChild(closeBtn);
+            
+            console.log('📝 Text span content:', textSpan.textContent);
+            console.log('📝 Final message:', finalMessage);
+
+            // Close button
+            closeBtn.addEventListener('click', () => {
+                hideNotification(notification);
+            });
+
+            document.body.appendChild(notification);
+            notification.offsetHeight; // reflow
+            requestAnimationFrame(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+                const textNode = notification.querySelector('.notification-text');
+                console.log('🔍 After render - textNode:', textNode);
+                console.log('🔍 After render - textContent:', textNode ? textNode.textContent : 'NULL');
+                
+                if (textNode) {
+                    const currentText = textNode.textContent.trim().toLowerCase();
+                    console.log('🔍 Current text lowercase:', currentText);
+                    
+                    if (currentText === 'false' || currentText === '[object object]') {
+                        console.warn('[notify] ⚠️ Post-render bad text detected, fixing!');
+                        const defaultMessages = {
+                            success: 'Thêm khóa học vào giỏ hàng thành công! 🎉',
+                            warning: 'Bạn đã đăng ký khóa học này rồi! Kiểm tra mục "Khóa học của tôi".',
+                            info: 'Khóa học này đã có trong giỏ hàng của bạn.',
+                            error: 'Có lỗi xảy ra. Vui lòng thử lại.'
+                        };
+                        textNode.textContent = defaultMessages[type] || defaultMessages.info;
+                        console.log('✅ Fixed to:', textNode.textContent);
+                    }
+                }
+            });
+
+            // Auto hide
+            const ttl = 5000;
+            const autoTimer = setTimeout(() => hideNotification(notification), ttl);
+            notification.addEventListener('mouseenter', () => {
+                clearTimeout(autoTimer); // pause on hover
+            });
+        }
+
+        function hideNotification(el) {
+            if (! el) return;
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(400px)';
+            setTimeout(() => el.remove(), 400);
+        }
+
+        // MutationObserver to catch rogue 'false' text nodes created elsewhere
+        const debugFalseObserver = new MutationObserver(mutations => {
+            mutations.forEach(m => {
+                m.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // element
+                        const text = node.textContent && node.textContent.trim();
+                        if (text === 'false' && !node.classList.contains('custom-notification')) {
+                            console.warn('[notify] Removing rogue false element:', node);
+                            node.remove();
+                        }
+                    }
+                });
+            });
+        });
+        debugFalseObserver.observe(document.body, { childList: true, subtree: true });
 
         // Lazy loading for images
         if ('IntersectionObserver' in window) {
@@ -416,6 +676,90 @@
 
     <!-- Additional Styles for Instructor Card -->
     <style>
+        /* ========================================
+           NOTIFICATION STYLES - INLINE
+           ======================================== */
+        .notification {
+            position: fixed !important;
+            top: 30px !important;
+            right: 30px !important;
+            min-width: 350px !important;
+            max-width: 450px !important;
+            padding: 22px 28px !important;
+            border-radius: 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 18px !important;
+            font-size: 1.05rem !important;
+            font-weight: 600 !important;
+            line-height: 1.5 !important;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+            z-index: 999999 !important;
+            opacity: 0 !important;
+            transform: translateX(500px) !important;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+            pointer-events: none !important;
+        }
+
+        .notification.show {
+            opacity: 1 !important;
+            transform: translateX(0) !important;
+            pointer-events: auto !important;
+        }
+
+        .notification i {
+            font-size: 1.8rem !important;
+            flex-shrink: 0 !important;
+            display: block !important;
+            color: #ffffff !important;
+        }
+
+        .notification span {
+            flex: 1 !important;
+            display: block !important;
+            line-height: 1.6 !important;
+            color: #ffffff !important;
+        }
+
+        /* Success - Green */
+        .notification-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+        }
+
+        /* Warning - Yellow/Orange */
+        .notification-warning {
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%) !important;
+        }
+
+        /* Error - Red */
+        .notification-error {
+            background: linear-gradient(135deg, #f85032 0%, #e73827 100%) !important;
+        }
+
+        /* Info - Blue */
+        .notification-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .notification {
+                min-width: auto !important;
+                max-width: calc(100% - 40px) !important;
+                right: 20px !important;
+                left: 20px !important;
+                font-size: 0.95rem !important;
+                padding: 18px 22px !important;
+            }
+            
+            .notification i {
+                font-size: 1.5rem !important;
+            }
+        }
+        
+        /* ========================================
+           INSTRUCTOR CARD STYLES
+           ======================================== */
         .instructor-card {
             background: linear-gradient(135deg, #f8f9fd 0%, #e8eaf6 100%);
             padding: 30px;

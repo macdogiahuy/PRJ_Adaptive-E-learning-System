@@ -817,7 +817,22 @@ body {
     max-width: 400px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    animation: slideInRight 0.3s ease-out;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification i {
+    font-size: 1.5rem;
 }
 
 .notification-success {
@@ -836,6 +851,12 @@ body {
     background: var(--warning-50);
     border: 1px solid var(--warning-500);
     color: var(--warning-500);
+}
+
+.notification-info {
+    background: var(--primary-50);
+    border: 1px solid var(--primary-500);
+    color: var(--primary-500);
 }
 
 .notification-content {

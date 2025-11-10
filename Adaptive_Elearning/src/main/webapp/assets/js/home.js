@@ -61,7 +61,8 @@ class CartManager {
             const result = await response.json();
 
             if (result.success) {
-                this.showNotification('Đã thêm khóa học vào giỏ hàng!', 'success');
+                // ✅ Thêm thành công
+                this.showNotification('✅ Đã thêm khóa học vào giỏ hàng!', 'success');
                 button.classList.add('added');
                 button.innerHTML = '<i class="fas fa-check"></i> Đã thêm';
                 this.updateCartBadge();
@@ -71,11 +72,18 @@ class CartManager {
                     button.innerHTML = originalText;
                 }, 2000);
             } else {
-                this.showNotification(result.message || 'Có lỗi xảy ra!', 'error');
+                // ❌ Thất bại - kiểm tra lý do
+                if (result.alreadyOwned) {
+                    // Đã sở hữu khóa học
+                    this.showNotification('⚠️ ' + (result.message || 'Bạn đã sở hữu khóa học này!'), 'warning');
+                } else {
+                    // Lỗi khác (đã có trong giỏ, etc.)
+                    this.showNotification('ℹ️ ' + (result.message || 'Khóa học đã có trong giỏ hàng!'), 'info');
+                }
             }
         } catch (error) {
             console.error('Error adding to cart:', error);
-            this.showNotification('Có lỗi xảy ra khi thêm vào giỏ hàng!', 'error');
+            this.showNotification('❌ Có lỗi xảy ra khi thêm vào giỏ hàng!', 'error');
         } finally {
             button.classList.remove('loading');
             if (!button.classList.contains('added')) {
@@ -120,24 +128,20 @@ class CartManager {
         };
 
         notification.innerHTML = `
-            <div class="notification-content">
-                <i class="${iconMap[type] || iconMap.info}"></i>
-                <span>${message}</span>
-                <button class="notification-close">&times;</button>
-            </div>
+            <i class="${iconMap[type] || iconMap.info}"></i>
+            <span>${message}</span>
         `;
 
         document.body.appendChild(notification);
 
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        // Show notification with animation
+        setTimeout(() => notification.classList.add('show'), 100);
 
-        // Close button
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            notification.remove();
-        });
+        // Auto remove after 3 seconds with fade out
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 }
 
