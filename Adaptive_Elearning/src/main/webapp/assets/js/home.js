@@ -14,10 +14,27 @@ class CartManager {
     }
 
     bindEvents() {
-        // Add to cart buttons
+        // Handle both cart button and card click in one listener
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.add-to-cart-btn')) {
-                this.handleAddToCart(e.target.closest('.add-to-cart-btn'));
+            // Check if clicking on add to cart button first
+            const addToCartBtn = e.target.closest('.add-to-cart-btn');
+            if (addToCartBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleAddToCart(addToCartBtn);
+                return;
+            }
+
+            // Check if clicking on enroll button or any link
+            if (e.target.closest('.enroll-btn, a')) {
+                return; // Let default behavior happen
+            }
+
+            // Then check for course card click
+            const courseCard = e.target.closest('.course-card');
+            if (courseCard && courseCard.hasAttribute('data-course-id')) {
+                const courseId = courseCard.getAttribute('data-course-id');
+                window.location.href = `/Adaptive_Elearning/detail?id=${courseId}`;
             }
         });
     }

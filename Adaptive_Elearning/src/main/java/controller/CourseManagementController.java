@@ -34,6 +34,8 @@ public class CourseManagementController {
         private int ratingCount;
         private long totalRating;
         private String instructorName;
+        private String description;
+        private String intro;
         
         // Constructors
         public Course() {}
@@ -53,6 +55,17 @@ public class CourseManagementController {
             this.ratingCount = ratingCount;
             this.totalRating = totalRating;
             this.instructorName = instructorName;
+        }
+        
+        // Constructor with description
+        public Course(String id, String title, String thumbUrl, String status, 
+                     double price, double discount, Date discountExpiry, String level,
+                     int learnerCount, int ratingCount, long totalRating, 
+                     String instructorName, String description, String intro) {
+            this(id, title, thumbUrl, status, price, discount, discountExpiry, level,
+                 learnerCount, ratingCount, totalRating, instructorName);
+            this.description = description;
+            this.intro = intro;
         }
         
         // Getters and Setters
@@ -91,6 +104,12 @@ public class CourseManagementController {
         
         public String getInstructorName() { return instructorName; }
         public void setInstructorName(String instructorName) { this.instructorName = instructorName; }
+        
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        
+        public String getIntro() { return intro; }
+        public void setIntro(String intro) { this.intro = intro; }
         
         // Helper methods
         public boolean hasDiscount() {
@@ -468,6 +487,7 @@ public class CourseManagementController {
     public Course getCourseById(String id) throws SQLException {
         String sql = "SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, " +
                 "c.DiscountExpiry, c.Level, c.LearnerCount, c.RatingCount, c.TotalRating, " +
+                "c.Description, c.Intro, " +
                 "u.FullName as InstructorName " +
                 "FROM Courses c LEFT JOIN Users u ON c.InstructorId = u.Id WHERE c.Id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -487,7 +507,9 @@ public class CourseManagementController {
                         rs.getInt("LearnerCount"),
                         rs.getInt("RatingCount"),
                         rs.getLong("TotalRating"),
-                        rs.getString("InstructorName")
+                        rs.getString("InstructorName"),
+                        rs.getString("Description"),
+                        rs.getString("Intro")
                     );
                 }
             }
@@ -497,11 +519,11 @@ public class CourseManagementController {
 
     // Get more courses by instructor, excluding the current course
     public List<Course> getCoursesByInstructor(String instructorName, String excludeCourseId) throws SQLException {
-        String sql = "SELECT c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, " +
+        String sql = "SELECT TOP 4 c.Id, c.Title, c.ThumbUrl, c.Status, c.Price, c.Discount, " +
                 "c.DiscountExpiry, c.Level, c.LearnerCount, c.RatingCount, c.TotalRating, " +
-                "u.FullName as InstructorName " +
+                "u.FullName as InstructorName, c.Description, c.Intro " +
                 "FROM Courses c LEFT JOIN Users u ON c.InstructorId = u.Id " +
-                "WHERE u.FullName = ? AND c.Id <> ? ORDER BY c.CreationTime DESC LIMIT 4";
+                "WHERE u.FullName = ? AND c.Id <> ? ORDER BY c.CreationTime DESC";
         List<Course> courses = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -521,7 +543,9 @@ public class CourseManagementController {
                         rs.getInt("LearnerCount"),
                         rs.getInt("RatingCount"),
                         rs.getLong("TotalRating"),
-                        rs.getString("InstructorName")
+                        rs.getString("InstructorName"),
+                        rs.getString("Description"),
+                        rs.getString("Intro")
                     ));
                 }
             }

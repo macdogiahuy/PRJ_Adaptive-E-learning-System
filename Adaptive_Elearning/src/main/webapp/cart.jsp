@@ -60,7 +60,7 @@
                 
                 <div class="nav-menu">
                     <a href="/Adaptive_Elearning/" class="nav-link">Trang chủ</a>
-                    <a href="/Adaptive_Elearning/courses" class="nav-link">Khóa học</a>
+                  
                     <% if (u != null) { %>
                         <a href="/Adaptive_Elearning/my-courses" class="nav-link">Khóa học của tôi</a>
                     <% } %>

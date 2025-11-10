@@ -535,6 +535,7 @@ body {
     transition: all var(--animate-duration);
     opacity: 0;
     transform: translateY(20px);
+    cursor: pointer;
 }
 
 .course-card:hover {
@@ -634,6 +635,8 @@ body {
 .course-actions {
     display: flex;
     gap: 0.5rem;
+    position: relative;
+    z-index: 10;
 }
 
 .add-to-cart-btn,
@@ -651,6 +654,8 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: relative;
+    z-index: 10;
 }
 
 .add-to-cart-btn:hover,
