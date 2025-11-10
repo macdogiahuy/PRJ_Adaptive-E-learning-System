@@ -3,6 +3,7 @@ package controller;
 import client.CatApiClient;
 import com.google.gson.*;
 import dao.CatResultsDAO;
+import dao.CompletionDAO;
 import dao.QuizDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,6 +17,7 @@ public class AdaptiveQuizServlet extends HttpServlet {
     private CatApiClient catApi;
     private QuizDAO quizDAO = new QuizDAO();
     private CatResultsDAO resultsDAO = new CatResultsDAO();
+    private CompletionDAO completionDAO = new CompletionDAO();
 
     @Override
     public void init() throws ServletException {
@@ -249,6 +251,19 @@ public class AdaptiveQuizServlet extends HttpServlet {
 
                 boolean passed = mark >= gradeToPass;
                 System.out.println("🎯 GradeToPass = " + gradeToPass + " → Passed = " + passed);
+                if (passed) {
+                try {
+                    // Lấy assignmentId từ session (vì nó vẫn còn đó)
+                    String assignIdToMark = (String) session.getAttribute("cat_assignmentId");
+                    
+                    if (assignIdToMark != null) {
+                        completionDAO.markAssignmentAsComplete(userId, assignIdToMark);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Lỗi khi tự động đánh dấu hoàn thành assignment: " + e.getMessage());
+                }
+            }
 
                 req.setAttribute("correct", correct);
                 req.setAttribute("total", total);

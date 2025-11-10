@@ -28,10 +28,11 @@
     <class>model.Lectures</class>
     <class>model.Enrollments</class>
     <class>model.Comments</class>
+    <class>model.AssignmentCompletions</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <!-- Database configuration with SSL bypass -->
-      <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;"/>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB1;encrypt=true;trustServerCertificate=true;"/>
       <property name="jakarta.persistence.jdbc.user" value="sa"/>
       <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
       <property name="jakarta.persistence.jdbc.password" value="1234"/>

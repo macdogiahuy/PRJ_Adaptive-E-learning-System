@@ -1,8 +1,13 @@
 package model;
 
+// THÊM 2 IMPORT NÀY
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects; // Sửa lại import cho .equals
 
 @Entity
 @Table(
@@ -12,9 +17,10 @@ import java.util.Date;
 public class LectureCompletions implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // <-- THÊM DÒNG NÀY
     @Basic(optional = false)
     @Column(name = "Id")
-    private String id; // UUID string
+    private Long id; // <-- SỬA TỪ String sang Long (hoặc Integer)
 
     @JoinColumn(name = "UserId", referencedColumnName = "Id")
     @ManyToOne(optional = false)
@@ -28,15 +34,15 @@ public class LectureCompletions implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date completedDate;
 
-    public LectureCompletions() {}
-
-    public LectureCompletions(String id) {
-        this.id = id;
+    public LectureCompletions() {
+        // Không cần gán ID ở đây nữa, CSDL sẽ tự làm
     }
 
-    // getters & setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // Xóa constructor cũ: public LectureCompletions(String id) {}
+
+    // getters & setters (SỬA LẠI KIỂU DỮ LIỆU)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public Users getUserId() { return userId; }
     public void setUserId(Users userId) { this.userId = userId; }
@@ -47,15 +53,19 @@ public class LectureCompletions implements Serializable {
     public Date getCompletedDate() { return completedDate; }
     public void setCompletedDate(Date completedDate) { this.completedDate = completedDate; }
 
+    // Sửa lại .hashCode() và .equals()
     @Override
-    public int hashCode() { return (id != null ? id.hashCode() : 0); }
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof LectureCompletions)) return false;
+        if (!(object instanceof LectureCompletions)) {
+            return false;
+        }
         LectureCompletions other = (LectureCompletions) object;
-        return (this.id != null || other.id == null)
-            && (this.id == null || this.id.equals(other.id));
+        return Objects.equals(this.id, other.id);
     }
 
     @Override
