@@ -4,8 +4,6 @@
  */
 package model;
 
-import java.io.Serializable;
-import java.util.Date;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -18,13 +16,19 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  *
- * @author LP
+ * @author ADMIN
  */
 @Entity
 @Table(name = "Enrollments")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Enrollments.findAll", query = "SELECT e FROM Enrollments e"),
     @NamedQuery(name = "Enrollments.findByCreatorId", query = "SELECT e FROM Enrollments e WHERE e.enrollmentsPK.creatorId = :creatorId"),
@@ -40,19 +44,28 @@ public class Enrollments implements Serializable {
     @EmbeddedId
     protected EnrollmentsPK enrollmentsPK;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 2147483647)
     @Column(name = "Status")
     private String status;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "CreationTime")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 2147483647)
     @Column(name = "AssignmentMilestones")
     private String assignmentMilestones;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 2147483647)
     @Column(name = "LectureMilestones")
     private String lectureMilestones;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 2147483647)
     @Column(name = "SectionMilestones")
     private String sectionMilestones;
     @JoinColumn(name = "BillId", referencedColumnName = "Id")
@@ -64,6 +77,18 @@ public class Enrollments implements Serializable {
     @JoinColumn(name = "CreatorId", referencedColumnName = "Id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Users users;
+
+    @JoinColumn(name = "LastViewedLectureId", referencedColumnName = "Id")
+    @ManyToOne(optional = true)
+    private Lectures lastViewedLectureId;
+
+    public Lectures getLastViewedLectureId() {
+        return lastViewedLectureId;
+    }
+
+    public void setLastViewedLectureId(Lectures lastViewedLectureId) {
+        this.lastViewedLectureId = lastViewedLectureId;
+    }
 
     public Enrollments() {
     }
@@ -181,5 +206,5 @@ public class Enrollments implements Serializable {
     public String toString() {
         return "model.Enrollments[ enrollmentsPK=" + enrollmentsPK + " ]";
     }
-    
+
 }
