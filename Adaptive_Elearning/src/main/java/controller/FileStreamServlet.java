@@ -21,6 +21,14 @@ public class FileStreamServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String fileName = request.getParameter("name");
+        
+        if (fileName != null) {
+            String prefix = "?name=";
+            int prefixIndex = fileName.indexOf(prefix);
+            if (prefixIndex != -1) {
+                fileName = fileName.substring(prefixIndex + prefix.length());
+            }
+        }
 
         if (fileName == null || fileName.isEmpty() || fileName.contains("..")) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tên file không hợp lệ.");
@@ -42,6 +50,8 @@ public class FileStreamServlet extends HttpServlet {
 
         response.setContentLengthLong(Files.size(filePath));
         response.setHeader("Accept-Ranges", "bytes");
+        
+        response.setHeader("Access-Control-Allow-Origin", "*");
 
         try (InputStream in = Files.newInputStream(filePath);
              OutputStream out = response.getOutputStream()) {

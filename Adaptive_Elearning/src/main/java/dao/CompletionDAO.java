@@ -208,4 +208,28 @@ public class CompletionDAO {
         // Trả về tổng
         return totalLectures + totalAssignments;
     }
+    
+    public int getAssignmentDuration(String assignmentId) {
+        int duration = 0; // Giá trị mặc định nếu không tìm thấy
+        
+        // ✅ Câu SQL để lấy Duration từ bảng Assignments
+        String sql = "SELECT Duration FROM Assignments WHERE Id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, assignmentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    duration = rs.getInt("Duration");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Lỗi khi lấy duration của assignment: " + e.getMessage());
+        }
+        
+        // Trả về số phút (ví dụ: 30)
+        return duration;
+    }
 }

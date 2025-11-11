@@ -104,11 +104,24 @@ public class AdaptiveQuizServlet extends HttpServlet {
                 session.setAttribute("cat_responses", new ArrayList<>());
                 session.setAttribute("cat_theta", 0.0);
                 session.setAttribute("cat_userAnswers", new HashMap<String, String>());
+                session.setAttribute("cat_startTime", System.currentTimeMillis());
 
                 JsonObject res = catApi.nextQuestion(
                         userId, courseId, assignmentId, 0.0,
                         new ArrayList<>(), new ArrayList<>()
                 );
+                
+                int durationInMinutes = completionDAO.getAssignmentDuration(assignmentId);
+                
+                int durationInSeconds;
+                if (durationInMinutes > 0) {
+                    // Chuyển đổi phút sang giây
+                    durationInSeconds = durationInMinutes * 60;
+                } else {
+                    // Đặt giá trị mặc định nếu CSDL không có (ví dụ 30 phút)
+                    durationInSeconds = 1800; // 30 phút * 60 giây
+                    System.out.println("[WARN] Không tìm thấy duration, set mặc định 30 phút.");
+                }
 
                 if (res.has("message") && res.get("message").getAsString().contains("submitted")) {
                     resp.sendRedirect(req.getContextPath() + "/adaptive-quiz?action=finish");
@@ -125,6 +138,7 @@ public class AdaptiveQuizServlet extends HttpServlet {
                 req.setAttribute("tempTheta", res.has("temp_theta")
                         ? res.get("temp_theta").getAsDouble() : 0.0);
                 req.setAttribute("questionNumber", 1);
+                req.setAttribute("durationInSeconds", durationInSeconds);
 
                 req.getRequestDispatcher("take-quiz.jsp").forward(req, resp);
                 return;
@@ -234,12 +248,27 @@ public class AdaptiveQuizServlet extends HttpServlet {
                 double mark = (double) correct / (total > 0 ? total : 1) * 10.0;
                 System.out.println("📊 Calculated mark = " + mark);
 
+               int durationInSeconds = 60; // Giá trị mặc định nếu không tìm thấy
+                Long startTime = (Long) session.getAttribute("cat_startTime");
+
+                if (startTime != null) {
+                    long endTime = System.currentTimeMillis();
+                    long durationInMillis = endTime - startTime;
+                    durationInSeconds = (int) (durationInMillis / 1000); // Đổi sang giây
+                } else {
+                    System.err.println("[CAT_WARN] Không tìm thấy 'cat_startTime' trong session. Đặt mặc định 60s.");
+                }
+
                 Map<String, String> userAnswers = (Map<String, String>) session.getAttribute("cat_userAnswers");
                 if (userAnswers == null) {
                     userAnswers = new HashMap<>();
                 }
 
-                quizDAO.saveQuizResult(userId, assignmentId, mark, 60, userAnswers);
+                quizDAO.saveQuizResult(userId, assignmentId, mark, durationInSeconds, userAnswers);
+                
+                int minutes = durationInSeconds / 60;
+                int seconds = durationInSeconds % 60;
+                String formattedDuration = String.format("%02d:%02d", minutes, seconds);
 
                 int rank = resultsDAO.getAssignmentRank(assignmentId, userId);
                 int totalParticipants = resultsDAO.getAssignmentTotalParticipants(assignmentId);
@@ -272,6 +301,7 @@ public class AdaptiveQuizServlet extends HttpServlet {
                 req.setAttribute("passed", passed);
                 req.setAttribute("rank", rank);
                 req.setAttribute("totalParticipants", totalParticipants);
+                req.setAttribute("formattedDuration", formattedDuration);
 
                 List<Map<String, Object>> history = quizDAO.getSubmissionHistory(userId, assignmentId);
                 req.setAttribute("history", history);

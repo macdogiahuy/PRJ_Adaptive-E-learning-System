@@ -8,11 +8,14 @@
         <meta charset="UTF-8">
         <title>Khóa học</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/course-player.css">
+        
+        <script src="${pageContext.request.contextPath}/assets/js/jszip.min.js"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/docx-preview.min.js"></script> 
+        
     </head>
 
     <body>
         <div class="player-container">
-            <!-- SIDEBAR -->
             <div class="sidebar">
                 <h3>Nội dung khóa học</h3>
                 <hr>
@@ -20,7 +23,6 @@
                 <c:forEach var="section" items="${sidebarData}">
                     <div class="section-title">${section.title}</div>
 
-                    <!-- Danh sách bài giảng -->
                     <c:forEach var="lecture" items="${section.lecturesCollection}">
                         <c:set var="activeClass" value="${lecture.id == currentLecture.id ? 'active' : ''}" />
                         <a class="lecture-item ${activeClass}"
@@ -34,7 +36,6 @@
                         </a>
                     </c:forEach>
 
-                    <!-- Danh sách bài tập -->
                     <c:forEach var="assignment" items="${section.assignmentsCollection}">
                         <c:url var="assignmentUrl" value="/assignment-info">
                             <c:param name="assignmentId" value="${assignment.id}" />
@@ -44,7 +45,6 @@
                                value="${completedAssignments.contains(assignment.id) ? 'completed' : ''}" />
 
                         <a class="lecture-item" href="${assignmentUrl}">
-
                             <span class="icon-checkbox ${completedClass}">
                                 <c:choose>
                                     <c:when test="${completedAssignments.contains(assignment.id)}">
@@ -55,7 +55,6 @@
                                     </c:otherwise>
                                 </c:choose>
                             </span>
-
                             <div class="lecture-text">
                                 <span class="lecture-title">${assignment.name}</span>
                             </div>
@@ -64,7 +63,6 @@
                 </c:forEach>
             </div>
 
-            <!-- MAIN CONTENT -->
             <div class="content-area">
                 <div class="content-wrapper">
                     <h1>${currentLecture.title}</h1>
@@ -75,35 +73,81 @@
 
                     <hr>
 
-                    <!-- HIỂN THỊ MATERIALS CỦA BÀI HIỆN TẠI -->
                     <c:if test="${not empty currentMaterials}">
                         <h3>Tài liệu bài giảng</h3>
                         <c:forEach var="material" items="${currentMaterials}">
-                            <c:set var="finalUrl" value="${material.url}" />
-                            <c:if test="${not material.url.startsWith('http')}">
-                                <c:set var="finalUrl" value="${pageContext.request.contextPath}/${material.url}" />
-                            </c:if>
+
+                            <c:url var="streamUrl" value="/stream-file">
+                                <c:param name="name" value="${material.url}" />
+                            </c:url>
+                            <c:set var="materialTypeLower" value="${fn:toLowerCase(material.type)}" />
+                            <c:set var="materialUrlLower" value="${fn:toLowerCase(material.url)}" />
 
                             <c:choose>
-                                <c:when test="${material.type eq 'Video'}">
-                                    <div class="material-video">
-                                        <h4>🎥 Video:</h4>
-                                        <iframe src="${finalUrl}" allowfullscreen></iframe>
+                                <%-- ✅ SỬA LỖI 3: DỌN DẸP ĐIỀU KIỆN DOCX --%>
+                                <c:when test="${materialTypeLower eq 'doc' || materialTypeLower eq 'docx' || fn:endsWith(materialUrlLower, '.doc') || fn:endsWith(materialUrlLower, '.docx')}">
+                                    <div class="material-doc" style="margin-bottom: 20px;">
+                                        <h4>📄 Tài liệu </h4>
+                                        <div id="docx-container-${material.lectureMaterialPK.id}" class="docx-viewer"
+                                             style="width: 100%; border: 1px solid #eee; padding: 25px; box-sizing: border-box; background: #fff;">
+                                            Đang tải tài liệu...
+                                        </div>
+                                        <script>
+                                            (function () {
+                                                const fileUrl = "${streamUrl}";
+                                                const container = document.getElementById("docx-container-${material.lectureMaterialPK.id}");
+                                                fetch(fileUrl)
+                                                        .then(response => response.blob())
+                                                        .then(blob => {
+                                                            docx.renderAsync(blob, container)
+                                                                    .catch(err => {
+                                                                        console.error("Lỗi render docx:", err);
+                                                                        container.innerHTML = '<p style="color: red;">Lỗi: Không thể hiển thị file này.</p>';
+                                                                    });
+                                                        })
+                                                        .catch(err => {
+                                                            console.error('Lỗi fetch file docx:', err);
+                                                            container.innerHTML = '<p style="color: red;">Lỗi: Không thể tải file từ server.</p>';
+                                                        });
+                                            })();
+                                        </script>
                                     </div>
                                 </c:when>
-                                <c:otherwise>
-                                    <div class="material-pdf">
-                                        <h4>📄 Tài liệu:</h4>
-                                        <iframe class="material-pdf" src="${finalUrl}">
+
+                                <c:when test="${materialTypeLower eq 'pdf' || fn:endsWith(materialUrlLower, '.pdf')}">
+                                    <div class="material-pdf" style="margin-bottom: 20px;">
+                                        <h4>📄 Tài liệu PDF</h4>
+                                        <iframe class="material-pdf" src="${streamUrl}"
+                                                style="width: 100%; height: 700px; border: 1px solid #ccc;">
                                             Trình duyệt của bạn không hỗ trợ xem PDF.
                                         </iframe>
+                                    </div>
+                                </c:when>
+
+                                <%-- ✅ SỬA LỖI 2: SỬA LẠI ĐIỀU KIỆN CHO VIDEO --%>
+                                <c:when test="${materialTypeLower eq 'video' || fn:endsWith(materialUrlLower, '.mp4') || fn:endsWith(materialUrlLower, '.webm') }">
+                                    <c:set var="videoUrl" value="${fn:startsWith(material.url, 'http') ? material.url : streamUrl}" />
+                                    <div class="material-video" style="margin-bottom: 20px;">
+                                        <h4>🎥 Video:</h4>
+                                        <iframe src="${videoUrl}"
+                                                style="width: 100%; aspect-ratio: 16/9; border: none;"
+                                                allow="autoplay; fullscreen; picture-in-picture"
+                                                allowfullscreen></iframe>
+                                    </div>
+                                </c:when>
+
+                                <c:otherwise>
+                                    <div class="material-download" style="margin-bottom: 20px;">
+                                        <h4>Tài liệu đính kèm:</h4>
+                                        <a href="${streamUrl}" target="_blank" class="complete-button" style="text-decoration: none;">
+                                            Tải xuống
+                                        </a>
                                     </div>
                                 </c:otherwise>
                             </c:choose>
                         </c:forEach>
                     </c:if>
 
-                    <!-- NÚT HOÀN THÀNH -->
                     <div class="navigation-footer">
                         <form action="mark-complete" method="post" style="display:inline-block;">
                             <input type="hidden" name="lectureId" value="${currentLecture.id}" />

@@ -127,6 +127,9 @@
                         </span>
                     </div>
                     <div class="result-metric">
+                        <b>Duration:</b> <span>${formattedDuration}</span>
+                    </div>
+                    <div class="result-metric">
                         <b>Xếp hạng:</b> ${rank} / ${totalParticipants}
                     </div>
                 </div>
