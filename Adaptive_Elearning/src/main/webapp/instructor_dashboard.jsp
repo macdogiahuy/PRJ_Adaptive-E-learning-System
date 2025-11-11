@@ -7,6 +7,18 @@
         response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
+    
+    // Get stats from servlet
+    Integer totalStudents = (Integer) request.getAttribute("totalStudents");
+    Integer activeCourses = (Integer) request.getAttribute("activeCourses");
+    Integer completionRate = (Integer) request.getAttribute("completionRate");
+    Integer monthlyRevenue = (Integer) request.getAttribute("monthlyRevenue");
+    
+    // Set default values if null
+    if (totalStudents == null) totalStudents = 0;
+    if (activeCourses == null) activeCourses = 0;
+    if (completionRate == null) completionRate = 87;
+    if (monthlyRevenue == null) monthlyRevenue = 45600;
 %>
 
 <!DOCTYPE html>
@@ -385,7 +397,7 @@
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>1,247</h3>
+                        <h3><%= totalStudents %></h3>
                         <p>Tổng học viên</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>
@@ -399,7 +411,7 @@
                         <i class="fas fa-book"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>23</h3>
+                        <h3><%= activeCourses %></h3>
                         <p>Khóa học hoạt động</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>
@@ -413,7 +425,7 @@
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>87%</h3>
+                        <h3><%= completionRate %>%</h3>
                         <p>Tỷ lệ hoàn thành</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>
@@ -427,7 +439,7 @@
                         <i class="fas fa-dollar-sign"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>45.600 đ</h3>
+                        <h3><%= String.format("%,d", monthlyRevenue) %> đ</h3>
                         <p>Doanh thu tháng</p>
                         <div class="stat-change positive">
                             <i class="fas fa-arrow-up"></i>

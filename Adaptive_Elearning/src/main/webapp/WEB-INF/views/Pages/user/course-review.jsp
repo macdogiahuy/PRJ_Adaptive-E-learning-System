@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -234,10 +235,135 @@
                                 <i class="fa-solid fa-star"></i>
                                 Đánh giá từ học viên
                             </h3>
-                            <div class="no-reviews-message">
-                                <i class="fa-solid fa-comments"></i>
-                                <p>Chưa có đánh giá nào!</p>
-                            </div>
+                            
+                            <!-- Show success/error messages -->
+                            <c:if test="${not empty successMessage}">
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                    ${successMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                <%session.removeAttribute("successMessage");%>
+                            </c:if>
+                            
+                            <c:if test="${not empty errorMessage}">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fa-solid fa-exclamation-circle"></i>
+                                    ${errorMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                <%session.removeAttribute("errorMessage");%>
+                            </c:if>
+                            
+                            <!-- Review Form - Show only if user can review -->
+                            <c:if test="${canReview == true}">
+                                <div class="add-review-form">
+                                    <h4><i class="fa-solid fa-pencil"></i> Viết đánh giá của bạn</h4>
+                                    <form action="${pageContext.request.contextPath}/add-review" method="POST">
+                                        <input type="hidden" name="courseId" value="${course.id}" />
+                                        
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Đánh giá của bạn <span class="text-danger">*</span></label>
+                                            <div class="rating-input">
+                                                <input type="radio" name="rating" value="5" id="star5" required />
+                                                <label for="star5" title="5 sao"><i class="fa-solid fa-star"></i></label>
+                                                
+                                                <input type="radio" name="rating" value="4" id="star4" />
+                                                <label for="star4" title="4 sao"><i class="fa-solid fa-star"></i></label>
+                                                
+                                                <input type="radio" name="rating" value="3" id="star3" />
+                                                <label for="star3" title="3 sao"><i class="fa-solid fa-star"></i></label>
+                                                
+                                                <input type="radio" name="rating" value="2" id="star2" />
+                                                <label for="star2" title="2 sao"><i class="fa-solid fa-star"></i></label>
+                                                
+                                                <input type="radio" name="rating" value="1" id="star1" />
+                                                <label for="star1" title="1 sao"><i class="fa-solid fa-star"></i></label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="reviewContent" class="form-label">Nội dung đánh giá <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="reviewContent" name="content" rows="4" 
+                                                      placeholder="Chia sẻ trải nghiệm của bạn về khóa học này..." required></textarea>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa-solid fa-paper-plane"></i> Gửi đánh giá
+                                        </button>
+                                    </form>
+                                </div>
+                                <hr class="my-4" />
+                            </c:if>
+                            
+                            <!-- Show message if not enrolled -->
+                            <c:if test="${hasEnrolled == false && not empty sessionScope.account}">
+                                <div class="alert alert-info">
+                                    <i class="fa-solid fa-info-circle"></i>
+                                    Bạn cần mua khóa học này để có thể đánh giá.
+                                </div>
+                            </c:if>
+                            
+                            <!-- Display Reviews -->
+                            <c:choose>
+                                <c:when test="${not empty reviews && reviews.size() > 0}">
+                                    <div class="reviews-list">
+                                        <c:forEach var="review" items="${reviews}">
+                                            <div class="review-item">
+                                                <div class="review-header">
+                                                    <div class="review-author">
+                                                        <img src="${not empty review.avatarUrl ? review.avatarUrl : (pageContext.request.contextPath + '/assets/img/default-avatar.png')}" 
+                                                             alt="${review.userName}" 
+                                                             class="review-avatar"
+                                                             onerror="this.src='${pageContext.request.contextPath}/assets/img/default-avatar.png'" />
+                                                        <div>
+                                                            <h5>${review.userName}</h5>
+                                                            <div class="review-rating">
+                                                                <c:forEach begin="1" end="${review.rating}">
+                                                                    <i class="fa-solid fa-star text-warning"></i>
+                                                                </c:forEach>
+                                                                <c:forEach begin="${review.rating + 1}" end="5">
+                                                                    <i class="fa-regular fa-star text-warning"></i>
+                                                                </c:forEach>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="review-meta">
+                                                        <div class="review-date">
+                                                            <fmt:formatDate value="${review.creationTime}" pattern="dd/MM/yyyy HH:mm" />
+                                                        </div>
+                                                        <!-- Show Edit/Delete buttons only for review owner -->
+                                                        <c:if test="${not empty sessionScope.account && sessionScope.account.id == review.creatorId}">
+                                                            <div class="review-actions">
+                                                                <button class="btn btn-sm btn-outline-primary btn-edit-review" 
+                                                                        data-review-id="${review.id}" 
+                                                                        data-rating="${review.rating}" 
+                                                                        data-content="${fn:escapeXml(review.content)}">
+                                                                    <i class="fa-solid fa-edit"></i> Sửa
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger btn-delete-review" 
+                                                                        data-review-id="${review.id}" 
+                                                                        data-course-id="${course.id}">
+                                                                    <i class="fa-solid fa-trash"></i> Xóa
+                                                                </button>
+                                                            </div>
+                                                        </c:if>
+                                                    </div>
+                                                </div>
+                                                <div class="review-content">
+                                                    <p>${review.content}</p>
+                                                </div>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="no-reviews-message">
+                                        <i class="fa-solid fa-comments"></i>
+                                        <p>Chưa có đánh giá nào!</p>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
                 </div>
@@ -828,5 +954,129 @@
             color: var(--text-primary);
         }
     </style>
+    
+    <!-- Edit Review Modal -->
+    <div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editReviewModalLabel">
+                        <i class="fa-solid fa-edit"></i> Chỉnh sửa đánh giá
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editReviewForm" action="${pageContext.request.contextPath}/manage-review" method="POST">
+                    <input type="hidden" name="action" value="edit" />
+                    <input type="hidden" name="reviewId" id="editReviewId" />
+                    <input type="hidden" name="courseId" value="${course.id}" />
+                    
+                    <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Đánh giá của bạn <span class="text-danger">*</span></label>
+                            <div class="rating-input" id="editRatingInput">
+                                <input type="radio" name="rating" value="5" id="editStar5" required />
+                                <label for="editStar5" title="5 sao"><i class="fa-solid fa-star"></i></label>
+                                
+                                <input type="radio" name="rating" value="4" id="editStar4" />
+                                <label for="editStar4" title="4 sao"><i class="fa-solid fa-star"></i></label>
+                                
+                                <input type="radio" name="rating" value="3" id="editStar3" />
+                                <label for="editStar3" title="3 sao"><i class="fa-solid fa-star"></i></label>
+                                
+                                <input type="radio" name="rating" value="2" id="editStar2" />
+                                <label for="editStar2" title="2 sao"><i class="fa-solid fa-star"></i></label>
+                                
+                                <input type="radio" name="rating" value="1" id="editStar1" />
+                                <label for="editStar1" title="1 sao"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="editReviewContent" class="form-label">Nội dung đánh giá <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="editReviewContent" name="content" rows="4" 
+                                      placeholder="Chia sẻ trải nghiệm của bạn về khóa học này..." required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-save"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Event listeners for edit buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Edit review buttons
+            const editButtons = document.querySelectorAll('.btn-edit-review');
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const reviewId = this.getAttribute('data-review-id');
+                    const rating = this.getAttribute('data-rating');
+                    const content = this.getAttribute('data-content');
+                    openEditModal(reviewId, rating, content);
+                });
+            });
+            
+            // Delete review buttons
+            const deleteButtons = document.querySelectorAll('.btn-delete-review');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const reviewId = this.getAttribute('data-review-id');
+                    const courseId = this.getAttribute('data-course-id');
+                    confirmDelete(reviewId, courseId);
+                });
+            });
+        });
+        
+        // Open edit modal and populate data
+        function openEditModal(reviewId, rating, content) {
+            document.getElementById('editReviewId').value = reviewId;
+            document.getElementById('editReviewContent').value = content;
+            
+            // Set rating
+            document.getElementById('editStar' + rating).checked = true;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editReviewModal'));
+            modal.show();
+        }
+        
+        // Confirm delete
+        function confirmDelete(reviewId, courseId) {
+            if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '${pageContext.request.contextPath}/manage-review';
+                
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'delete';
+                
+                const reviewIdInput = document.createElement('input');
+                reviewIdInput.type = 'hidden';
+                reviewIdInput.name = 'reviewId';
+                reviewIdInput.value = reviewId;
+                
+                const courseIdInput = document.createElement('input');
+                courseIdInput.type = 'hidden';
+                courseIdInput.name = 'courseId';
+                courseIdInput.value = courseId;
+                
+                form.appendChild(actionInput);
+                form.appendChild(reviewIdInput);
+                form.appendChild(courseIdInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
 </body>
 </html>
