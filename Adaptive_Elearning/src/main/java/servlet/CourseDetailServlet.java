@@ -2,6 +2,9 @@ package servlet;
 
 import controller.CourseManagementController;
 import controller.CourseManagementController.Course;
+import dao.CourseReviewDAO;
+import dao.CourseReviewDAO.ReviewDTO;
+import model.Users;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -11,14 +14,17 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet(name = "CourseDetailServlet", urlPatterns = {"/course-detail", "/detail"})
 public class CourseDetailServlet extends HttpServlet {
     private CourseManagementController courseController;
+    private CourseReviewDAO reviewDAO;
 
     @Override
     public void init() throws ServletException {
         courseController = new CourseManagementController();
+        reviewDAO = new CourseReviewDAO();
     }
 
     @Override
@@ -53,6 +59,20 @@ public class CourseDetailServlet extends HttpServlet {
             }
 
             request.setAttribute("course", course);
+
+            // Load reviews for this course
+            List<ReviewDTO> reviews = reviewDAO.getReviewsByCourseId(courseId);
+            request.setAttribute("reviews", reviews);
+            
+            // Check if current user can review (logged in and enrolled)
+            HttpSession session = request.getSession(false);
+            if (session != null && session.getAttribute("account") != null) {
+                Users user = (Users) session.getAttribute("account");
+                boolean hasEnrolled = reviewDAO.hasUserEnrolled(user.getId(), courseId);
+                boolean hasReviewed = reviewDAO.hasUserReviewed(user.getId(), courseId);
+                request.setAttribute("canReview", hasEnrolled && !hasReviewed);
+                request.setAttribute("hasEnrolled", hasEnrolled);
+            }
 
             // try to load related courses by instructor (use instructorName)
             List<Course> related = new ArrayList<>();
