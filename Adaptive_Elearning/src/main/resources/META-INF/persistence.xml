@@ -2,6 +2,15 @@
 <persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
   <persistence-unit name="Adaptive_ElearningPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>model.PrivateConversations</class>
+    <class>model.CartCheckout</class>
+    <class>model.CourseNotifications</class>
+    <class>model.CATResults</class>
+    <class>model.CATLogs</class>
+    <class>model.UserAbilities</class>
+    <class>model.PrivateMessages</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <!-- 🧩 Entity từ dự án lớn -->
     <class>model.CourseReviews</class>
     <class>model.Tag</class>
     <class>model.Submissions</class>
@@ -28,13 +37,18 @@
     <class>model.Lectures</class>
     <class>model.Enrollments</class>
     <class>model.Comments</class>
-    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <class>model.McqUserAnswer</class>
+    <class>model.McqUserAnswerPK</class>
     <properties>
-      <!-- Database configuration with SSL bypass -->
+      <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
       <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;"/>
       <property name="jakarta.persistence.jdbc.user" value="sa"/>
-      <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-      <property name="jakarta.persistence.jdbc.password" value="1234"/>
+      <property name="jakarta.persistence.jdbc.password" value="123456"/>
+      <property name="eclipselink.logging.level" value="INFO"/>
+      <property name="eclipselink.logging.parameters" value="true"/>
+      <property name="eclipselink.weaving" value="false"/>
+      <property name="eclipselink.ddl-generation" value="none"/>
+      <property name="eclipselink.target-database" value="SQLServer"/>
     </properties>
   </persistence-unit>
 </persistence>
