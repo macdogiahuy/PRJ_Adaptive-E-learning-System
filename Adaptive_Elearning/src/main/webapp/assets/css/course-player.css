@@ -1,0 +1,222 @@
+/* ===============================
+   COURSE PLAYER LAYOUT (Coursera-style)
+   =============================== */
+
+/* === CÀI ĐẶT CHUNG === */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.player-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* === 1. SIDEBAR (MỤC LỤC) === */
+.sidebar {
+    width: 320px;
+    background: #ffffff;
+    border-right: 1px solid #dee2e6;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+}
+
+.sidebar h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0056d2;
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-left: 10px;
+}
+
+.sidebar hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin-bottom: 15px;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 0.9em;
+    padding-left: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lecture-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.lecture-item:hover {
+    background: #f0f4f7;
+}
+
+/* Checkbox trạng thái */
+.icon-checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #aaa;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: transparent;
+    transition: all 0.2s ease;
+}
+
+.icon-checkbox.completed {
+    background-color: #0056d2;
+    border-color: #0056d2;
+    color: white;
+}
+
+.lecture-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.lecture-title {
+    font-size: 1em;
+    color: #222;
+    line-height: 1.4;
+}
+
+.lecture-item.active {
+    background: #e6f7ff;
+    border-left: 4px solid #0056d2;
+    font-weight: 600;
+    padding-left: 8px;
+}
+
+.lecture-item.active:hover {
+    background: #e6f7ff;
+}
+
+/* === 2. KHUNG NỘI DUNG === */
+.content-area {
+    flex-grow: 1;
+    padding: 80px 60px 40px 60px;
+    overflow-y: auto;
+    background-color: #ffffff;
+}
+
+.content-wrapper {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.content-area h1 {
+    font-size: 2.1rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #111;
+    text-align: center;
+}
+
+.content-area h3 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.content-area hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 30px 0;
+}
+
+.content-area p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #555;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* === NỘI DUNG DOC / PDF === */
+.reading-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #444;
+    text-align: left;
+}
+
+.reading-content ol li {
+    margin-bottom: 10px;
+}
+
+.material-video {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.material-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.material-pdf {
+    width: 100%;
+    height: 800px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* === BUTTON / FOOTER === */
+.navigation-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.complete-button {
+    background-color: #ffffff;
+    color: #0056d2;
+    border: 2px solid #0056d2;
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.complete-button:hover {
+    background-color: #0056d2;
+    color: #ffffff;
+}
