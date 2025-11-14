@@ -130,6 +130,30 @@
                                class="form-control bg-dark text-light border-0" 
                                placeholder="e.g., Getting Started with HTML Tags" required />
                     </div>
+                    
+                    <div class="mb-3">
+                        <label for="assignmentSelect" class="form-label text-light">Choose Assignment (optional - for JSON import)</label>
+                        <select id="assignmentSelect" name="assignmentId" class="form-select bg-dark text-light">
+                            <option value="">-- Create new assignment (default) --</option>
+                            <%
+                                java.util.List assigns = (java.util.List) request.getAttribute("assignments");
+                                if (assigns != null) {
+                                    for (Object a : assigns) {
+                                        com.coursehub.tools.DBSectionInserter.AssignmentItem ai = (com.coursehub.tools.DBSectionInserter.AssignmentItem) a;
+                                        out.println("<option value='" + ai.id + "'>" + ai.name + " (" + ai.id + ")</option>");
+                                    }
+                                }
+                            %>
+                        </select>
+                        <div class="form-text mt-2">Or <a href="#" id="toggleManual">paste an Assignment UUID</a></div>
+
+                        <div id="manualAssignment" style="display:none; margin-top:.5rem;">
+                            <input type="text" id="assignmentIdManual" name="assignmentIdManual"
+                                   class="form-control bg-dark text-light border-0"
+                                   placeholder="Paste existing Assignment UUID here" />
+                            <div class="form-text">If you paste a UUID here it overrides the dropdown selection.</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- File Upload Section -->
@@ -155,10 +179,28 @@
                             <span id="fileCount">0</span> file(s) selected
                         </span>
                     </div>
-                    <input type="file" id="files" name="files" multiple
-                           accept="video/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*,text/plain" 
-                           required onchange="handleFileSelect(event)" />
+              <input type="file" id="files" name="files" multiple
+                  accept=".json,application/json,video/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*,text/plain" 
+                  required onchange="handleFileSelect(event)" />
                 </div>
+
+                                <!-- Dedicated JSON importer input (single file) - visible only to Instructors -->
+                                <%
+                                    model.Users __curr = (model.Users) session.getAttribute("account");
+                                    boolean __isInstructor = (__curr != null && __curr.getRole() != null && "Instructor".equalsIgnoreCase(__curr.getRole()));
+                                %>
+                                <% if (__isInstructor) { %>
+                                    <div class="mb-3">
+                                        <label class="form-label text-light">Import MCQ JSON (use this field to import questions only)</label>
+                                        <input type="file" id="jsonFile" name="jsonFile" accept=".json,application/json" class="form-control bg-dark text-light border-0" onchange="handleJsonSelect(event)" />
+                                        <div class="form-text">If you choose a JSON file here, other file uploads will be disabled to avoid conflicts.</div>
+                                    </div>
+                                <% } else { %>
+                                    <div class="mb-3">
+                                        <label class="form-label text-light">Import MCQ JSON</label>
+                                        <div class="form-text text-muted">Chỉ người có quyền "Instructor" mới được import file JSON. Nếu bạn là giảng viên nhưng không thấy ô này, hãy đăng nhập lại hoặc liên hệ quản trị viên.</div>
+                                    </div>
+                                <% } %>
 
                 <div id="fileList" class="mb-3 small"></div>
 
@@ -221,6 +263,14 @@
             function handleFileSelect(e) {
                 const files = e.target.files;
                 if (files && files.length) {
+                    // If a JSON importer file is already chosen, prevent selecting other files
+                    const jf = document.getElementById('jsonFile');
+                    if (jf && jf.files && jf.files.length) {
+                        alert('Bạn đã chọn một file JSON cho import. Xóa file JSON nếu muốn upload files khác.');
+                        // clear the files chosen
+                        e.target.value = null;
+                        return;
+                    }
                     document.getElementById('uploadText').innerHTML = `<span class='text-info fw-semibold'>${files.length} file(s) selected</span>`;
                     const badgeWrap = document.getElementById('fileCountBadge');
                     document.getElementById('fileCount').textContent = files.length;
@@ -232,6 +282,12 @@
             function handleDrop(e) {
                 e.preventDefault();
                 const dtFiles = e.dataTransfer.files;
+                // If JSON file is set, prevent dropping other files
+                const jf = document.getElementById('jsonFile');
+                if (jf && jf.files && jf.files.length) {
+                    alert('Bạn đã chọn một file JSON cho import. Xóa file JSON nếu muốn upload files khác.');
+                    return;
+                }
                 document.getElementById('files').files = dtFiles;
                 if (dtFiles && dtFiles.length) {
                     document.getElementById('uploadText').innerHTML = `<span class='text-info fw-semibold'>${dtFiles.length} file(s) selected</span>`;
@@ -242,10 +298,38 @@
                 }
             }
 
-            // Toggle between existing course or new course
-            document.getElementById('courseSelect').addEventListener('change', function() {
+            // Handle dedicated JSON import file selection
+            function handleJsonSelect(e) {
+                const f = e.target.files;
+                const fileInput = document.getElementById('files');
+                if (f && f.length) {
+                    // Basic check: extension
+                    const name = f[0].name || '';
+                    if (!name.toLowerCase().endsWith('.json')) {
+                        alert('Vui lòng chọn file .json hợp lệ.');
+                        e.target.value = null;
+                        return;
+                    }
+                    // Disable multi-file input to avoid conflicts
+                    if (fileInput) {
+                        fileInput.value = null;
+                        fileInput.required = false; // remove required so browser allows submit with only JSON
+                        document.getElementById('fileCountBadge').style.display = 'none';
+                        document.getElementById('fileList').innerHTML = '';
+                    }
+                    document.getElementById('uploadText').innerHTML = `<span class='text-warning fw-semibold'>JSON importer selected — other files disabled</span>`;
+                } else {
+                    // If user cleared JSON input, restore message
+                    if (fileInput) fileInput.required = true; // restore required when JSON cleared
+                    document.getElementById('uploadText').innerHTML = `Click to select or drag & drop multiple files<br /><small class="text-secondary">Video (MP4/MOV/WEBM), PDF, DOCX, PPTX, XLSX, Images</small><br /><small class="text-warning">Max 10 files per upload (demo limit)</small>`;
+                }
+            }
+
+            // Toggle between existing course or new course + load assignments for selected course
+            document.getElementById('courseSelect').addEventListener('change', async function() {
                 const courseTitle = document.getElementById('courseTitle');
                 const authorName = document.getElementById('authorName');
+                const assignmentSelect = document.getElementById('assignmentSelect');
                 
                 if (this.value) {
                     // Existing course selected - make author optional
@@ -257,6 +341,42 @@
                     courseTitle.style.display = 'block';
                     courseTitle.previousElementSibling.style.display = 'block';
                     authorName.required = true;
+                }
+
+                // Fetch assignments for this course via AJAX and populate dropdown
+                const courseId = this.value;
+                try {
+                    // Clear manual input when switching
+                    document.getElementById('assignmentIdManual').value = '';
+                    document.getElementById('manualAssignment').style.display = 'none';
+
+                    // Default option
+                    assignmentSelect.innerHTML = '<option value="">-- Create new assignment (default) --</option>';
+                    if (!courseId) return;
+                    const url = appContextPath + '/instructor/assignments-by-course?courseId=' + encodeURIComponent(courseId);
+                    const res = await fetch(url, { credentials: 'same-origin' });
+                    if (!res.ok) return;
+                    const list = await res.json();
+                    list.forEach(it => {
+                        const opt = document.createElement('option');
+                        opt.value = it.id;
+                        opt.textContent = it.name + ' (' + it.id + ')';
+                        assignmentSelect.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.error('Failed to load assignments for course', err);
+                }
+            });
+
+            // Toggle manual assignment UUID input
+            document.getElementById('toggleManual').addEventListener('click', function(e){
+                e.preventDefault();
+                var wrap = document.getElementById('manualAssignment');
+                if (wrap.style.display === 'none' || wrap.style.display === '') {
+                    wrap.style.display = 'block';
+                } else {
+                    wrap.style.display = 'none';
+                    document.getElementById('assignmentIdManual').value = '';
                 }
             });
 
