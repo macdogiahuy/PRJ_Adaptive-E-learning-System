@@ -238,6 +238,22 @@
             </div>
         </c:when>
         <c:otherwise>
+            <%-- Flash message support: read from session then remove so it shows once after redirect --%>
+            <%
+                String flash = (String) session.getAttribute("flashMsg");
+                String flashType = (String) session.getAttribute("flashType");
+                if (flash != null) {
+                    session.removeAttribute("flashMsg");
+                    session.removeAttribute("flashType");
+            %>
+            <div class="container alert-box">
+                <div class="alert <%= ("success".equalsIgnoreCase(flashType) ? "alert-success" : ("error".equalsIgnoreCase(flashType) ? "alert-danger" : "alert-info")) %>" role="alert">
+                    <%= flash %>
+                </div>
+            </div>
+            <%
+                }
+            %>
             <div class="player-shell">
                 <div class="player-main">
                     <div class="player-header">
