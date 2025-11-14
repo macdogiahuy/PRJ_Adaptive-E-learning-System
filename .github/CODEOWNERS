@@ -1,0 +1,21 @@
+# Code Owners
+# This file defines who is responsible for code in this repository
+
+# Global owners - require review from repository maintainers
+* @macdogiahuy
+
+# Documentation
+*.md @macdogiahuy
+docs/ @macdogiahuy
+
+# Java source code
+*.java @macdogiahuy
+src/ @macdogiahuy
+
+# Build and configuration files
+pom.xml @macdogiahuy
+*.xml @macdogiahuy
+*.properties @macdogiahuy
+
+# GitHub configuration
+.github/ @macdogiahuy

@@ -14,13 +14,14 @@ buildNumber.properties
 src/conf/env.properties
 src/main/resources/env.properties
 src/main/java/env.properties
-*.env
+env.properties
+Adaptive_Elearning/src/java/env.properties
 .env
 .env.local
 .env.development
 .env.test
 .env.production
-
+*.env
 # Google Service Account Keys
 service-account-key.json
 google-credentials.json
