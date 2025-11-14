@@ -17,7 +17,7 @@ public class DBSectionInserter {
 
     // Default DB config; override with env vars DB_URL, DB_USER, DB_PASSWORD
     private static final String DEFAULT_DB_URL = System.getenv().getOrDefault("DB_URL",
-            "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true");
+            "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB11;encrypt=true;trustServerCertificate=true");
     private static final String DEFAULT_DB_USER = System.getenv().getOrDefault("DB_USER", "sa");
     private static final String DEFAULT_DB_PASSWORD = System.getenv().getOrDefault("DB_PASSWORD", "123456789");
 
@@ -269,6 +269,51 @@ public class DBSectionInserter {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         out.add(new SectionItem(rs.getString("Id"), rs.getString("Title")));
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    // ---------- Assignments helper ----------
+    public static class AssignmentItem {
+        public final String id;
+        public final String name;
+        public AssignmentItem(String id, String name) { this.id = id; this.name = name; }
+    }
+
+    /**
+     * Return assignments created by an instructor/creator (CreatorId)
+     */
+    public static java.util.List<AssignmentItem> getAssignmentsByCreator(String creatorId) throws SQLException {
+        java.util.List<AssignmentItem> out = new java.util.ArrayList<>();
+        try (java.sql.Connection conn = java.sql.DriverManager.getConnection(DEFAULT_DB_URL, DEFAULT_DB_USER, DEFAULT_DB_PASSWORD)) {
+            String sql = "SELECT Id, Name FROM dbo.Assignments WHERE CreatorId = ? ORDER BY Name";
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, creatorId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        out.add(new AssignmentItem(rs.getString("Id"), rs.getString("Name")));
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Return assignments for a given courseId (joins Sections -> Assignments)
+     */
+    public static java.util.List<AssignmentItem> getAssignmentsForCourse(String courseId) throws SQLException {
+        java.util.List<AssignmentItem> out = new java.util.ArrayList<>();
+        try (java.sql.Connection conn = java.sql.DriverManager.getConnection(DEFAULT_DB_URL, DEFAULT_DB_USER, DEFAULT_DB_PASSWORD)) {
+            String sql = "SELECT a.Id, a.Name FROM dbo.Assignments a JOIN dbo.Sections s ON a.SectionId = s.Id WHERE s.CourseId = ? ORDER BY a.Name";
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, courseId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        out.add(new AssignmentItem(rs.getString("Id"), rs.getString("Name")));
                     }
                 }
             }

@@ -102,6 +102,7 @@ public class DriveService {
     }
 
     public static String getEmbedUrl(String fileId) {
+        // Trả về link preview của Google Drive (đã set quyền public)
         return "https://drive.google.com/file/d/" + fileId + "/preview";
     }
 
