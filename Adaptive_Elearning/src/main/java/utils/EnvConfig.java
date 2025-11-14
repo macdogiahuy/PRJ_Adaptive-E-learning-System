@@ -27,6 +27,11 @@ public class EnvConfig {
     }
 
     public static String get(String key) {
+        String envOverride = System.getenv(key);
+        if (envOverride != null && !envOverride.isBlank()) {
+            return envOverride;
+        }
+
         String value = props.getProperty(key);
         if (value == null) {
             LOGGER.warning("⚠️ Environment variable not found: " + key);
@@ -35,6 +40,11 @@ public class EnvConfig {
     }
 
     public static String get(String key, String defaultValue) {
+        String envOverride = System.getenv(key);
+        if (envOverride != null && !envOverride.isBlank()) {
+            return envOverride;
+        }
+
         String value = props.getProperty(key, defaultValue);
         if (props.getProperty(key) == null) {
             LOGGER.info("🔧 Using default value for: " + key);
