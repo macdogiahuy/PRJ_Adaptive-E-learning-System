@@ -1,0 +1,56 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "project": "adaptive-elearning",
+  "services": [
+    {
+      "name": "adaptive-java",
+      "source": {
+        "type": "docker",
+        "path": "deploy/containers/Dockerfile.java",
+        "context": "."
+      },
+      "envVars": {
+        "DB_URL": {"fromProject": "DB_URL"},
+        "DB_USER": {"fromProject": "DB_USER"},
+        "DB_PASSWORD": {"fromProject": "DB_PASSWORD"},
+        "GOOGLE_CLIENT_ID": {"fromProject": "GOOGLE_CLIENT_ID"},
+        "GOOGLE_CLIENT_SECRET": {"fromProject": "GOOGLE_CLIENT_SECRET"},
+        "GOOGLE_REDIRECT_URI": {"value": "https://adaptive-elearning.up.railway.app/oauth2callback"}
+      }
+    },
+    {
+      "name": "adaptive-cat",
+      "source": {
+        "type": "docker",
+        "path": "deploy/containers/Dockerfile.cat",
+        "context": "."
+      },
+      "envVars": {
+        "CAT_DB_SERVER": {"fromProject": "DB_HOST"},
+        "CAT_DB_PORT": {"value": "1433"},
+        "CAT_DB_NAME": {"fromProject": "DB_NAME"},
+        "CAT_DB_USER": {"fromProject": "DB_USER"},
+        "CAT_DB_PASSWORD": {"fromProject": "DB_PASSWORD"}
+      }
+    },
+    {
+      "name": "adaptive-ai",
+      "source": {
+        "type": "docker",
+        "path": "deploy/containers/Dockerfile.chat",
+        "context": "."
+      },
+      "envVars": {
+        "AI_DB_SERVER": {"fromProject": "DB_HOST"},
+        "AI_DB_PORT": {"value": "1433"},
+        "AI_DB_NAME": {"fromProject": "DB_NAME"},
+        "AI_DB_USER": {"fromProject": "DB_USER"},
+        "AI_DB_PASSWORD": {"fromProject": "DB_PASSWORD"},
+        "OLLAMA_URL": {"fromProject": "OLLAMA_URL"},
+        "OLLAMA_MODEL": {"fromProject": "OLLAMA_MODEL"},
+        "OLLAMA_API_KEY": {"fromProject": "OLLAMA_API_KEY"}
+      }
+    }
+  ]
+}
+

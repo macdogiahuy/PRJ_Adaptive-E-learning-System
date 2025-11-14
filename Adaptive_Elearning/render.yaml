@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: adaptive-java
+    env: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: deploy/containers/Dockerfile.java
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://adaptive-yourapp.onrender.com/oauth2callback
+
+  - type: web
+    name: adaptive-ai
+    env: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: deploy/containers/Dockerfile.chat
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: AI_DB_SERVER
+        sync: false
+      - key: AI_DB_PORT
+        value: "1433"
+      - key: AI_DB_NAME
+        value: CourseHubDB
+      - key: AI_DB_USER
+        sync: false
+      - key: AI_DB_PASSWORD
+        sync: false
+      - key: OLLAMA_URL
+        sync: false
+      - key: OLLAMA_API_KEY
+        sync: false
+      - key: OLLAMA_MODEL
+        value: gpt-oss:120b-cloud
+

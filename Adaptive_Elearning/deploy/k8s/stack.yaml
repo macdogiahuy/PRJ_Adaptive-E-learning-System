@@ -1,0 +1,301 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: adaptive-elearning
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+  namespace: adaptive-elearning
+type: Opaque
+stringData:
+  DB_USER: "sa"
+  DB_PASSWORD: "ChangeMe123!@#"
+  MSSQL_SA_PASSWORD: "ChangeMe123!@#"
+  OLLAMA_API_KEY: "change-me"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: adaptive-elearning
+data:
+  DB_HOST: "mssql"
+  DB_PORT: "1433"
+  DB_NAME: "CourseHubDB"
+  GOOGLE_CLIENT_ID: "your-google-client-id"
+  GOOGLE_CLIENT_SECRET: "your-google-client-secret"
+  GOOGLE_REDIRECT_URI: "https://adaptive.example.com/oauth2callback"
+  OLLAMA_URL: "https://ollama.example.com/api/chat"
+  OLLAMA_MODEL: "gpt-oss:120b-cloud"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adaptive-java
+  namespace: adaptive-elearning
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: adaptive-java
+  template:
+    metadata:
+      labels:
+        app: adaptive-java
+    spec:
+      containers:
+        - name: java
+          image: ghcr.io/example/adaptive-java:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DB_URL
+              value: "jdbc:sqlserver://mssql:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_PASSWORD
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: GOOGLE_CLIENT_SECRET
+            - name: GOOGLE_REDIRECT_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: GOOGLE_REDIRECT_URI
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adaptive-java
+  namespace: adaptive-elearning
+spec:
+  selector:
+    app: adaptive-java
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: adaptive-java-hpa
+  namespace: adaptive-elearning
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: adaptive-java
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adaptive-cat
+  namespace: adaptive-elearning
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adaptive-cat
+  template:
+    metadata:
+      labels:
+        app: adaptive-cat
+    spec:
+      containers:
+        - name: cat
+          image: ghcr.io/example/adaptive-cat:latest
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: db-credentials
+          env:
+            - name: CAT_DB_SERVER
+              value: "mssql"
+            - name: CAT_DB_PORT
+              value: "1433"
+            - name: CAT_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_NAME
+            - name: CAT_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_USER
+            - name: CAT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_PASSWORD
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 40
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adaptive-cat
+  namespace: adaptive-elearning
+spec:
+  selector:
+    app: adaptive-cat
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adaptive-ai
+  namespace: adaptive-elearning
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adaptive-ai
+  template:
+    metadata:
+      labels:
+        app: adaptive-ai
+    spec:
+      containers:
+        - name: ai
+          image: ghcr.io/example/adaptive-ai:latest
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: db-credentials
+          env:
+            - name: AI_DB_SERVER
+              value: "mssql"
+            - name: AI_DB_PORT
+              value: "1433"
+            - name: OLLAMA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: OLLAMA_API_KEY
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 40
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adaptive-ai
+  namespace: adaptive-elearning
+spec:
+  selector:
+    app: adaptive-ai
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adaptive-ingress
+  namespace: adaptive-elearning
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: adaptive.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: adaptive-java
+                port:
+                  number: 8080
+          - path: /api/cat/
+            pathType: Prefix
+            backend:
+              service:
+                name: adaptive-cat
+                port:
+                  number: 5000
+          - path: /api/ai/
+            pathType: Prefix
+            backend:
+              service:
+                name: adaptive-ai
+                port:
+                  number: 8000
+  tls:
+    - hosts:
+        - adaptive.example.com
+      secretName: adaptive-cert
+
