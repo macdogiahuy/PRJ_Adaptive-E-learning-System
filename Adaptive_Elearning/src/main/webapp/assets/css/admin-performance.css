@@ -1,0 +1,265 @@
+/**
+ * Admin Performance Optimization CSS
+ * Giảm animation và cải thiện performance cho admin panel
+ * Author: AI Assistant
+ * Date: Nov 1, 2025
+ */
+
+/* ========================================
+   DISABLE UNNECESSARY ANIMATIONS
+   ======================================== */
+
+/* Tắt tất cả animation slideIn cho sidebar navigation */
+.nav-group {
+    animation: none !important;
+    animation-delay: 0s !important;
+}
+
+/* Giảm transition duration cho hover effects */
+.nav-item,
+.sidebar a,
+.btn,
+button,
+.card,
+.stat-card {
+    transition-duration: 0.15s !important; /* Giảm từ 0.3s xuống 0.15s */
+}
+
+/* Tắt transform scale animation cho buttons */
+.btn:hover,
+button:hover,
+.action-btn:hover {
+    transform: none !important;
+}
+
+/* Tắt translateY animation cho cards */
+.card:hover,
+.stat-card:hover,
+.report-card:hover {
+    transform: none !important;
+}
+
+/* Giữ lại shadow nhẹ thay vì animation */
+.card:hover,
+.stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Tắt ripple effect (tốn performance) */
+@keyframes ripple {
+    to { 
+        transform: none;
+        opacity: 0;
+    }
+}
+
+@keyframes click-ripple {
+    to { 
+        transform: none;
+        opacity: 0;
+    }
+}
+
+@keyframes float-particle {
+    to { 
+        transform: none;
+        opacity: 0;
+    }
+}
+
+/* Tắt slideInLeft animation */
+@keyframes slideInLeft {
+    from, to {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+/* Giữ spin animation cho loading (cần thiết) nhưng tối ưu */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========================================
+   OPTIMIZE TABLE RENDERING
+   ======================================== */
+
+/* Tối ưu table rendering */
+table {
+    table-layout: fixed;
+    will-change: auto;
+}
+
+/* Tắt transform cho table rows */
+tbody tr:hover {
+    transform: none !important;
+    background-color: #f8f9fa;
+}
+
+/* ========================================
+   OPTIMIZE MODAL ANIMATIONS
+   ======================================== */
+
+/* Giảm animation cho modal */
+.modal {
+    transition: opacity 0.15s ease !important;
+}
+
+.modal-content {
+    animation: none !important;
+    transform: none !important;
+}
+
+/* ========================================
+   OPTIMIZE DROPDOWN ANIMATIONS
+   ======================================== */
+
+.dropdown-menu {
+    transition: opacity 0.1s ease !important;
+    animation: none !important;
+}
+
+/* ========================================
+   OPTIMIZE ALERT ANIMATIONS
+   ======================================== */
+
+.alert {
+    animation-duration: 0.2s !important;
+}
+
+/* ========================================
+   OPTIMIZE PAGINATION
+   ======================================== */
+
+.pagination li a {
+    transition: background-color 0.1s ease !important;
+}
+
+.pagination li a:hover {
+    transform: none !important;
+}
+
+/* ========================================
+   REDUCE GPU USAGE
+   ======================================== */
+
+/* Tắt will-change để giảm memory usage */
+* {
+    will-change: auto !important;
+}
+
+/* Chỉ enable hardware acceleration cho scroll */
+.sidebar,
+.main-content {
+    will-change: scroll-position;
+}
+
+/* ========================================
+   OPTIMIZE HOVER EFFECTS
+   ======================================== */
+
+/* Đơn giản hóa hover effects */
+.nav-item:hover,
+.sidebar a:hover {
+    transform: none !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item:hover .nav-icon {
+    transform: none !important;
+    color: #fff;
+}
+
+/* ========================================
+   OPTIMIZE ACTIVE STATES
+   ======================================== */
+
+.nav-item.active {
+    animation: none !important;
+}
+
+/* ========================================
+   DISABLE PARTICLE EFFECTS
+   ======================================== */
+
+.particle,
+.ripple-effect,
+.click-effect {
+    display: none !important;
+}
+
+/* ========================================
+   OPTIMIZE LOADING INDICATORS
+   ======================================== */
+
+/* Giữ loading spinner nhưng tối ưu */
+.spinner,
+.loading-spinner {
+    animation-timing-function: linear;
+    will-change: transform;
+}
+
+/* ========================================
+   MOBILE OPTIMIZATIONS
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Tắt tất cả animation trên mobile */
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    /* Chỉ giữ fade transition nhẹ cho UX */
+    .modal,
+    .dropdown-menu,
+    .alert {
+        transition: opacity 0.15s ease !important;
+    }
+}
+
+/* ========================================
+   PERFORMANCE MODE (Optional)
+   Thêm class 'performance-mode' vào body để bật
+   ======================================== */
+
+body.performance-mode * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+}
+
+body.performance-mode .modal,
+body.performance-mode .alert,
+body.performance-mode .dropdown-menu {
+    transition: opacity 0.1s ease !important;
+}
+
+/* ========================================
+   REDUCE PAINT & COMPOSITE
+   ======================================== */
+
+/* Tối ưu rendering cho các element thường xuyên thay đổi */
+.table-row,
+.list-item {
+    contain: layout style;
+}
+
+/* Isolate expensive repaints */
+.modal-backdrop {
+    contain: strict;
+}
+
+/* ========================================
+   PREFERS REDUCED MOTION
+   Support cho user settings
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
