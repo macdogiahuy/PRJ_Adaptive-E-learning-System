@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Player Test - Your Course ID</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .url-box { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #007bff; }
+        .btn { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin: 5px; }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .course-id { background: #e7f3ff; padding: 10px; border-radius: 4px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Course Player Test</h1>
+        <h2>Course ID: <span class="course-id">69746C85-6109-4370-9334-1490CD2334B0</span></h2>
+        
+        <h3>🚀 Test URLs:</h3>
+        
+        <div class="url-box">
+            <h4>✅ JDBC Version (Recommended):</h4>
+            <code>http://localhost:8080/Adaptive_Elearning/course-player-test?id=69746C85-6109-4370-9334-1490CD2334B0</code>
+            <br><br>
+            <a href="http://localhost:8080/Adaptive_Elearning/course-player-test?id=69746C85-6109-4370-9334-1490CD2334B0" 
+               class="btn btn-success" target="_blank">🧪 Test JDBC Version</a>
+        </div>
+        
+        <div class="url-box">
+            <h4>⚠️ Original Version (May have SSL issues):</h4>
+            <code>http://localhost:8080/Adaptive_Elearning/course-player?id=69746C85-6109-4370-9334-1490CD2334B0</code>
+            <br><br>
+            <a href="http://localhost:8080/Adaptive_Elearning/course-player?id=69746C85-6109-4370-9334-1490CD2334B0" 
+               class="btn" target="_blank">🔧 Test Original Version</a>
+        </div>
+        
+        <h3>📋 URL Corrections Made:</h3>
+        <ul>
+            <li><strong>Context Path:</strong> <code>/Learning</code> → <code>/Adaptive_Elearning</code></li>
+            <li><strong>Parameter Name:</strong> <code>courseId</code> → <code>id</code></li>
+            <li><strong>Removed:</strong> <code>&lectureId=...</code> (not needed)</li>
+            <li><strong>New Option:</strong> <code>/course-player-test</code> (JDBC version)</li>
+        </ul>
+        
+        <h3>🔍 Expected Results:</h3>
+        <ul>
+            <li><strong>JDBC Version:</strong> Should bypass SSL issues and connect directly</li>
+            <li><strong>Original Version:</strong> May still show SSL certificate error</li>
+            <li><strong>Success:</strong> Will show course title if course exists in database</li>
+            <li><strong>Error:</strong> Will show specific error message for debugging</li>
+        </ul>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; margin-top: 20px;">
+            <strong>💡 Tip:</strong> Try the JDBC version first as it's designed to bypass the SSL certificate issues you encountered.
+        </div>
+    </div>
+</body>
+</html>

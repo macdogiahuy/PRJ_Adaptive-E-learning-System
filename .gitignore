@@ -1,7 +1,73 @@
 # Ignore environment configuration files
 env.properties
-# Bỏ qua tệp chứa secrets/cấu hình môi trường
 Adaptive_Elearning/src/java/env.properties
 
-# Bỏ qua các tệp .class được biên dịch (NetBeans/Java)
-Adaptive_Elearning/build/
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Sensitive Configuration Files - DO NOT COMMIT
+src/conf/env.properties
+src/main/resources/env.properties
+*.env
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Google Service Account Keys
+service-account-key.json
+google-credentials.json
+firebase-adminsdk-*.json
+
+# Database configuration files
+src/conf/persistence.xml.local
+src/conf/db.properties
+database.properties
+
+# IDE / NetBeans
+nbproject/private/
+build/
+dist/
+*.class
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JAR files (except lib folder)
+*.jar
+!lib/*.jar
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Application specific sensitive files
+config/secrets.properties
+config/api-keys.properties
+oauth-credentials.json
