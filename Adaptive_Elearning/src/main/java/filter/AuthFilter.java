@@ -47,7 +47,6 @@ public class AuthFilter implements Filter {
         System.out.println("[AuthFilter] User ID: " + currentUser.getId() + ", Username: " + currentUser.getUserName());
 
 
-        // Admin pages - only Admin can access
         if ((uri.contains("admin-dashboard.jsp") || uri.contains("/admin")) 
                 && !"Admin".equalsIgnoreCase(role)) {
             System.out.println("[AuthFilter] BLOCKING admin access for role: " + role);
@@ -55,15 +54,12 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // Instructor pages - Admin and Instructor can access (Admin inherits Instructor permissions)
         if ((uri.contains("instructor-dashboard.jsp") || uri.contains("/instructor")) 
                 && !"Admin".equalsIgnoreCase(role) && !"Instructor".equalsIgnoreCase(role)) {
             System.out.println("[AuthFilter] BLOCKING instructor access for role: " + role);
             response.sendRedirect(context + "/access-denied.jsp");
             return;
         }
-
-        // Learner pages - all authenticated users can access
         if ((uri.contains("learner-home.jsp") || uri.contains("/learner")) 
                 && !"Admin".equalsIgnoreCase(role) && !"Instructor".equalsIgnoreCase(role) && !"Learner".equalsIgnoreCase(role)) {
             System.out.println("[AuthFilter] BLOCKING learner access for role: " + role);

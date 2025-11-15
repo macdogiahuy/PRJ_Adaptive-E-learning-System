@@ -373,4 +373,32 @@ public class QuizDAO {
             em.close();
         }
     }
+
+    public Submissions getSubmissionForReview(String submissionId, String userId) {
+        EntityManager em = JPAUtils.getEntityManager();
+        try {
+            Submissions submission = em.find(Submissions.class, submissionId);
+
+            if (submission != null
+                    && submission.getCreatorId().getId().equals(userId)) {
+
+                if (submission.getMcqUserAnswers() != null) {
+                    submission.getMcqUserAnswers().size();
+                }
+
+                return submission;
+            }
+
+            return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
 }
+

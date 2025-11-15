@@ -115,17 +115,10 @@ public class AdaptiveQuizServlet extends HttpServlet {
                 
                 int durationInSeconds;
                 if (durationInMinutes > 0) {
-                    // Chuyển đổi phút sang giây
                     durationInSeconds = durationInMinutes * 60;
                 } else {
-                    // Đặt giá trị mặc định nếu CSDL không có (ví dụ 30 phút)
-                    durationInSeconds = 1800; // 30 phút * 60 giây
+                    durationInSeconds = 1800; 
                     System.out.println("[WARN] Không tìm thấy duration, set mặc định 30 phút.");
-                }
-
-                if (res.has("message") && res.get("message").getAsString().contains("submitted")) {
-                    resp.sendRedirect(req.getContextPath() + "/adaptive-quiz?action=finish");
-                    return;
                 }
 
                 JsonObject nq = res.getAsJsonObject("next_question");

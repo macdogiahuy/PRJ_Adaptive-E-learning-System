@@ -62,12 +62,10 @@ public class MyCoursesServlet extends HttpServlet {
                 // 1. Lấy tổng số mục (Lectures + Assignments)
                 int totalItems = completionDAO.getTotalCompletableItems(courseId);
 
-                // 2. Lấy số mục đã hoàn thành (từ các hàm đã có trong DAO)
                 int completedLectures = completionDAO.getCompletedLectureIds(user.getId(), courseId).size();
                 int completedAssignments = completionDAO.getCompletedAssignmentIds(user.getId(), courseId).size();
                 int completedItems = completedLectures + completedAssignments;
 
-                // 3. Tính toán % (tránh lỗi chia cho 0)
                 int progress = 0;
                 if (totalItems > 0) {
                     progress = (int) Math.round(((double) completedItems / totalItems) * 100);
@@ -78,7 +76,6 @@ public class MyCoursesServlet extends HttpServlet {
                 logger.info("  Course: " + info.getCourse().getTitle() + " - Progress: " + progress + "% (" + completedItems + "/" + totalItems + ")");
             }
 
-            // Lấy thống kê
            CourseStats stats = getCourseStats(user.getId(), enrolledCourses);
             // Set attributes cho JSP
             request.setAttribute("enrolledCourses", enrolledCourses);

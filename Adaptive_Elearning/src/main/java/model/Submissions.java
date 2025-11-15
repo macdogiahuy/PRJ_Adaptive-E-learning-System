@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -66,6 +67,9 @@ public class Submissions implements Serializable {
     @JoinColumn(name = "CreatorId", referencedColumnName = "Id")
     @ManyToOne(optional = false)
     private Users creatorId;
+
+    @OneToMany(mappedBy = "submissions")
+    private List<McqUserAnswer> mcqUserAnswers;
 
     public Submissions() {
     }
@@ -155,6 +159,16 @@ public class Submissions implements Serializable {
         this.creatorId = creatorId;
     }
 
+    public List<McqUserAnswer> getMcqUserAnswers() {
+        return mcqUserAnswers;
+    }
+
+    public void setMcqUserAnswers(List<McqUserAnswer> mcqUserAnswers) {
+        this.mcqUserAnswers = mcqUserAnswers;
+    }
+    
+    
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -179,5 +193,5 @@ public class Submissions implements Serializable {
     public String toString() {
         return "model.Submissions[ id=" + id + " ]";
     }
-    
+
 }

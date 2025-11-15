@@ -205,14 +205,12 @@ public class CompletionDAO {
             e.printStackTrace();
         }
 
-        // Trả về tổng
         return totalLectures + totalAssignments;
     }
     
     public int getAssignmentDuration(String assignmentId) {
         int duration = 0; // Giá trị mặc định nếu không tìm thấy
         
-        // ✅ Câu SQL để lấy Duration từ bảng Assignments
         String sql = "SELECT Duration FROM Assignments WHERE Id = ?";
 
         try (Connection conn = DBConnection.getConnection();

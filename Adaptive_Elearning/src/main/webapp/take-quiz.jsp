@@ -7,7 +7,6 @@
     <meta charset="UTF-8">
     <title>Take Quiz</title>
     <style>
-        /* ... (Toàn bộ CSS của bạn giữ nguyên) ... */
         body {
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(135deg, #eef4ff, #f8fbff);
@@ -116,7 +115,7 @@
 <body>
     <div class="quiz-container">
         
-        <div id="timer" class="quiz-timer">Thời gian: 00:00</div>
+<!--        <div id="timer" class="quiz-timer">Thời gian: 00:00</div>-->
 
         <div class="question-header">Câu hỏi ${questionNumber}</div>
         <div class="question-content">
@@ -136,7 +135,7 @@
                 </c:forEach>
             </div>
 
-            <button type="submit" class="submit-button">Next ➜</button>
+            <button type="submit" class="submit-button">Next</button>
         </form>
 
         <div class="debug-info">
@@ -145,50 +144,39 @@
     </div>
 
     <script>
-        // Lấy TỔNG THỜI GIAN (bằng giây) từ Servlet
-        // ${durationInSeconds} sẽ được JSP render thành một con số (ví dụ: 1800)
+        // ${durationInSeconds} 
         let totalSeconds = ${durationInSeconds};
 
         if (totalSeconds > 0) {
             const timerElement = document.getElementById("timer");
 
-            // Hàm helper để cập nhật hiển thị đồng hồ
             function updateTimerDisplay(secondsLeft) {
-                // Chuyển đổi sang phút và giây
                 const minutes = Math.floor(secondsLeft / 60);
                 const seconds = secondsLeft % 60;
                 
-                // Format (MM:SS) để đảm bảo có 2 chữ số (ví dụ: 01:05)
                 const formattedMinutes = String(minutes).padStart(2, '0');
                 const formattedSeconds = String(seconds).padStart(2, '0');
                 
-                // Hiển thị lên màn hình
                 timerElement.innerText = `Thời gian: ${formattedMinutes}:${formattedSeconds}`;
             }
 
-            // Cập nhật đồng hồ ngay lập tức (không chờ 1 giây đầu)
             updateTimerDisplay(totalSeconds);
 
-            // Bắt đầu đếm ngược
             const timerInterval = setInterval(() => {
-                totalSeconds--; // Giảm 1 giây
+                totalSeconds--;
 
-                // Cập nhật đồng hồ
                 updateTimerDisplay(totalSeconds);
 
-                // ✅ TỰ ĐỘNG NỘP BÀI KHI HẾT GIỜ
                 if (totalSeconds <= 0) {
-                    clearInterval(timerInterval); // Dừng đếm ngược
+                    clearInterval(timerInterval); 
                     timerElement.innerText = "Hết giờ!";
-                    
-                    // Thông báo và chuyển hướng để nộp bài
+        
                     alert("Đã hết thời gian làm bài. Bài của bạn sẽ được tự động nộp.");
-                    // Dùng contextPath để đảm bảo link luôn đúng
+
                     window.location.href = '${pageContext.request.contextPath}/adaptive-quiz?action=finish';
                 }
-            }, 1000); // 1000ms = 1 giây
+            }, 1000); 
         } else {
-             // Xử lý trường hợp không có thời gian (ví dụ: lỗi hoặc duration = 0)
              document.getElementById("timer").innerText = "Không giới hạn";
         }
     </script>
