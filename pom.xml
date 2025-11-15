@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.coursehub</groupId>
+    <artifactId>adaptive-elearning</artifactId>
+    <version>1.0.0</version>
+    <packaging>war</packaging>
+
+    <name>Adaptive E-Learning System</name>
+    <description>CourseHub E-Learning Management System Dashboard</description>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jakarta.version>6.0.0</jakarta.version>
+        <tomcat.version>10.1.28</tomcat.version>
+        <eclipselink.version>4.0.3</eclipselink.version>
+        <json.version>20240303</json.version>
+        <gson.version>2.10.1</gson.version>
+        <mssql.version>12.8.1.jre11</mssql.version>
+        <jakarta.mail.version>2.0.1</jakarta.mail.version>
+        <jakarta.activation.version>2.0.1</jakarta.activation.version>
+        <junit.version>5.10.0</junit.version>
+        <failsafe.version>3.2.5</failsafe.version>
+        <surefire.version>3.2.5</surefire.version>
+        <war.plugin.version>3.4.0</war.plugin.version>
+    </properties>
+
+    <dependencies>
+        <!-- Jakarta EE Web APIs -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet.jsp</groupId>
+            <artifactId>jakarta.servlet.jsp-api</artifactId>
+            <version>3.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JSTL -->
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+        <!-- Jakarta Mail API -->
+        <!--        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>${jakarta.mail.version}</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+
+        <!-- ✅ Angus Activation (bắt buộc đi kèm) -->
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+
+        <!-- Jakarta Validation -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
+        <!-- JPA / EclipseLink -->
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>${eclipselink.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
+            <version>${eclipselink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Database Driver -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>${mssql.version}</version>
+        </dependency>
+
+        <!-- JSON Processing -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.14</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>1.35.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-servlet</artifactId>
+            <version>1.36.0</version> 
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-drive</artifactId>
+            <version>v3-rev197-1.25.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value-annotations</artifactId>
+            <version>1.10.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>Adaptive_Elearning</finalName>
+        
+        <plugins>
+            <!-- Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <!-- WAR Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>${war.plugin.version}</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <warSourceDirectory>src/main/webapp</warSourceDirectory>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/resources</directory>
+                            <targetPath>WEB-INF/classes</targetPath>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire Plugin for Unit Tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- Failsafe Plugin for Integration Tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${failsafe.version}</version>
+                <configuration>
+                    <includes>
+                        <include>**/*IT.java</include>
+                        <include>**/*IntegrationTest.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Resources Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- Tomcat Plugin for Development -->
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <port>8080</port>
+                    <path>/Adaptive_Elearning</path>
+                    <contextReloadable>true</contextReloadable>
+                </configuration>
+            </plugin>
+
+            <!-- Clean Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.2</version>
+            </plugin>
+
+            <!-- Install Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+
+            <!-- Deploy Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Development Profile -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env>dev</env>
+            </properties>
+        </profile>
+
+        <!-- Production Profile -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <env>prod</env>
+            </properties>
+        </profile>
+    </profiles>
+</project>
