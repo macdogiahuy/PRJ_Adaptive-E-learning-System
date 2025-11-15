@@ -13,15 +13,13 @@ buildNumber.properties
 # Sensitive Configuration Files - DO NOT COMMIT
 src/conf/env.properties
 src/main/resources/env.properties
-src/main/java/env.properties
-env.properties
-Adaptive_Elearning/src/java/env.properties
+*.env
 .env
 .env.local
 .env.development
 .env.test
 .env.production
-*.env
+
 # Google Service Account Keys
 service-account-key.json
 google-credentials.json
@@ -31,13 +29,6 @@ firebase-adminsdk-*.json
 src/conf/persistence.xml.local
 src/conf/db.properties
 database.properties
-
-# Ignore environment configuration files (from KhanhHin2)
-# Bỏ qua tệp chứa secrets/cấu hình môi trường
-Adaptive_Elearning/src/java/env.properties
-
-# Bỏ qua các tệp .class được biên dịch (NetBeans/Java)
-Adaptive_Elearning/build/
 
 # IDE files
 nbproject/private/
@@ -79,11 +70,6 @@ target/
 *.swp
 *.swo
 *~
-
-# Environment configs (from KhanhHin2)
-*.env
-*.properties
-Adaptive_Elearning/src/main/java/env.properties
 
 # Application specific sensitive files
 config/secrets.properties

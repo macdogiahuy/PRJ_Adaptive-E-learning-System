@@ -1,0 +1,5 @@
+- [x] Audit existing course player files and remove obsolete code
+- [ ] Design new learner course player layout (video left, menu right)
+- [ ] Implement backend logic to fetch course, sections, lectures, materials from DB using Drive links
+- [ ] Build JSP/servlet to render new UI with data binding
+- [ ] Test end-to-end ensuring videos load correctly
