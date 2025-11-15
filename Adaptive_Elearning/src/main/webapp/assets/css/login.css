@@ -1,0 +1,213 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    background: url("../images/bg.jpg") no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.navbar {
+    width: 100%;
+    padding: 20px 60px;  
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.logo img {
+    height: 60px;
+    width: auto;
+}
+
+.btn-signin {
+    padding: 8px 20px;
+    background: #e91e63;
+    color: #fff;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.btn-signin:hover {
+    background: #d81b60;
+}
+
+/* Container chính */
+.form-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.65);;   
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+}
+.login-container header {
+   text-align: center;
+    font-size: 60px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+} 
+
+/* Ô input */
+.input-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.input-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 18px;
+}
+
+
+.submit {
+    width: 100%;
+    padding: 12px;
+    background: #fff;
+    color: #333;
+    font-weight: bold;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.submit:hover {
+    background: #e91e63;
+    color: #fff;
+}
+
+.divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.divider span {
+    background: #fff;
+    padding: 0 10px;
+    color: #666;
+    font-size: 14px;
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
+}
+
+.divider::before {
+    content: "";
+    height: 1px;
+    background: #ccc;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    z-index: 0;
+}
+
+.google-login {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-radius: 30px;
+    background: #fff;
+    border: 1px solid #ccc;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.google-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.google-btn:hover {
+    background: #f5f5f5;
+}
+
+.top {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.top span {
+    font-size: 14px;
+}
+
+.top a {
+    color: #e91e63;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.top a:hover {
+    text-decoration: underline;
+}
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #444;
+}
+
+.options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.options input[type="checkbox"] {
+    accent-color: #e91e63;
+    cursor: pointer;
+}
+
+.options .forgot {
+    text-decoration: none;
+    color: #e91e63;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.options .forgot:hover {
+    text-decoration: underline;
+}
