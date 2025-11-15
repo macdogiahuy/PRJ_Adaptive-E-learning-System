@@ -1,4 +1,4 @@
-# Maven
+# Maven and build artifacts
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -10,36 +10,51 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-# Sensitive Configuration Files - DO NOT COMMIT
-src/conf/env.properties
-src/main/resources/env.properties
-src/main/java/env.properties
-*.env
+# Environment and sensitive configuration files (do NOT commit)
 .env
+*.env
 .env.local
 .env.development
 .env.test
 .env.production
-
-# Google Service Account Keys
+env.properties
+src/conf/env.properties
+src/main/resources/env.properties
+src/main/java/env.properties
+Adaptive_Elearning/src/java/env.properties
+Adaptive_Elearning/src/main/java/env.properties
+database.properties
+src/conf/persistence.xml.local
+src/conf/db.properties
+config/secrets.properties
+config/api-keys.properties
+oauth-credentials.json
 service-account-key.json
 google-credentials.json
 firebase-adminsdk-*.json
 
-# Database configuration files
-src/conf/persistence.xml.local
-src/conf/db.properties
-database.properties
-
-# IDE files
+# IDE / NetBeans files
 nbproject/private/
+.nb-gradle/
+nbbuild/
+nbdist/
 build/
 dist/
-*.class
+Adaptive_Elearning/build/
 
-# Logs
+# Compiled classes and jars
+*.class
+*.jar
+!lib/*.jar
+
+# Logs and temporary files
 *.log
 logs/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
 
 # OS generated files
 .DS_Store
@@ -50,29 +65,5 @@ logs/
 ehthumbs.db
 Thumbs.db
 
-# JAR files (except lib folder)
-*.jar
-!lib/*.jar
-
-# NetBeans specific
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
-
-# Maven target directory
-target/
-
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
-
-# Application specific sensitive files
-config/secrets.properties
-config/api-keys.properties
-oauth-credentials.json
+# Misc
+# keep explicit exclusions for any other local secrets
