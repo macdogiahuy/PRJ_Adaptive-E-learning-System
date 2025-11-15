@@ -16,10 +16,10 @@ public class DriveService {
 
     // ✅ OAuth Client (lấy từ JSON)
     public static final String CLIENT_ID =
-            "REDACTED_GOOGLE_CLIENT_ID_DRIVESERVICE";
+            \"REDACTED_GOOGLE_CLIENT_ID\";
 
     public static final String CLIENT_SECRET =
-            "REDACTED_GOOGLE_CLIENT_SECRET_DRIVESERVICE";
+            \"REDACTED_GOOGLE_CLIENT_SECRET\";
 
     public static final String REDIRECT_URI =
             "http://localhost:9999/Adaptive_Elearning/oauth2drivecallback";
