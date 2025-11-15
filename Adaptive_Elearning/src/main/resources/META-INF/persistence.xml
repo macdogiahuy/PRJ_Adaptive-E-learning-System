@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+  <persistence-unit name="Adaptive_ElearningPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>model.PrivateConversations</class>
+    <class>model.CartCheckout</class>
+    <class>model.CourseNotifications</class>
+    <class>model.CATResults</class>
+    <class>model.CATLogs</class>
+    <class>model.UserAbilities</class>
+    <class>model.PrivateMessages</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <!-- 🧩 Entity từ dự án lớn -->
+    <class>model.CourseReviews</class>
+    <class>model.Tag</class>
+    <class>model.Submissions</class>
+    <class>model.LectureMaterial</class>
+    <class>model.Instructors</class>
+    <class>model.Sections</class>
+    <class>model.ConversationMembers</class>
+    <class>model.Articles</class>
+    <class>model.McqChoices</class>
+    <class>model.Reactions</class>
+    <class>model.Courses</class>
+    <class>model.CommentMedia</class>
+    <class>model.Sysdiagrams</class>
+    <class>model.Bills</class>
+    <class>model.Assignments</class>
+    <class>model.Users</class>
+    <class>model.Categories</class>
+    <class>model.McqQuestions</class>
+    <class>model.CourseMeta</class>
+    <class>model.Conversations</class>
+    <class>model.Notifications</class>
+    <class>model.ChatMessages</class>
+    <class>model.EFMigrationsHistory</class>
+    <class>model.Lectures</class>
+    <class>model.Enrollments</class>
+    <class>model.Comments</class>
+    <class>model.McqUserAnswer</class>
+    <class>model.McqUserAnswerPK</class>
+    <properties>
+      <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;"/>
+      <property name="jakarta.persistence.jdbc.user" value="sa"/>
+      <property name="jakarta.persistence.jdbc.password" value="123456"/>
+      <property name="eclipselink.logging.level" value="INFO"/>
+      <property name="eclipselink.logging.parameters" value="true"/>
+      <property name="eclipselink.weaving" value="false"/>
+      <property name="eclipselink.ddl-generation" value="none"/>
+      <property name="eclipselink.target-database" value="SQLServer"/>
+    </properties>
+  </persistence-unit>
+</persistence>

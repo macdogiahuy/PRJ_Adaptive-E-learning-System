@@ -30,12 +30,20 @@
     <class>model.Comments</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
+<<<<<<< HEAD
       <!-- Database configuration is now handled by DBConnection.java using env.properties -->
       <!-- These are placeholder values - actual values are read from env.properties -->
       <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost;databaseName=placeholder"/>
       <property name="javax.persistence.jdbc.user" value="placeholder"/>
       <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
       <property name="javax.persistence.jdbc.password" value="placeholder"/>
+=======
+      <!-- Database configuration with SSL bypass -->
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;"/>
+      <property name="jakarta.persistence.jdbc.user" value="sa"/>
+      <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+      <property name="jakarta.persistence.jdbc.password" value="1234"/>
+>>>>>>> KhanhHin
     </properties>
   </persistence-unit>
 </persistence>
