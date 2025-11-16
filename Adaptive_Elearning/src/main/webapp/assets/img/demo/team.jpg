@@ -1,0 +1,14 @@
+<svg width="1200" height="700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g3" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#fddb92"/>
+      <stop offset="100%" stop-color="#d1fdff"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#g3)"/>
+  <g transform="translate(60,60)">
+    <circle cx="120" cy="120" r="100" fill="#fff" opacity="0.14"/>
+    <text x="260" y="160" font-family="Arial, Helvetica, sans-serif" font-size="54" fill="#0b2b3a">Team</text>
+    <text x="260" y="210" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#0b2b3a" opacity="0.9">Collaboration & Coaching</text>
+  </g>
+</svg>
