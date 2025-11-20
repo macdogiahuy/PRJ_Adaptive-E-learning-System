@@ -23,7 +23,7 @@ public class SaveDriveLink {
     private static final String DEFAULT_DB_URL = System.getenv().getOrDefault(
             "DB_URL", "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB");
     private static final String DEFAULT_DB_USER = System.getenv().getOrDefault("DB_USER", "sa");
-    private static final String DEFAULT_DB_PASSWORD = System.getenv().getOrDefault("DB_PASSWORD", "01012003");
+    private static final String DEFAULT_DB_PASSWORD = System.getenv().getOrDefault("DB_PASSWORD", "123456");
 
     public static void main(String[] args) {
         if (args.length < 2) {

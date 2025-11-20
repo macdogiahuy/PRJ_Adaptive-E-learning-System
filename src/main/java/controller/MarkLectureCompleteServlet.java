@@ -22,7 +22,7 @@ public class MarkLectureCompleteServlet extends HttpServlet {
 
     private static final String DB_URL = "jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;";
     private static final String DB_USER = "sa";
-    private static final String DB_PASSWORD = "01012003";
+    private static final String DB_PASSWORD = "123456";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

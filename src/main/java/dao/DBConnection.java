@@ -10,7 +10,7 @@ public class DBConnection {
     public static String driverName = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
     public static String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;";
     public static String userDB = "sa";
-    public static String passDB = "01012003";
+    public static String passDB = "123456";
 
     // Hàm lấy Connection
     public static Connection getConnection() throws SQLException {

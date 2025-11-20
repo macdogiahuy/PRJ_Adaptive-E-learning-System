@@ -306,7 +306,7 @@ public class AutoSyncDriveServlet extends HttpServlet {
         String dbUrl = System.getenv().getOrDefault("DB_URL",
                 "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true");
         String dbUser = System.getenv().getOrDefault("DB_USER", "sa");
-        String dbPassword = System.getenv().getOrDefault("DB_PASSWORD", "01012003");
+        String dbPassword = System.getenv().getOrDefault("DB_PASSWORD", "123456");
         return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
     }
 

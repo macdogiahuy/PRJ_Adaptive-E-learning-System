@@ -19,7 +19,7 @@ public class DBSectionInserter {
     private static final String DEFAULT_DB_URL = System.getenv().getOrDefault("DB_URL",
             "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true");
     private static final String DEFAULT_DB_USER = System.getenv().getOrDefault("DB_USER", "sa");
-    private static final String DEFAULT_DB_PASSWORD = System.getenv().getOrDefault("DB_PASSWORD", "01012003");
+    private static final String DEFAULT_DB_PASSWORD = System.getenv().getOrDefault("DB_PASSWORD", "123456");
 
     private static boolean courseExists(Connection conn, String courseId) throws SQLException {
         String sql = "SELECT 1 FROM Courses WHERE Id = ?";

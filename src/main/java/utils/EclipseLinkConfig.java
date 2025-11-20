@@ -37,7 +37,7 @@ public class EclipseLinkConfig {
                 String devDbUrl = "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=true;trustServerCertificate=true;";
                 properties.put(PersistenceUnitProperties.JDBC_URL, devDbUrl);
                 properties.put(PersistenceUnitProperties.JDBC_USER, "sa");
-                properties.put(PersistenceUnitProperties.JDBC_PASSWORD, "01012003");
+                properties.put(PersistenceUnitProperties.JDBC_PASSWORD, "123456");
                 properties.put(PersistenceUnitProperties.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
                 // Tell EclipseLink to use these properties

@@ -52,15 +52,15 @@ public class DriveAuthCallbackServlet extends HttpServlet {
                     + "<p>Refresh Token của bạn đã được tạo. Vui lòng làm theo các bước sau:</p>"
                     + "<div class='token-box'>"
                     + "<strong>Refresh Token:</strong><br>"
-+ "<span id='token'>" + refreshToken + "</span><br>"
+                    + "<span id='token'>" + refreshToken + "</span><br>"
                     + "<button class='copy-btn' onclick='copyToken()'>📋 Copy Token</button>"
                     + "</div>"
                     + "<div class='instructions'>"
                     + "<h3>📝 Hướng dẫn cấu hình:</h3>"
                     + "<p><strong>Cách 1:</strong> Cập nhật vào file <code>src/conf/env.properties</code></p>"
-                    + "<pre>GOOGLE_DRIVE_REFRESH_TOKEN=REDACTED
+                    + "<pre>GOOGLE_DRIVE_REFRESH_TOKEN=REDACTED</pre>"
                     + "<p><strong>Cách 2:</strong> Hoặc thêm vào biến môi trường hệ thống:</p>"
-                    + "<pre>GOOGLE_DRIVE_REFRESH_TOKEN=REDACTED
+                    + "<pre>GOOGLE_DRIVE_REFRESH_TOKEN=REDACTED</pre>"
                     + "<p><strong>⚠️ Lưu ý:</strong> Sau khi cập nhật, cần restart server để áp dụng thay đổi.</p>"
                     + "</div>"
                     + "</div>"

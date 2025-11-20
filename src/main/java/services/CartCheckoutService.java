@@ -1,4 +1,4 @@
- package services;
+package services;
 
 import java.sql.*;
 import java.util.List;
@@ -15,10 +15,10 @@ import model.CartItem;
  * Service xử lý checkout giỏ hàng sử dụng Stored Procedures và Triggers
  */
 public class CartCheckoutService {
-    
+
     private static final Logger logger = Logger.getLogger(CartCheckoutService.class.getName());
     private DataSource dataSource;
-    
+
     public CartCheckoutService() {
         try {
             Context ctx = new InitialContext();
@@ -36,16 +36,17 @@ public class CartCheckoutService {
             logger.log(Level.SEVERE, "Error initializing CartCheckoutService", e);
         }
     }
-    
+
     /**
      * Xử lý checkout giỏ hàng sử dụng stored procedure
      */
-    public CheckoutResult processCheckout(Users user, List<CartItem> cartItems, double totalAmount, String paymentMethod, String sessionId) {
+    public CheckoutResult processCheckout(Users user, List<CartItem> cartItems, double totalAmount,
+            String paymentMethod, String sessionId) {
         CheckoutResult result = new CheckoutResult();
-        
+
         Connection conn = null;
         CallableStatement stmt = null;
-        
+
         try {
             conn = getConnection();
             // 1. Pre-filter duplicate courses to avoid charging for already owned ones
@@ -54,7 +55,8 @@ public class CartCheckoutService {
             List<String> skippedCourseNames = new java.util.ArrayList<>();
             for (CartItem item : originalItems) {
                 if (isAlreadyEnrolled(conn, user.getId(), item.getCourseId())) {
-                    logger.info("⏭️  Skipping already owned course: " + item.getCourseName() + " (" + item.getCourseId() + ")");
+                    logger.info("⏭️  Skipping already owned course: " + item.getCourseName() + " (" + item.getCourseId()
+                            + ")");
                     skippedCourseNames.add(item.getCourseName());
                 } else {
                     filteredItems.add(item);
@@ -79,7 +81,8 @@ public class CartCheckoutService {
 
             // Log difference if any
             if (Math.round(effectiveTotal) != Math.round(totalAmount)) {
-                logger.info("💰 Adjusting total amount. Original submitted: " + totalAmount + ", Effective (new courses only): " + effectiveTotal);
+                logger.info("💰 Adjusting total amount. Original submitted: " + totalAmount
+                        + ", Effective (new courses only): " + effectiveTotal);
             }
 
             // Use filtered list for downstream processing
@@ -89,14 +92,14 @@ public class CartCheckoutService {
             result.setOriginalCourseCount(originalItems.size());
             result.setFilteredCourseCount(filteredItems.size());
             result.setSkippedCourses(skippedCourseNames);
-            
+
             // Chuyển đổi danh sách course IDs thành JSON
             Gson gson = new Gson();
             List<String> courseIds = cartItems.stream()
                     .map(item -> item.getCourseId())
                     .toList();
             String courseIdsJson = gson.toJson(courseIds);
-            
+
             logger.info("=== PROCESSING CHECKOUT WITH STORED PROCEDURE ===");
             logger.info("User ID: " + user.getId());
             logger.info("User ID Type: " + user.getId().getClass().getName());
@@ -107,37 +110,37 @@ public class CartCheckoutService {
             if (!skippedCourseNames.isEmpty()) {
                 logger.info("Skipped (already owned): " + skippedCourseNames);
             }
-            
+
             // Log individual course IDs
             for (int i = 0; i < cartItems.size(); i++) {
                 CartItem item = cartItems.get(i);
-                logger.info("  Course " + (i+1) + ": " + item.getCourseName() + " (ID: " + item.getCourseId() + ")");
+                logger.info("  Course " + (i + 1) + ": " + item.getCourseName() + " (ID: " + item.getCourseId() + ")");
             }
-            
+
             // Gọi stored procedure ProcessCartCheckout
             String sql = "{CALL ProcessCartCheckout(?, ?, ?, ?, ?, ?, ?, ?)}";
             stmt = conn.prepareCall(sql);
-            
+
             // Input parameters
-            stmt.setString(1, user.getId());  // @UserId
+            stmt.setString(1, user.getId()); // @UserId
             stmt.setString(2, courseIdsJson); // @CourseIds
             stmt.setLong(3, (long) totalAmount); // @TotalAmount
-            stmt.setString(4, paymentMethod);  // @PaymentMethod
-            stmt.setString(5, sessionId);     // @SessionId
-            
+            stmt.setString(4, paymentMethod); // @PaymentMethod
+            stmt.setString(5, sessionId); // @SessionId
+
             // Output parameters
             stmt.registerOutParameter(6, Types.VARCHAR); // @BillId
             stmt.registerOutParameter(7, Types.VARCHAR); // @CheckoutId
             stmt.registerOutParameter(8, Types.NVARCHAR); // @ResultMessage
-            
+
             // Execute
             stmt.execute();
-            
+
             // Lấy kết quả
             String billId = stmt.getString(6);
             String checkoutId = stmt.getString(7);
             String message = stmt.getString(8);
-            
+
             result.setSuccess(true);
             result.setBillId(billId);
             result.setCheckoutId(checkoutId);
@@ -146,7 +149,7 @@ public class CartCheckoutService {
                 message = message + " | Bỏ qua (đã sở hữu): " + String.join(", ", skippedCourseNames);
             }
             result.setMessage(message);
-            
+
             logger.info("=== CHECKOUT SUCCESSFUL ===");
             logger.info("Bill ID: " + billId);
             logger.info("Checkout ID: " + checkoutId);
@@ -159,8 +162,10 @@ public class CartCheckoutService {
                     logger.warning("⚠️ Missing enrollments detected for bill " + billId + ": " + missing);
                     // Detect possible root cause: unique index on BillId blocking multiple rows
                     if (isBillIdUniqueConstraint(conn)) {
-                        logger.severe("Root Cause: Unique index on Enrollments.BillId prevents multiple courses under the same bill. Only first course inserted.");
-                        result.setMessage(result.getMessage() + " | Lý do: BillId đang bị UNIQUE nên chỉ lưu được 1 khóa học. Cần gỡ index 'IX_Enrollments_BillId'.");
+                        logger.severe(
+                                "Root Cause: Unique index on Enrollments.BillId prevents multiple courses under the same bill. Only first course inserted.");
+                        result.setMessage(result.getMessage()
+                                + " | Lý do: BillId đang bị UNIQUE nên chỉ lưu được 1 khóa học. Cần gỡ index 'IX_Enrollments_BillId'.");
                     }
                     for (String missCourseId : missing) {
                         logger.info("Attempt recovery insert for missing course: " + missCourseId);
@@ -168,9 +173,11 @@ public class CartCheckoutService {
                         logCourseAndUserPresence(conn, user.getId(), missCourseId);
                         if (!isAlreadyEnrolled(conn, user.getId(), missCourseId)) {
                             boolean inserted = insertEnrollment(conn, user.getId(), missCourseId, billId);
-                            logger.info("Recovery insert for course " + missCourseId + " => " + (inserted ? "OK" : "FAILED"));
+                            logger.info("Recovery insert for course " + missCourseId + " => "
+                                    + (inserted ? "OK" : "FAILED"));
                             if (!inserted) {
-                                logger.severe("Recovery insert failed for course " + missCourseId + ", will remain missing.");
+                                logger.severe(
+                                        "Recovery insert failed for course " + missCourseId + ", will remain missing.");
                             }
                         } else {
                             logger.info("Course " + missCourseId + " appears enrolled after re-check.");
@@ -182,7 +189,8 @@ public class CartCheckoutService {
                         logger.info("✅ Reconciliation successful. All courses enrolled.");
                     } else {
                         logger.severe("❌ Reconciliation failed for courses: " + stillMissing);
-                        result.setMessage(result.getMessage() + " | Cảnh báo: chưa tạo được các khóa: " + String.join(", ", stillMissing));
+                        result.setMessage(result.getMessage() + " | Cảnh báo: chưa tạo được các khóa: "
+                                + String.join(", ", stillMissing));
                     }
                 } else {
                     logger.info("✅ All requested new courses have enrollments.");
@@ -191,34 +199,34 @@ public class CartCheckoutService {
                 logger.log(Level.SEVERE, "Reconciliation error", reconErr);
                 result.setMessage(result.getMessage() + " | Lỗi kiểm tra sau thanh toán: " + reconErr.getMessage());
             }
-            
+
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "❌ DATABASE ERROR DURING CHECKOUT ❌", e);
             logger.severe("SQLException Details:");
             logger.severe("  Error Code: " + e.getErrorCode());
             logger.severe("  SQL State: " + e.getSQLState());
             logger.severe("  Message: " + e.getMessage());
-            
+
             result.setSuccess(false);
             result.setMessage("Lỗi database: " + e.getMessage());
-            
+
             // IMPORTANT: DO NOT FALLBACK - We need real enrollments!
             // The fallback creates fake success without actual database records
             logger.severe("⚠️ CHECKOUT FAILED - NO FALLBACK ⚠️");
             logger.severe("Enrollments were NOT created. User must retry.");
-            
+
             // DO NOT USE SIMULATION MODE - it causes ghost purchases
             // try {
-            //     logger.info("=== FALLBACK TO EMAIL SIMULATION ===");
-            //     simulateCheckoutProcess(user, cartItems, totalAmount, paymentMethod);
-            //     result.setSuccess(true);
-            //     result.setBillId(UUID.randomUUID().toString());
-            //     result.setMessage("Checkout thành công (simulation mode)");
+            // logger.info("=== FALLBACK TO EMAIL SIMULATION ===");
+            // simulateCheckoutProcess(user, cartItems, totalAmount, paymentMethod);
+            // result.setSuccess(true);
+            // result.setBillId(UUID.randomUUID().toString());
+            // result.setMessage("Checkout thành công (simulation mode)");
             // } catch (Exception fallbackError) {
-            //     logger.log(Level.SEVERE, "Fallback also failed", fallbackError);
-            //     result.setMessage("Lỗi checkout: " + fallbackError.getMessage());
+            // logger.log(Level.SEVERE, "Fallback also failed", fallbackError);
+            // result.setMessage("Lỗi checkout: " + fallbackError.getMessage());
             // }
-            
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Unexpected error during checkout", e);
             result.setSuccess(false);
@@ -226,30 +234,30 @@ public class CartCheckoutService {
         } finally {
             closeResources(stmt, conn);
         }
-        
+
         return result;
     }
-    
+
     /**
      * Lấy lịch sử checkout của user
      */
     public List<CheckoutHistory> getUserCheckoutHistory(String userId, int limit) {
         List<CheckoutHistory> history = new java.util.ArrayList<>();
-        
+
         Connection conn = null;
         CallableStatement stmt = null;
         ResultSet rs = null;
-        
+
         try {
             conn = getConnection();
-            
+
             String sql = "{CALL GetUserCheckoutHistory(?, ?)}";
             stmt = conn.prepareCall(sql);
             stmt.setString(1, userId);
             stmt.setInt(2, limit);
-            
+
             rs = stmt.executeQuery();
-            
+
             while (rs.next()) {
                 CheckoutHistory item = new CheckoutHistory();
                 item.setCheckoutId(rs.getString("CheckoutId"));
@@ -262,26 +270,27 @@ public class CartCheckoutService {
                 item.setBillId(rs.getString("BillId"));
                 item.setTransactionId(rs.getString("TransactionId"));
                 item.setIsSuccessful(rs.getBoolean("IsSuccessful"));
-                
+
                 history.add(item);
             }
-            
+
             logger.info("Retrieved " + history.size() + " checkout history records for user: " + userId);
-            
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error getting checkout history", e);
         } finally {
             closeResources(rs, stmt, conn);
         }
-        
+
         return history;
     }
-    
+
     /**
      * Simulation khi database không khả dụng
      */
-    // Removed unused simulation method (previously used for fallback ghost purchases)
-    
+    // Removed unused simulation method (previously used for fallback ghost
+    // purchases)
+
     /**
      * Lấy connection
      */
@@ -290,9 +299,9 @@ public class CartCheckoutService {
             return dataSource.getConnection();
         } else {
             // Fallback direct connection
-            String url = "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB1;encrypt=false;trustServerCertificate=true";
+            String url = "jdbc:sqlserver://localhost:1433;databaseName=CourseHubDB;encrypt=false;trustServerCertificate=true";
             String username = "sa";
-            String password = "1234";  // ← FIXED: Match with persistence.xml
+            String password = "123456"; // ← FIXED: Match with persistence.xml
             return DriverManager.getConnection(url, username, password);
         }
     }
@@ -311,11 +320,12 @@ public class CartCheckoutService {
                 }
             }
         } catch (SQLException e) {
-            logger.log(Level.WARNING, "Error checking existing enrollment (continuing as not enrolled): " + courseId, e);
+            logger.log(Level.WARNING, "Error checking existing enrollment (continuing as not enrolled): " + courseId,
+                    e);
         }
         return false;
     }
-    
+
     /**
      * Đóng resources
      */
@@ -332,11 +342,14 @@ public class CartCheckoutService {
     }
 
     /**
-     * Find course IDs from the requested list that do NOT have an enrollment with this billId/user.
+     * Find course IDs from the requested list that do NOT have an enrollment with
+     * this billId/user.
      */
-    private List<String> findMissingEnrollments(Connection conn, String userId, String billId, List<String> requestedCourseIds) {
+    private List<String> findMissingEnrollments(Connection conn, String userId, String billId,
+            List<String> requestedCourseIds) {
         List<String> missing = new java.util.ArrayList<>();
-        if (requestedCourseIds == null || requestedCourseIds.isEmpty()) return missing;
+        if (requestedCourseIds == null || requestedCourseIds.isEmpty())
+            return missing;
         String sql = "SELECT CAST(CourseId AS VARCHAR(36)) FROM Enrollments WHERE BillId = ? AND CAST(CreatorId AS VARCHAR(36)) = ?";
         java.util.Set<String> present = new java.util.HashSet<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -393,26 +406,36 @@ public class CartCheckoutService {
      * Log presence of related entities to diagnose FK failures.
      */
     private void logCourseAndUserPresence(Connection conn, String userId, String courseId) {
-        try (PreparedStatement ps1 = conn.prepareStatement("SELECT COUNT(*) FROM Users WHERE CAST(Id AS VARCHAR(36))=?");
-             PreparedStatement ps2 = conn.prepareStatement("SELECT COUNT(*) FROM Courses WHERE CAST(Id AS VARCHAR(36))=?")) {
+        try (PreparedStatement ps1 = conn
+                .prepareStatement("SELECT COUNT(*) FROM Users WHERE CAST(Id AS VARCHAR(36))=?");
+                PreparedStatement ps2 = conn
+                        .prepareStatement("SELECT COUNT(*) FROM Courses WHERE CAST(Id AS VARCHAR(36))=?")) {
             ps1.setString(1, userId);
             ps2.setString(1, courseId);
-            int userCount = 0; int courseCount = 0;
-            try (ResultSet r1 = ps1.executeQuery()) { if (r1.next()) userCount = r1.getInt(1); }
-            try (ResultSet r2 = ps2.executeQuery()) { if (r2.next()) courseCount = r2.getInt(1); }
-            logger.info("Presence check => userExists=" + (userCount>0) + ", courseExists=" + (courseCount>0));
+            int userCount = 0;
+            int courseCount = 0;
+            try (ResultSet r1 = ps1.executeQuery()) {
+                if (r1.next())
+                    userCount = r1.getInt(1);
+            }
+            try (ResultSet r2 = ps2.executeQuery()) {
+                if (r2.next())
+                    courseCount = r2.getInt(1);
+            }
+            logger.info("Presence check => userExists=" + (userCount > 0) + ", courseExists=" + (courseCount > 0));
         } catch (SQLException e) {
             logger.log(Level.WARNING, "Error logging presence diagnostics", e);
         }
     }
 
     /**
-     * Detect if a unique index on BillId exists (causing single enrollment per bill).
+     * Detect if a unique index on BillId exists (causing single enrollment per
+     * bill).
      */
     private boolean isBillIdUniqueConstraint(Connection conn) {
         String sql = "SELECT is_unique FROM sys.indexes WHERE name = 'IX_Enrollments_BillId' AND object_id = OBJECT_ID('dbo.Enrollments')";
         try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 boolean unique = rs.getBoolean(1);
                 logger.info("Index IX_Enrollments_BillId present. is_unique=" + unique);
@@ -425,7 +448,7 @@ public class CartCheckoutService {
         }
         return false;
     }
-    
+
     /**
      * Kết quả checkout
      */
@@ -438,29 +461,73 @@ public class CartCheckoutService {
         private int originalCourseCount;
         private int filteredCourseCount;
         private List<String> skippedCourses = java.util.Collections.emptyList();
-        
+
         // Getters and setters
-        public boolean isSuccess() { return success; }
-        public void setSuccess(boolean success) { this.success = success; }
-        
-        public String getBillId() { return billId; }
-        public void setBillId(String billId) { this.billId = billId; }
-        
-        public String getCheckoutId() { return checkoutId; }
-        public void setCheckoutId(String checkoutId) { this.checkoutId = checkoutId; }
-        
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
-        public double getEffectiveAmount() { return effectiveAmount; }
-        public void setEffectiveAmount(double effectiveAmount) { this.effectiveAmount = effectiveAmount; }
-        public int getOriginalCourseCount() { return originalCourseCount; }
-        public void setOriginalCourseCount(int originalCourseCount) { this.originalCourseCount = originalCourseCount; }
-        public int getFilteredCourseCount() { return filteredCourseCount; }
-        public void setFilteredCourseCount(int filteredCourseCount) { this.filteredCourseCount = filteredCourseCount; }
-        public List<String> getSkippedCourses() { return skippedCourses; }
-        public void setSkippedCourses(List<String> skippedCourses) { this.skippedCourses = skippedCourses; }
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public void setSuccess(boolean success) {
+            this.success = success;
+        }
+
+        public String getBillId() {
+            return billId;
+        }
+
+        public void setBillId(String billId) {
+            this.billId = billId;
+        }
+
+        public String getCheckoutId() {
+            return checkoutId;
+        }
+
+        public void setCheckoutId(String checkoutId) {
+            this.checkoutId = checkoutId;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public double getEffectiveAmount() {
+            return effectiveAmount;
+        }
+
+        public void setEffectiveAmount(double effectiveAmount) {
+            this.effectiveAmount = effectiveAmount;
+        }
+
+        public int getOriginalCourseCount() {
+            return originalCourseCount;
+        }
+
+        public void setOriginalCourseCount(int originalCourseCount) {
+            this.originalCourseCount = originalCourseCount;
+        }
+
+        public int getFilteredCourseCount() {
+            return filteredCourseCount;
+        }
+
+        public void setFilteredCourseCount(int filteredCourseCount) {
+            this.filteredCourseCount = filteredCourseCount;
+        }
+
+        public List<String> getSkippedCourses() {
+            return skippedCourses;
+        }
+
+        public void setSkippedCourses(List<String> skippedCourses) {
+            this.skippedCourses = skippedCourses;
+        }
     }
-    
+
     /**
      * Lịch sử checkout
      */
@@ -475,36 +542,86 @@ public class CartCheckoutService {
         private String billId;
         private String transactionId;
         private boolean isSuccessful;
-        
+
         // Getters and setters
-        public String getCheckoutId() { return checkoutId; }
-        public void setCheckoutId(String checkoutId) { this.checkoutId = checkoutId; }
-        
-        public long getTotalAmount() { return totalAmount; }
-        public void setTotalAmount(long totalAmount) { this.totalAmount = totalAmount; }
-        
-        public String getPaymentMethod() { return paymentMethod; }
-        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-        
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        
-        public Timestamp getCreationTime() { return creationTime; }
-        public void setCreationTime(Timestamp creationTime) { this.creationTime = creationTime; }
-        
-        public Timestamp getProcessedTime() { return processedTime; }
-        public void setProcessedTime(Timestamp processedTime) { this.processedTime = processedTime; }
-        
-        public String getNotes() { return notes; }
-        public void setNotes(String notes) { this.notes = notes; }
-        
-        public String getBillId() { return billId; }
-        public void setBillId(String billId) { this.billId = billId; }
-        
-        public String getTransactionId() { return transactionId; }
-        public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
-        
-        public boolean isSuccessful() { return isSuccessful; }
-        public void setIsSuccessful(boolean isSuccessful) { this.isSuccessful = isSuccessful; }
+        public String getCheckoutId() {
+            return checkoutId;
+        }
+
+        public void setCheckoutId(String checkoutId) {
+            this.checkoutId = checkoutId;
+        }
+
+        public long getTotalAmount() {
+            return totalAmount;
+        }
+
+        public void setTotalAmount(long totalAmount) {
+            this.totalAmount = totalAmount;
+        }
+
+        public String getPaymentMethod() {
+            return paymentMethod;
+        }
+
+        public void setPaymentMethod(String paymentMethod) {
+            this.paymentMethod = paymentMethod;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public Timestamp getCreationTime() {
+            return creationTime;
+        }
+
+        public void setCreationTime(Timestamp creationTime) {
+            this.creationTime = creationTime;
+        }
+
+        public Timestamp getProcessedTime() {
+            return processedTime;
+        }
+
+        public void setProcessedTime(Timestamp processedTime) {
+            this.processedTime = processedTime;
+        }
+
+        public String getNotes() {
+            return notes;
+        }
+
+        public void setNotes(String notes) {
+            this.notes = notes;
+        }
+
+        public String getBillId() {
+            return billId;
+        }
+
+        public void setBillId(String billId) {
+            this.billId = billId;
+        }
+
+        public String getTransactionId() {
+            return transactionId;
+        }
+
+        public void setTransactionId(String transactionId) {
+            this.transactionId = transactionId;
+        }
+
+        public boolean isSuccessful() {
+            return isSuccessful;
+        }
+
+        public void setIsSuccessful(boolean isSuccessful) {
+            this.isSuccessful = isSuccessful;
+        }
     }
 }
